@@ -17,3 +17,11 @@ Feature: Tuples feature
             And a.w = 0.0
             And a is not a point
             And a is a vector
+
+    Scenario: point() creates tuples with w=1
+        Given p <- point(4.0, -4.0, 3.0)
+        Then p = tuple(4.0, -4.0, 3.0, 1.0)
+
+    Scenario: vector() creates tuples with w=0
+        Given v <- vector(4.0, -4.0, 3.0)
+        Then v = tuple(4.0, -4.0, 3.0, 0.0)
