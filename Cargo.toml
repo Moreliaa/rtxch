@@ -8,3 +8,14 @@ wgpu = "22.1.0"
 
 [dev-dependencies]
 cucumber = "0.21.1"
+futures = "0.3.30"
+
+[lib]
+name = "rtxch_lib"
+path = "src/lib.rs"
+crate-type = ["lib"]
+
+[[test]]
+name = "tuples"
+path = "tests\\tuples.rs"
+harness = false  # allows Cucumber to print output instead of libtest
