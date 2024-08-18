@@ -50,9 +50,28 @@ fn is_point(world: &mut TuplesWorld, matches: &[String]) {
     assert!(is_target == is_true);
 }
 
-#[given("p ← point(4, -4, 3)")]
-fn create_point(world: &mut TuplesWorld) {
-    world.tuple = rtxch_lib::Tuples::point(4.0, -4.0, 3.0);
+#[given(regex = r"p ← point\((.+), (.+), (.+)\)")]
+fn create_point(world: &mut TuplesWorld, matches: &[String]) {
+    let values: Vec<f64> = matches.into_iter().map(|m| m.parse::<f64>().unwrap()).collect();
+    world.tuple = rtxch_lib::Tuples::point(values[0], values[1], values[2]);
+}
+
+#[given(regex = r"p(\d) ← point\((.+), (.+), (.+)\)")]
+fn create_pointi(world: &mut TuplesWorld, matches: &[String]) {
+    let values: Vec<f64> = matches[1..4].into_iter().map(|m| m.parse::<f64>().unwrap()).collect();
+    let tuple = rtxch_lib::Tuples::point(values[0], values[1], values[2]);
+    match matches[0].as_str() {
+        "1" => world.tuple = tuple,
+        "2" => world.other = tuple,
+        _ => panic!()
+    };
+}
+
+#[then(regex = r"p1 - p2 = vector\((.+), (.+), (.+)\)")]
+fn subtract_points(world: &mut TuplesWorld, matches: &[String]) {
+    let values: Vec<f64> = matches.into_iter().map(|m| m.parse::<f64>().unwrap()).collect();
+    let wanted = rtxch_lib::Tuples::vector(values[0], values[1], values[2]);
+    assert!(wanted.is_equal(world.tuple.subtract(&world.other)));
 }
 
 #[given("v ← vector(4, -4, 3)")]

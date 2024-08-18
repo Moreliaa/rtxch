@@ -36,11 +36,19 @@ impl Tuples {
         is_equal_f64(self.w, other.w)
     }
 
-    pub fn add (&mut self, other: &Tuples) -> &Tuples {
+    pub fn add(&mut self, other: &Tuples) -> &Tuples {
         self.x += other.x;
         self.y += other.y;
         self.z += other.z;
         self.w += other.w;
+        self
+    }
+
+    pub fn subtract(&mut self, other: &Tuples) -> &Tuples {
+        self.x -= other.x;
+        self.y -= other.y;
+        self.z -= other.z;
+        self.w -= other.w;
         self
     }
 }
