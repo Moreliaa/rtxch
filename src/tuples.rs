@@ -1,6 +1,6 @@
 use crate::utils::is_equal_f64;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct Tuples { 
     pub x: f64,
     pub y: f64,
