@@ -94,7 +94,7 @@ Scenario: Normalizing vector(4, 0, 0) gives (1, 0, 0)
 Scenario: Normalizing vector(1, 2, 3)
   Given v ← vector(1, 2, 3)
                                   # vector(1/√14,   2/√14,   3/√14)
-  Then normalize(v) = approximately vector(0.26726, 0.53452, 0.80178)
+  Then normalize(v) = vector(0.26726, 0.53452, 0.80178)
 
 Scenario: The magnitude of a normalized vector
   Given v ← vector(1, 2, 3)
@@ -102,15 +102,15 @@ Scenario: The magnitude of a normalized vector
   Then magnitude(norm) = 1
 
 Scenario: The dot product of two tuples
-  Given a ← vector(1, 2, 3)
-    And b ← vector(2, 3, 4)
-  Then dot(a, b) = 20
+  Given v1 ← vector(1, 2, 3)
+    And v2 ← vector(2, 3, 4)
+  Then dot(v1, v2) = 20
 
 Scenario: The cross product of two vectors
-  Given a ← vector(1, 2, 3)
-    And b ← vector(2, 3, 4)
-  Then cross(a, b) = vector(-1, 2, -1)
-    And cross(b, a) = vector(1, -2, 1)
+  Given v1 ← vector(1, 2, 3)
+    And v2 ← vector(2, 3, 4)
+  Then cross(v1, v2) = vector(-1, 2, -1)
+    And cross(v2, v1) = vector(1, -2, 1)
 
 Scenario: Colors are (red, green, blue) tuples
   Given c ← color(-0.5, 0.4, 1.7)

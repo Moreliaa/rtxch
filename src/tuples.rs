@@ -8,6 +8,7 @@ pub struct Tuples {
     pub w: f64
 }
 
+// Static
 impl Tuples {
     pub fn new (x: f64, y: f64, z: f64, w: f64) -> Tuples {
         Tuples {x, y, z, w}
@@ -21,6 +22,21 @@ impl Tuples {
         Tuples {x, y, z, w: 0.0}
     }
 
+    pub fn dot(v1: &Tuples, v2: &Tuples) -> f64 {
+        v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w 
+    }
+
+    pub fn cross(v1: &Tuples, v2: &Tuples) -> Tuples {
+        Tuples::vector(
+            v1.y * v2.z - v1.z * v2.y,
+            v1.z * v2.x - v1.x * v2.z,
+            v1.x * v2.y - v1.y * v2.x,
+        )
+    }
+}
+
+// Methods
+impl Tuples {
     pub fn is_point(&self) -> bool {
         self.w == 1.0
     }
@@ -49,6 +65,35 @@ impl Tuples {
         self.y -= other.y;
         self.z -= other.z;
         self.w -= other.w;
+        self
+    }
+
+    pub fn negate(&mut self) -> &Tuples {
+        self.x = -self.x;
+        self.y = -self.y;
+        self.z = -self.z;
+        self.w = -self.w;
+        self
+    }
+
+    pub fn scale(&mut self, scalar: f64) -> &Tuples {
+        self.x *= scalar;
+        self.y *= scalar;
+        self.z *= scalar;
+        self.w *= scalar;
+        self
+    }
+
+    pub fn magnitude(&mut self) -> f64 {
+        (self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w).sqrt()
+    }
+
+    pub fn normalize(&mut self) -> &Tuples {
+        let mag = self.magnitude();
+        self.x /= mag;
+        self.y /= mag;
+        self.z /= mag;
+        self.w /= mag;
         self
     }
 }
