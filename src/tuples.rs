@@ -93,6 +93,14 @@ impl Tuples {
         self
     }
 
+    pub fn multiply(&mut self, other: &Tuples) -> &Tuples {
+        self.x *= other.x;
+        self.y *= other.y;
+        self.z *= other.z;
+        self.w *= other.w;
+        self
+    }
+
     pub fn scale(&mut self, scalar: f64) -> &Tuples {
         self.x *= scalar;
         self.y *= scalar;

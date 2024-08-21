@@ -20,17 +20,20 @@ fn tuple(world: &mut TuplesWorld, matches: &[String]) {
     };
 }
 
-#[then(regex = r"^a.(.) = (.+)$")]
+#[then(regex = r"^..(.|red|green|blue) = (.+)$")]
 fn compare(world: &mut TuplesWorld, matches: &[String]) {
     let prop = match matches[0].as_str() {
         "x" => world.tuple.x,
         "y" => world.tuple.y,
         "z" => world.tuple.z,
         "w" => world.tuple.w,
+        "red" => world.color1.x,
+        "green" => world.color1.y,
+        "blue" => world.color1.z,
         _ => panic!()
     };
     let value = matches[1].parse::<f64>().unwrap();
-    assert!(is_equal_f64(prop, value));
+    assert!(is_equal_f64(prop, value), "{} {}", prop, value);
 }
 
 #[then(regex = "a is (a|not a) (point|vector)")]
@@ -43,12 +46,13 @@ fn is_point(world: &mut TuplesWorld, matches: &[String]) {
     assert!(is_target == is_true);
 }
 
-#[given(regex = r"(.+) ← (point|vector)\((.+), (.+), (.+)\)")]
+#[given(regex = r"(.+) ← (point|vector|color)\((.+), (.+), (.+)\)")]
 fn create_vector_or_point(world: &mut TuplesWorld, matches: &[String]) {
     let values: Vec<f64> = matches[2..].into_iter().map(|m| m.parse::<f64>().unwrap()).collect();
     let tuple = match matches[1].as_str() {
         "point" => rtxch_lib::Tuples::point(values[0], values[1], values[2]),
         "vector" => rtxch_lib::Tuples::vector(values[0], values[1], values[2]),
+        "color" => rtxch_lib::Tuples::color(values[0], values[1], values[2]),
         _ => panic!(),
     };
     match matches[0].as_str() {
@@ -59,6 +63,8 @@ fn create_vector_or_point(world: &mut TuplesWorld, matches: &[String]) {
         "p2" => world.point2 = tuple,
         "v" | "v1" => world.vector1 = tuple,  
         "v2" => world.vector2 = tuple,
+        "c" | "c1" => world.color1 = tuple,
+        "c2" => world.color2 = tuple,
         _ => panic!(),        
     };
 }
@@ -138,7 +144,7 @@ fn cross(world: &mut TuplesWorld, matches: &[String]) {
 }
 
 // Operation
-#[then(regex = r"^(.+) (.+) (.+) = (vector|point|tuple)\((.+)\)$")]
+#[then(regex = r"^(.+) (.+) (.+) = (vector|point|tuple|color)\((.+)\)$")]
 fn subtract_p_v(world: &mut TuplesWorld, matches: &[String]) {
     let mut param1 = match matches[0].as_str() {
         "zero" => world.zero.clone(),
@@ -148,6 +154,8 @@ fn subtract_p_v(world: &mut TuplesWorld, matches: &[String]) {
         "p2" => world.point2.clone(),
         "v" | "v1" => world.vector1.clone(),
         "v2" => world.vector2.clone(),
+        "c" | "c1" => world.color1.clone(),
+        "c2" => world.color2.clone(),
         _ => panic!(),
     };
 
@@ -161,6 +169,8 @@ fn subtract_p_v(world: &mut TuplesWorld, matches: &[String]) {
         "p2" => Some(world.point2.clone()),
         "v" | "v1" => Some(world.vector1.clone()),
         "v2" => Some(world.vector2.clone()),
+        "c" | "c1" => Some(world.color1.clone()),
+        "c2" => Some(world.color2.clone()),
         _ => None,
     };
 
@@ -169,12 +179,20 @@ fn subtract_p_v(world: &mut TuplesWorld, matches: &[String]) {
         "point" => rtxch_lib::Tuples::point(values[0], values[1], values[2]),
         "vector" => rtxch_lib::Tuples::vector(values[0], values[1], values[2]),
         "tuple" => rtxch_lib::Tuples::new(values[0], values[1], values[2], values[3]),
+        "color" => rtxch_lib::Tuples::color(values[0], values[1], values[2]),
         _ => panic!(),
     };
     let result = match op {
         "+" => param1.add(&param2.unwrap()),
         "-" => param1.subtract(&param2.unwrap()),
-        "*" => param1.scale(matches[2].as_str().parse::<f64>().unwrap()),
+        "*" => {
+            if let Some(other_value) = param2 {
+                param1.multiply(&other_value)
+            } else {
+                param1.scale(matches[2].as_str().parse::<f64>().unwrap())
+            }
+            
+        },
         "/" => param1.scale(1.0 / matches[2].as_str().parse::<f64>().unwrap()),
         _ => panic!(),
     };
@@ -209,6 +227,8 @@ struct TuplesWorld {
     vector2: rtxch_lib::Tuples,
     zero: rtxch_lib::Tuples,
     norm: rtxch_lib::Tuples,
+    color1: rtxch_lib::Tuples,
+    color2: rtxch_lib::Tuples,
 }
 
 fn main() {
