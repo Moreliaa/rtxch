@@ -1,7 +1,20 @@
 use crate::utils::is_equal_f64;
 
+
+#[derive(Debug, Clone, PartialEq)]
+enum TuplesEnum {
+    Tuple, Point, Vector, Color
+}
+
+impl Default for TuplesEnum {
+    fn default() -> Self {
+        TuplesEnum::Tuple
+    }
+}
+
 #[derive(Debug, Clone, Default)]
-pub struct Tuples { 
+pub struct Tuples {
+    kind: TuplesEnum, 
     pub x: f64,
     pub y: f64,
     pub z: f64,
@@ -11,15 +24,19 @@ pub struct Tuples {
 // Static
 impl Tuples {
     pub fn new (x: f64, y: f64, z: f64, w: f64) -> Tuples {
-        Tuples {x, y, z, w}
+        Tuples {kind: TuplesEnum::Tuple, x, y, z, w}
     }
 
     pub fn point(x: f64, y: f64, z: f64) -> Tuples {
-        Tuples {x, y, z, w: 1.0}
+        Tuples {kind: TuplesEnum::Point, x, y, z, w: 1.0}
     }
 
     pub fn vector(x: f64, y: f64, z: f64) -> Tuples {
-        Tuples {x, y, z, w: 0.0}
+        Tuples {kind: TuplesEnum::Vector, x, y, z, w: 0.0}
+    }
+
+    pub fn color(x: f64, y: f64, z: f64) -> Tuples {
+        Tuples {kind: TuplesEnum::Color, x, y, z, w: 0.0}
     }
 
     pub fn dot(v1: &Tuples, v2: &Tuples) -> f64 {
@@ -38,11 +55,11 @@ impl Tuples {
 // Methods
 impl Tuples {
     pub fn is_point(&self) -> bool {
-        self.w == 1.0
+        self.kind == TuplesEnum::Point
     }
 
     pub fn is_vector(&self) -> bool {
-        self.w == 0.0
+        self.kind == TuplesEnum::Vector
     }
 
     pub fn is_equal(&self, other: &Tuples) -> bool {
