@@ -1,7 +1,7 @@
 use crate::utils::is_equal_f64;
 
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 enum TuplesEnum {
     Tuple, Point, Vector, Color
 }
@@ -12,7 +12,7 @@ impl Default for TuplesEnum {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct Tuples {
     kind: TuplesEnum, 
     pub x: f64,
