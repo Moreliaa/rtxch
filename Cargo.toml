@@ -19,3 +19,8 @@ crate-type = ["lib"]
 name = "tuples"
 path = "tests\\tuples_test.rs"
 harness = false  # allows Cucumber to print output instead of libtest
+
+[[test]]
+name = "canvas"
+path = "tests\\canvas_test.rs"
+harness = false
