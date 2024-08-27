@@ -12,7 +12,7 @@ impl Default for TuplesEnum {
     }
 }
 
-#[derive(Debug, Copy, Clone, Default)]
+#[derive(Debug, Copy, Clone, Default, PartialEq)]
 pub struct Tuples {
     kind: TuplesEnum, 
     pub x: f64,

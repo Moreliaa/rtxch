@@ -11,3 +11,7 @@ pub fn parse_values_f64(input: &String) -> Vec<f64> {
 pub fn parse_values_u64(input: &String) -> Vec<u64> {
     input.split(", ").map(|m| m.parse::<u64>().unwrap()).collect()
 }
+
+pub fn parse_values_usize(input: &String) -> Vec<usize> {
+    input.split(", ").map(|m| m.parse::<usize>().unwrap()).collect()
+}
