@@ -15,12 +15,7 @@ Scenario: Writing pixels to a canvas
 Scenario: Constructing the PPM header
   Given c ← canvas(5, 3)
   When ppm ← canvas_to_ppm(c)
-  Then lines 1-3 of ppm are
-    """
-    P3
-    5 3
-    255
-    """
+  Then lines 1-3 of ppm are 'P3\n5 3\n255'
 
 Scenario: Constructing the PPM pixel data
   Given c ← canvas(5, 3)
@@ -31,24 +26,13 @@ Scenario: Constructing the PPM pixel data
     And write_pixel(c, 2, 1, c2)
     And write_pixel(c, 4, 2, c3)
     And ppm ← canvas_to_ppm(c)
-  Then lines 4-6 of ppm are
-    """
-    255 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-    0 0 0 0 0 0 0 128 0 0 0 0 0 0 0
-    0 0 0 0 0 0 0 0 0 0 0 0 0 0 255
-    """
+  Then lines 4-6 of ppm are '255 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 128 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0 0 0 0 0 255'
 
 Scenario: Splitting long lines in PPM files
   Given c ← canvas(10, 2)
   When every pixel of c is set to color(1, 0.8, 0.6)
     And ppm ← canvas_to_ppm(c)
-  Then lines 4-7 of ppm are
-    """
-    255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204
-    153 255 204 153 255 204 153 255 204 153 255 204 153
-    255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204
-    153 255 204 153 255 204 153 255 204 153 255 204 153
-    """
+  Then lines 4-7 of ppm are '255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204\n153 255 204 153 255 204 153 255 204 153 255 204 153\n255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204\n153 255 204 153 255 204 153 255 204 153 255 204 153'
 
 Scenario: PPM files are terminated by a newline character
   Given c ← canvas(5, 3)

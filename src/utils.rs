@@ -15,3 +15,9 @@ pub fn parse_values_u64(input: &String) -> Vec<u64> {
 pub fn parse_values_usize(input: &String) -> Vec<usize> {
     input.split(", ").map(|m| m.parse::<usize>().unwrap()).collect()
 }
+
+pub fn color_to_256(input: f64) -> u8 {
+    let factor = if input > 1.0 { 1.0 } else if input < 0.0 { 0.0 } else { input };
+    let output = (factor * 255.0).round();
+    output as u8
+}
