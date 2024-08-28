@@ -46,7 +46,7 @@ fn check_ppm_lines(world: &mut CanvasWorld, matches: &[String]) {
     let wanted: Vec<&str> = matches[2].split("\\n").collect();
     assert!(ppm_split.len() > end);
     for i in start..end {
-        assert!(ppm_split[i] == wanted[i - start], "{} {}", ppm_split[i], wanted[i - start]);
+        assert!(ppm_split[i] == wanted[i - start], "'{}' != '{}'", ppm_split[i], wanted[i - start]);
     }
 }
 

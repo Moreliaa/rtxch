@@ -79,8 +79,10 @@ impl Canvas {
                 let colors = [pixel.x, pixel.y, pixel.z];
                 for (i, c) in colors.iter().enumerate() {
                     let c_str = color_to_256(*c).to_string();
+                    
                     characters_in_line += c_str.len();
                     if characters_in_line > max_characters {
+                        output = output.trim_end().to_string();
                         output.push_str("\n");
                         characters_in_line = c_str.len();
                     }
