@@ -196,7 +196,7 @@ fn subtract_p_v(world: &mut TuplesWorld, matches: &[String]) {
         "/" => param1.scale(1.0 / matches[2].as_str().parse::<f64>().unwrap()),
         _ => panic!(),
     };
-    assert!(wanted.is_equal(result));
+    assert!(wanted.is_equal(&result));
 }
 
 #[then(regex = r"^(-?\w+\d?) = tuple\((.+), (.+), (.+), (.+)\)")]

@@ -69,56 +69,56 @@ impl Tuples {
         is_equal_f64(self.w, other.w)
     }
 
-    pub fn add(&mut self, other: &Tuples) -> &Tuples {
+    pub fn add(&mut self, other: &Tuples) -> Tuples {
         self.x += other.x;
         self.y += other.y;
         self.z += other.z;
         self.w += other.w;
-        self
+        *self
     }
 
-    pub fn subtract(&mut self, other: &Tuples) -> &Tuples {
+    pub fn subtract(&mut self, other: &Tuples) -> Tuples {
         self.x -= other.x;
         self.y -= other.y;
         self.z -= other.z;
         self.w -= other.w;
-        self
+        *self
     }
 
-    pub fn negate(&mut self) -> &Tuples {
+    pub fn negate(&mut self) -> Tuples {
         self.x = -self.x;
         self.y = -self.y;
         self.z = -self.z;
         self.w = -self.w;
-        self
+        *self
     }
 
-    pub fn multiply(&mut self, other: &Tuples) -> &Tuples {
+    pub fn multiply(&mut self, other: &Tuples) -> Tuples {
         self.x *= other.x;
         self.y *= other.y;
         self.z *= other.z;
         self.w *= other.w;
-        self
+        *self
     }
 
-    pub fn scale(&mut self, scalar: f64) -> &Tuples {
+    pub fn scale(&mut self, scalar: f64) -> Tuples {
         self.x *= scalar;
         self.y *= scalar;
         self.z *= scalar;
         self.w *= scalar;
-        self
+        *self
     }
 
     pub fn magnitude(&mut self) -> f64 {
         (self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w).sqrt()
     }
 
-    pub fn normalize(&mut self) -> &Tuples {
+    pub fn normalize(&mut self) -> Tuples {
         let mag = self.magnitude();
         self.x /= mag;
         self.y /= mag;
         self.z /= mag;
         self.w /= mag;
-        self
+        *self
     }
 }
