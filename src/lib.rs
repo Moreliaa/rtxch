@@ -1,5 +1,6 @@
 pub mod tuples;
 pub use tuples::Tuples;
+pub mod matrices;
 pub mod projectile;
 pub use projectile::Projectile;
 pub mod environment;

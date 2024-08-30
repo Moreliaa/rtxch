@@ -24,3 +24,8 @@ harness = false  # allows Cucumber to print output instead of libtest
 name = "canvas"
 path = "tests\\canvas_test.rs"
 harness = false
+
+[[test]]
+name = "matrices"
+path = "tests\\matrices_test.rs"
+harness = false
