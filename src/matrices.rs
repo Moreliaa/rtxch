@@ -15,46 +15,100 @@ pub struct Mat2 {
 
 impl Default for Mat2 {
     fn default() -> Self {
-        Mat2::new()
+        Self::new()
     }
-}
-
-
-pub struct Mat3 {
-    m: [f64; 9]
-}
-
-pub struct Mat4 {
-    m: [f64; 16]
 }
 
 impl Matrix for Mat2 {
-    fn new() -> Mat2 {
-        let out = Mat2 { m: [0.0; 4]};
-        Mat2::identity(out)
+    fn new() -> Self {
+        let out = Self { m: [0.0; 4]};
+        Self::identity(out)
     }
-    fn from_values(values: &Vec<f64>) -> Mat2 {
-        from_values::<Mat2>(values)
+    fn from_values(values: &Vec<f64>) -> Self {
+        from_values(values)
     }
     fn identity(out: Self) -> Self {
         identity(out)
     }
     fn set(&mut self, row: usize, col: usize, val: f64) {
-        let step = 2;
-        let idx = step * row + col;
-        self.m[idx] = val;
+        self.m[get_idx::<Self>(row, col)] = val;
     }
     fn get(&self, row: usize, col: usize) -> f64 {
-        let step = 2;
-        let idx = step * row + col;
-        self.m[idx]
+        self.m[get_idx::<Self>(row, col)]
     }
-    fn mul(out: Mat2, a: &Mat2, b: &Mat2) -> Mat2 {
+    fn mul(out: Self, a: &Self, b: &Self) -> Self {
         out
     }
     fn dim() -> usize {
         2
     }
+}
+
+#[derive(Debug)]
+pub struct Mat3 {
+    m: [f64; 9]
+}
+
+impl Matrix for Mat3 {
+    fn new() -> Self {
+        let out = Self { m: [0.0; 9]};
+        Self::identity(out)
+    }
+    fn from_values(values: &Vec<f64>) -> Self {
+        from_values(values)
+    }
+    fn identity(out: Self) -> Self {
+        identity(out)
+    }
+    fn set(&mut self, row: usize, col: usize, val: f64) {
+        self.m[get_idx::<Self>(row, col)] = val;
+    }
+    fn get(&self, row: usize, col: usize) -> f64 {
+        self.m[get_idx::<Self>(row, col)]
+    }
+    fn mul(out: Self, a: &Self, b: &Self) -> Self {
+        out
+    }
+    fn dim() -> usize {
+        3
+    }
+}
+
+#[derive(Debug)]
+pub struct Mat4 {
+    m: [f64; 16]
+}
+
+impl Matrix for Mat4 {
+    fn new() -> Self {
+        let out = Self { m: [0.0; 16]};
+        Self::identity(out)
+    }
+    fn from_values(values: &Vec<f64>) -> Self {
+        from_values(values)
+    }
+    fn identity(out: Self) -> Self {
+        identity(out)
+    }
+    fn set(&mut self, row: usize, col: usize, val: f64) {
+        self.m[get_idx::<Self>(row, col)] = val;
+    }
+    fn get(&self, row: usize, col: usize) -> f64 {
+        self.m[get_idx::<Self>(row, col)]
+    }
+    fn mul(out: Self, a: &Self, b: &Self) -> Self {
+        out
+    }
+    fn dim() -> usize {
+        4
+    }
+}
+
+fn get_idx<T>(row: usize, col: usize) -> usize
+where
+    T: Matrix,
+{
+    T::dim() * row + col
 }
 
 fn from_values<T>(values: &Vec<f64>) -> T
@@ -85,18 +139,3 @@ where
     }
     out
 }
-
-/*impl Matrix for Mat3 {
-    fn new() -> Self;
-    fn from_values(values: &Vec<f64>) -> Self;
-    fn identity(out: Self) -> Self;
-    fn get(row: usize, col: usize) -> f64;
-    fn mul(out: &mut Self, a: &Self, b: &Self) -> Self;
-}*/
-
-/*impl Matrix for Mat4 {
-    fn new() -> Self;
-    fn from_values(values: &Vec<f64>) -> Self;
-    fn get(row: usize, col: usize) -> f64;
-    fn mul(out: &mut Self, a: &Self, b: &Self) -> Self;   
-}*/
