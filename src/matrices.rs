@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 pub trait Matrix {
     fn new() -> Self;
     fn from_values(values: &Vec<f64>) -> Self;
@@ -49,6 +51,12 @@ pub struct Mat3 {
     m: [f64; 9]
 }
 
+impl Default for Mat3 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Matrix for Mat3 {
     fn new() -> Self {
         let out = Self { m: [0.0; 9]};
@@ -77,6 +85,12 @@ impl Matrix for Mat3 {
 #[derive(Debug)]
 pub struct Mat4 {
     m: [f64; 16]
+}
+
+impl Default for Mat4 {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Matrix for Mat4 {
