@@ -69,6 +69,26 @@ impl Tuples {
         is_equal_f64(self.w, other.w)
     }
 
+    pub fn get_at_idx(&self, idx: usize) -> f64 {
+        match idx {
+            0 => self.x,
+            1 => self.y,
+            2 => self.z,
+            3 => self.w,
+            _ => panic!("Index out of bounds"),
+        }
+    }
+
+    pub fn set_at_idx(&mut self, idx: usize, val: f64) {
+        match idx {
+            0 => self.x = val,
+            1 => self.y = val,
+            2 => self.z = val,
+            3 => self.w = val,
+            _ => panic!("Index out of bounds"),
+        };
+    }
+
     pub fn add(&mut self, other: &Tuples) -> Tuples {
         self.x += other.x;
         self.y += other.y;

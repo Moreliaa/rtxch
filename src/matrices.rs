@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use std::collections::HashMap;
 use crate::Tuples;
 
 #[derive(Debug)]
@@ -67,11 +68,29 @@ impl Matrix {
     }
 
     pub fn mul_tuple(a: &Self, b: &Tuples) -> Tuples {
-        Tuples::default()
+        if a.dim() != 4 {
+            panic!("Cannot use mul_tuple with dim {}", a.dim());
+        }
+        let mut out = Tuples::default();
+
+        for row in 0..a.dim() {
+            let mut val = 0.0;
+            for col in 0..a.dim() {
+                val += a.get(row, col) * b.get_at_idx(col);
+            }
+            out.set_at_idx(row, val);
+        }
+        out
     }
 
     pub fn transpose(a: &Self) -> Self {
-        Self::new(a.dim())
+        let mut out = Self::new(a.dim());
+        for col in 0..out.dim() {
+            for row in 0..out.dim() {
+                out.set(col, row, a.get(row, col));
+            }
+        }
+        out
     }
 
     pub fn inverse(a: &Self) -> Self {
