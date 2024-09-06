@@ -1,9 +1,7 @@
 pub mod tuples;
 pub use tuples::Tuples;
 pub mod matrices;
-pub use matrices::Mat2;
-pub use matrices::Mat3;
-pub use matrices::Mat4;
+pub use matrices::Matrix;
 pub mod projectile;
 pub use projectile::Projectile;
 pub mod environment;
