@@ -97,20 +97,50 @@ impl Matrix {
         Self::new(a.dim())
     }
 
-    pub fn det(a: &Self) -> i32 {
-        0
+    pub fn det(a: &Self) -> f64 {
+        if a.dim() == 2 {
+            return a.get(0,0) * a.get(1, 1) - (a.get(0, 1) * a.get(1, 0));
+        } else {
+            let row = 0;
+            let mut det = 0.0;
+            for col in 0..a.dim() {
+                let v = a.get(row, col);
+                let cofactor = Matrix::cofactor(&a, row, col);
+                det +=  v * cofactor;
+            }
+            return det;
+        }
     }
 
-    pub fn submatrix(a: &Self, row: usize, col: usize) -> Self {
-        Self::new(a.dim())
+    pub fn submatrix(a: &Self, row_to_remove: usize, col_to_remove: usize) -> Self {
+        let mut out = Self::new(a.dim() - 1);
+        let (mut row_new, mut col_new) = (0, 0);
+        for col in 0..a.dim() {
+            if col == col_to_remove {
+                continue;
+            }
+            for row in 0..a.dim() {
+                if row == row_to_remove {
+                    continue;
+                }
+
+                out.set(row_new, col_new, a.get(row, col));
+                row_new += 1;
+            }
+            col_new += 1;
+            row_new = 0;
+        }
+        out
     }
 
-    pub fn minor(a: &Self) -> i32 {
-        0
+    pub fn minor(a: &Self, row: usize, col: usize) -> f64 {
+        let sm = Matrix::submatrix(a, row, col);
+        Matrix::det(&sm)
     }
 
-    pub fn cofactor(a: &Self) -> i32 {
-        0
+    pub fn cofactor(a: &Self, row: usize, col: usize) -> f64 {
+        let minor = Matrix::minor(&a, row, col);
+        if row + col % 2 == 0 { minor } else { -minor }
     }
 }
 

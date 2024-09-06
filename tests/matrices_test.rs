@@ -24,6 +24,18 @@ fn point_tuple(world: &mut MatricesWorld, matches: &[String]) {
     world.tuple.insert(key, tuple);
 }
 
+#[given(regex = r"(.+) ← submatrix\((.+)\)")]
+fn submatrix(world: &mut MatricesWorld, matches: &[String]) {
+    let key = matches[0].clone();
+    let params: Vec<&str> = matches[1].split(", ").collect();
+    let param_key = params[0].to_string();
+    let param_row = params[1].parse::<usize>().unwrap();
+    let param_col = params[2].parse::<usize>().unwrap();
+    let a = world.mat.get(&param_key).unwrap();
+    let b = rtxch_lib::Matrix::submatrix(a, param_row, param_col);
+    world.mat.insert(key, b);
+}
+
 #[then(regex = r"(.+)\[(.+),(.+)\] = (.+)")]
 fn check_field(world: &mut MatricesWorld, matches: &[String]) {
     let key = matches[0].clone();
@@ -118,11 +130,27 @@ fn check_function(world: &mut MatricesWorld, matches: &[String]) {
 
     match fn_name {
         "determinant" => {
-            let wanted = matches[2].parse::<i32>().unwrap();
+            let wanted = matches[2].parse::<f64>().unwrap();
             let m = world.mat.get(params[0]).unwrap();
             let det = rtxch_lib::Matrix::det(m);
             assert!(det == wanted);
-        }, 
+        },
+        "minor" => {
+            let wanted = matches[2].parse::<f64>().unwrap();
+            let m = world.mat.get(params[0]).unwrap();
+            let row = params[1].parse::<usize>().unwrap();
+            let col = params[2].parse::<usize>().unwrap();
+            let minor = rtxch_lib::Matrix::minor(&m, row, col);
+            assert!(minor == wanted);
+        },
+        "cofactor" => {
+            let wanted = matches[2].parse::<f64>().unwrap();
+            let m = world.mat.get(params[0]).unwrap();
+            let row = params[1].parse::<usize>().unwrap();
+            let col = params[2].parse::<usize>().unwrap();
+            let cofactor = rtxch_lib::Matrix::cofactor(&m, row, col);
+            assert!(cofactor == wanted);
+        }
         _ => panic!("fn {fn_name} not defined"),
     }
 }
