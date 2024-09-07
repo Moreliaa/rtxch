@@ -1,8 +1,40 @@
 extern crate rtxch_lib;
 
 use std::fs;
+use rtxch_lib::Matrix;
 
 fn main() {
+
+    let mut m1 = Matrix::new(4);
+    m1 = Matrix::inverse(&m1).unwrap();
+
+    println!("Inverse of identity matrix {:?}", m1);
+
+    let m2 = Matrix::from_values(&vec![25.0,13.0,23.0,765.0,12.0,24.0,63.0,24.0,124.0,46.0,24.0,35.0,12.0,23.0,45.0,123.0]);
+    let m2_inv = Matrix::inverse(&m2).unwrap();
+    let m2_out = Matrix::mul(&m2, &m2_inv);
+    println!("m2 multiplied with its inverse {:?}", m2_out);
+
+    let m3 = Matrix::from_values(&vec![25.0,13.0,23.0,765.0,12.0,24.0,63.0,24.0,124.0,46.0,24.0,35.0,12.0,23.0,45.0,123.0]);
+    let m3_inv = Matrix::inverse(&m2).unwrap();
+    let m3_invtrans = Matrix::transpose(&m3_inv);
+    let m3_trans = Matrix::transpose(&m3);
+    let m3_transinv = Matrix::inverse(&m3_trans).unwrap();
+
+    println!("m3 inv -> trans {:?}", m3_invtrans);
+    println!("m3 trans -> inv {:?}", m3_transinv);
+
+    let mut m4 = Matrix::new(4);
+    let tuple = rtxch_lib::Tuples::vector(0.1, 0.2, 0.3);
+    let mut res_tuple = Matrix::mul_tuple(&m4, &tuple);
+    println!("tuple * ident {:?}", res_tuple);
+    m4.set(0, 2, 5.0);
+    m4.set(1, 2, 5.0);
+    m4.set(2, 2, 5.0);
+    res_tuple = Matrix::mul_tuple(&m4, &tuple);
+    println!("tuple * changed {:?}", res_tuple);
+    
+
     let mut canvas = rtxch_lib::Canvas::new(900, 550);
 
     let mut proj_velocity = rtxch_lib::Tuples::vector(1.0, 1.8, 0.0);
@@ -20,8 +52,7 @@ fn main() {
         (proj.position.x,proj.position.x,proj.position.y,proj.position.y);
     let mut ticks: Vec<(f64, f64)> = Vec::new();
     for i in 0..100 {
-        proj.tick(&env); 
-        println!("Step {}: {:?}", {i}, {proj.position});
+        proj.tick(&env);
         if proj.position.y < 0.0 {
             break;
         }
@@ -49,7 +80,6 @@ fn main() {
 
             let y_size = pixel_2.1 as f64 - pixel_1.1 as f64;
             let y = pixel_1.1 as f64 + factor * y_size;
-            println!("factor {factor} {y}");
             canvas.write_pixel(x, y as usize, &proj_color);
         }
     }
