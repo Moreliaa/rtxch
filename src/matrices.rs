@@ -1,5 +1,4 @@
 use std::fmt::Debug;
-use std::collections::HashMap;
 use crate::Tuples;
 
 #[derive(Debug)]
@@ -93,8 +92,24 @@ impl Matrix {
         out
     }
 
-    pub fn inverse(a: &Self) -> Self {
-        Self::new(a.dim())
+    pub fn is_invertible(a: &Self) -> bool {
+        !crate::utils::is_equal_f64(Matrix::det(&a), 0.0)
+    }
+
+    pub fn inverse(a: &Self) -> Result<Self, &'static str> {
+        let det = Matrix::det(&a);
+        if crate::utils::is_equal_f64(det, 0.0) {
+            return Err("Matrix is not invertible.");
+        }
+        let mut out = Self::new(a.dim());
+        for row in 0..a.dim() {
+            for col in 0..a.dim() {
+                let cofactor = Matrix::cofactor(&a, row, col);
+                let val = cofactor / det;
+                out.set(col, row, val);
+            }
+        }
+        Ok(out)
     }
 
     pub fn det(a: &Self) -> f64 {
@@ -140,14 +155,22 @@ impl Matrix {
 
     pub fn cofactor(a: &Self, row: usize, col: usize) -> f64 {
         let minor = Matrix::minor(&a, row, col);
-        if row + col % 2 == 0 { minor } else { -minor }
+        if (row + col) % 2 == 0 { minor } else { -minor }
     }
 }
 
 // Methods
 impl Matrix {
     pub fn is_equal(&self, b: &Self) -> bool {
-        self.m == b.m
+        if self.dim() != b.dim() {
+            return false;
+        }
+        for i in 0..self.m.len() {
+            if !crate::utils::is_equal_f64(self.m[i], b.m[i]) {
+                return false;
+            }
+        }
+        true
     }
 
     pub fn set(&mut self, row: usize, col: usize, val: f64) {
@@ -160,6 +183,7 @@ impl Matrix {
     pub fn dim(&self) -> usize {
         self.dim
     }
+
     fn get_idx(&self, row: usize, col: usize) -> usize {
         self.dim() * row + col
     }

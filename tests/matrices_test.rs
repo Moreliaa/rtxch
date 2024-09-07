@@ -1,7 +1,7 @@
 extern crate rtxch_lib;
 
 use std::collections::HashMap;
-use cucumber::{given, when, then, World};
+use cucumber::{given, then, World};
 use rtxch_lib::utils::parse_values_f64;
 
 #[given(regex = r"the following .+ matrix (.+): (.+)")]
@@ -16,12 +16,27 @@ fn transpose_ident(world: &mut MatricesWorld, _: &[String]) {
     world.mat.insert("A".to_string(), rtxch_lib::Matrix::transpose(&ident));
 }
 
+#[given(regex = r"B ← inverse\(A\)")]
+fn inv(world: &mut MatricesWorld, _: &[String]) {
+    let a = world.mat.get(&"A".to_string()).unwrap();
+    let b = rtxch_lib::Matrix::inverse(&a).unwrap();
+    world.mat.insert("B".to_string(), b);
+}
+
 #[given(regex = "(.+) ← tuple\\((.+)\\)")]
 fn point_tuple(world: &mut MatricesWorld, matches: &[String]) {
     let values: Vec<f64> = parse_values_f64(&matches[1]);
     let key = matches[0].clone();
     let tuple = rtxch_lib::Tuples::new(values[0], values[1], values[2], values[3]);
     world.tuple.insert(key, tuple);
+}
+
+#[given(regex = r"C ← A \* B")]
+fn given_mul_mat(world: &mut MatricesWorld, _: &[String]) {
+    let a = world.mat.get(&"A".to_string()).unwrap();
+    let b = world.mat.get(&"B".to_string()).unwrap();
+    let c = rtxch_lib::Matrix::mul(&a, &b);
+    world.mat.insert("C".to_string(), c);
 }
 
 #[given(regex = r"(.+) ← submatrix\((.+)\)")]
@@ -43,7 +58,7 @@ fn check_field(world: &mut MatricesWorld, matches: &[String]) {
     let col = matches[2].parse::<usize>().unwrap();
     let val = matches[3].parse::<f64>().unwrap();
     let m = world.mat.get(&key).unwrap();
-    assert!(m.get(row, col) == val, "{}", m.get(row, col));
+    assert!(rtxch_lib::utils::is_equal_f64(m.get(row, col), val), "{}", m.get(row, col));
 }
 
 #[then(regex = r"^(.) (=|!=) (.)$")]
@@ -80,6 +95,15 @@ fn check_mul(world: &mut MatricesWorld, matches: &[String]) {
     assert!(out.is_equal(&wanted));
 }
 
+#[then(regex = r"^(.) is the following 4x4 matrix: (.+)")]
+fn check_mat(world: &mut MatricesWorld, matches: &[String]) {
+    let key = matches[0].clone();
+    let out = world.mat.get(&key).unwrap();
+    let values = extract(&matches[1]);
+    let wanted = rtxch_lib::Matrix::from_values(&values);
+    assert!(out.is_equal(&wanted), "{:?}", out);    
+}
+
 #[then(regex = r"A \* (B|identity_matrix) = A")]
 fn check_mul_a(world: &mut MatricesWorld, matches: &[String]) {
     let m1 = world.mat.get("A").unwrap();
@@ -94,7 +118,7 @@ fn check_mul_a(world: &mut MatricesWorld, matches: &[String]) {
 }
 
 #[then(regex = r"identity_matrix \* a = a")]
-fn check_mul_ident_a(world: &mut MatricesWorld, matches: &[String]) {
+fn check_mul_ident_a(world: &mut MatricesWorld, _: &[String]) {
     let a = world.tuple.get("a").unwrap();
     let m = rtxch_lib::Matrix::new(4);
     
@@ -150,7 +174,15 @@ fn check_function(world: &mut MatricesWorld, matches: &[String]) {
             let col = params[2].parse::<usize>().unwrap();
             let cofactor = rtxch_lib::Matrix::cofactor(&m, row, col);
             assert!(cofactor == wanted);
-        }
+        },
+        "C * inverse" => {
+            let c = world.mat.get(&"C".to_string()).unwrap();
+            let b = world.mat.get(&"B".to_string()).unwrap();
+            let b_inv = rtxch_lib::Matrix::inverse(&b).unwrap();
+            let out = rtxch_lib::Matrix::mul(&c, &b_inv);
+            let a = world.mat.get(&"A".to_string()).unwrap();
+            assert!(out.is_equal(&a));
+        },
         _ => panic!("fn {fn_name} not defined"),
     }
 }
@@ -164,6 +196,21 @@ fn check_submatrix(world: &mut MatricesWorld, matches: &[String]) {
     let row = params[1].parse::<usize>().unwrap();
     let col = params[2].parse::<usize>().unwrap();
     assert!(rtxch_lib::Matrix::submatrix(m, row, col).is_equal(&wanted));
+}
+
+#[then(regex = r"A (is|is not) invertible")]
+fn check_invertible(world: &mut MatricesWorld, matches: &[String]) {
+    let m = world.mat.get(&"A".to_string()).unwrap();
+    let result = rtxch_lib::Matrix::is_invertible(&m);
+    match matches[0].as_str() {
+        "is" => {
+            assert!(result);
+        },
+        "is not" => {
+            assert!(!result);
+        },
+        _ => panic!(),
+    };
 }
 
 fn extract(m: &String) -> Vec<f64> {
