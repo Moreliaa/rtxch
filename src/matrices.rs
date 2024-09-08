@@ -90,7 +90,14 @@ impl Matrix {
         out
     }
     pub fn shear(x_y: f64, x_z: f64, y_x: f64, y_z: f64, z_x: f64, z_y: f64) -> Self {
-        Matrix::new(4)
+        let mut out = Matrix::new(4);
+        out.set(0, 1, x_y);
+        out.set(0, 2, x_z);
+        out.set(1, 0, y_x);
+        out.set(1, 2, y_z);
+        out.set(2, 0, z_x);
+        out.set(2, 1, z_y);
+        out
     }
 
     pub fn mul(a: &Self, b: &Self) -> Self {
