@@ -2,7 +2,7 @@ extern crate rtxch_lib;
 
 use std::collections::HashMap;
 use std::f64::consts::PI;
-use cucumber::{given, then, World};
+use cucumber::{given, when, then, World};
 use rtxch_lib::utils::parse_values_f64;
 use rtxch_lib::Matrix;
 use rtxch_lib::Tuples;
@@ -63,6 +63,34 @@ fn create_matrix(world: &mut TrafoWorld, matches: &[String]) {
     };
 }
 
+#[when(regex = r"^(.+) ← (.+) \* ([a-z]|[a-z][0-9])$")]
+fn mul_tuple(world: &mut TrafoWorld, matches: &[String]) {
+    let m = world.mat.get(&matches[1]).unwrap();
+    let t = world.tuple.get(&matches[2]).unwrap();
+    let target = matches[0].clone();
+
+    let result = m * t;
+    world.tuple.insert(target, result);
+}
+
+#[when(regex = r"^(.+) ← (.+) \* (.+) \* (.+)$")]
+fn mul_mat_chain(world: &mut TrafoWorld, matches: &[String]) {
+    let key_out = matches[0].clone();
+    let c = world.mat.get(&matches[1]).unwrap();
+    let b = world.mat.get(&matches[2]).unwrap();
+    let a = world.mat.get(&matches[3]).unwrap();
+    let out = c * b * a;
+    world.mat.insert(key_out, out);
+}
+
+#[then(regex = r"^([a-z]|[a-z][0-9]) = point\((.+)\)$")]
+fn check_point(world: &mut TrafoWorld, matches: &[String]) {
+    let t = world.tuple.get(&matches[0]).unwrap();
+    let values = parse_values_f64(&matches[1]);
+    let wanted = Tuples::point(values[0],values[1],values[2]);
+    assert!(t.is_equal(&wanted), "Result does not match: {:?}", t);
+}
+
 #[then(regex = r"^(.+) \* (.+) = (.)$")]
 fn check_result(world: &mut TrafoWorld, matches: &[String]) {
     let m = world.mat.get(&matches[0]).unwrap();
@@ -73,7 +101,7 @@ fn check_result(world: &mut TrafoWorld, matches: &[String]) {
     assert!(result.is_equal(target), "Result does not match: {:?}", result);
 }
 
-#[then(regex = r"(.+) \* (.+) = (point|vector)\((.+)\)")]
+#[then(regex = r"^([a-zA-Z]+) \* ([a-z]|[a-z][0-9]) = (point|vector)\((.+)\)$")]
 fn check_result_fn(world: &mut TrafoWorld, matches: &[String]) {
     let m = world.mat.get(&matches[0]).unwrap();
     let t = world.tuple.get(&matches[1]).unwrap();
@@ -88,12 +116,17 @@ fn check_result_fn(world: &mut TrafoWorld, matches: &[String]) {
     assert!(result.is_equal(&target), "Result does not match: {:?}", result);
 }
 
-fn extract(m: &String) -> Vec<f64> {
-    let truncated = m.replace(" ", "");
-    truncated.split(r"|")
-                .filter(|m| m.chars().count() > 0)
-                .map(|m| m.parse::<f64>().unwrap())
-                .collect()
+#[then(regex = r"^C \* B \* A \* p = point\((.+)\)$")]
+fn check_result_chain(world: &mut TrafoWorld, matches: &[String]) {
+    let c = world.mat.get(&String::from("C")).unwrap();
+    let b = world.mat.get(&String::from("B")).unwrap();
+    let a = world.mat.get(&String::from("A")).unwrap();
+    let p = world.tuple.get(&String::from("p")).unwrap();
+    let result = c * b * a * p;
+    let values = parse_values_f64(&matches[0]);
+    let target = Tuples::point(values[0], values[1], values[2]);
+
+    assert!(result.is_equal(&target), "Result does not match: {:?}", result);
 }
 
 #[derive(Debug, Default, World)]

@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use std::ops;
 use crate::Tuples;
 
 #[derive(Debug)]
@@ -237,5 +238,56 @@ impl Matrix {
 
     fn get_idx(&self, row: usize, col: usize) -> usize {
         self.dim() * row + col
+    }
+}
+
+// Operator overloads
+// mul_matrix
+impl ops::Mul<Matrix> for Matrix {
+    type Output = Matrix;
+
+    fn mul(self, rhs: Matrix) -> Self::Output {
+        Matrix::mul(&self, &rhs)
+    }
+}
+
+impl ops::Mul<&Matrix> for Matrix {
+    type Output = Matrix;
+
+    fn mul(self, rhs: &Matrix) -> Self::Output {
+        Matrix::mul(&self, &rhs)
+    }
+}
+
+impl ops::Mul<&Matrix> for &Matrix {
+    type Output = Matrix;
+
+    fn mul(self, rhs: &Matrix) -> Self::Output {
+        Matrix::mul(&self, &rhs)
+    }
+}
+
+// mul_tuple
+impl ops::Mul<Tuples> for Matrix {
+    type Output = Tuples;
+
+    fn mul(self, rhs: Tuples) -> Self::Output {
+        Matrix::mul_tuple(&self, &rhs)
+    }
+}
+
+impl ops::Mul<&Tuples> for Matrix {
+    type Output = Tuples;
+
+    fn mul(self, rhs: &Tuples) -> Self::Output {
+        Matrix::mul_tuple(&self, &rhs)
+    }
+}
+
+impl ops::Mul<&Tuples> for &Matrix {
+    type Output = Tuples;
+
+    fn mul(self, rhs: &Tuples) -> Self::Output {
+        Matrix::mul_tuple(self, &rhs)
     }
 }

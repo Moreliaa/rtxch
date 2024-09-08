@@ -116,6 +116,7 @@ Scenario: Chained transformations must be applied in reverse order
     And C ← translation(10, 5, 7)
   When T ← C * B * A
   Then T * p = point(15, 0, 7)
+    And C * B * A * p = point(15, 0, 7)
 
 Scenario: The transformation matrix for the default orientation
   Given from ← point(0, 0, 0)
