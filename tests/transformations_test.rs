@@ -1,6 +1,7 @@
 extern crate rtxch_lib;
 
 use std::collections::HashMap;
+use std::f64::consts::PI;
 use cucumber::{given, then, World};
 use rtxch_lib::utils::parse_values_f64;
 use rtxch_lib::Matrix;
@@ -18,15 +19,18 @@ fn create_matrix(world: &mut TrafoWorld, matches: &[String]) {
             world.mat.insert(target, Matrix::translate(x, y, z));
         },
         "rotation_x" => {
-            let param = matches[2].parse::<f64>().unwrap();
+            let mut param = matches[2].chars().nth(4).unwrap().to_string().parse::<f64>().unwrap();
+            param = PI / param;
             world.mat.insert(target, Matrix::rotate_x(param));
         },
         "rotation_y" => {
-            let param = matches[2].parse::<f64>().unwrap();
+            let mut param = matches[2].chars().nth(4).unwrap().to_string().parse::<f64>().unwrap();
+            param = PI / param;
             world.mat.insert(target, Matrix::rotate_y(param));
         },
         "rotation_z" => {
-            let param = matches[2].parse::<f64>().unwrap();
+            let mut param = matches[2].chars().nth(4).unwrap().to_string().parse::<f64>().unwrap();
+            param = PI / param;
             world.mat.insert(target, Matrix::rotate_z(param));
         },
         "point" => {
@@ -57,6 +61,31 @@ fn create_matrix(world: &mut TrafoWorld, matches: &[String]) {
         },
         _ => panic!("'{func}' not implemented"),
     };
+}
+
+#[then(regex = r"^(.+) \* (.+) = (.)$")]
+fn check_result(world: &mut TrafoWorld, matches: &[String]) {
+    let m = world.mat.get(&matches[0]).unwrap();
+    let t = world.tuple.get(&matches[1]).unwrap();
+    let target = world.tuple.get(&matches[2]).unwrap();
+
+    let result = Matrix::mul_tuple(&m, &t);
+    assert!(result.is_equal(target), "Result does not match: {:?}", result);
+}
+
+#[then(regex = r"(.+) \* (.+) = (point|vector)\((.+)\)")]
+fn check_result_fn(world: &mut TrafoWorld, matches: &[String]) {
+    let m = world.mat.get(&matches[0]).unwrap();
+    let t = world.tuple.get(&matches[1]).unwrap();
+    let values = parse_values_f64(&matches[3]);
+    let target = match matches[2].as_str() {
+        "point" => { Tuples::point(values[0], values[1], values[2]) },
+        "vector" => { Tuples::vector(values[0], values[1], values[2]) },
+        _ => panic!(),
+    };
+
+    let result = Matrix::mul_tuple(&m, &t);
+    assert!(result.is_equal(&target), "Result does not match: {:?}", result);
 }
 
 fn extract(m: &String) -> Vec<f64> {

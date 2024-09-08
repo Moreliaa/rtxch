@@ -51,19 +51,43 @@ impl Matrix {
     }
 
     pub fn translate(x: f64, y: f64, z: f64) -> Self {
-        Matrix::new(4)
+        let mut out = Matrix::new(4);
+        out.set(0, 3, x);
+        out.set(1, 3, y);
+        out.set(2, 3, z);
+        out
+
     }
     pub fn rotate_x(angle_rad: f64) -> Self {
-        Matrix::new(4)
+        let mut out = Matrix::new(4);
+        out.set(1, 1, angle_rad.cos());
+        out.set(1, 2, -angle_rad.sin());
+        out.set(2, 1, angle_rad.sin());
+        out.set(2, 2, angle_rad.cos());
+        out
     }
     pub fn rotate_y(angle_rad: f64) -> Self {
-        Matrix::new(4)
+        let mut out = Matrix::new(4);
+        out.set(0, 0, angle_rad.cos());
+        out.set(0, 2, angle_rad.sin());
+        out.set(2, 0, -angle_rad.sin());
+        out.set(2, 2, angle_rad.cos());
+        out
     }
     pub fn rotate_z(angle_rad: f64) -> Self {
-        Matrix::new(4)
+        let mut out = Matrix::new(4);
+        out.set(0, 0, angle_rad.cos());
+        out.set(0, 1, -angle_rad.sin());
+        out.set(1, 0, angle_rad.sin());
+        out.set(1, 1, angle_rad.cos());
+        out
     }
     pub fn scale(x: f64, y: f64, z: f64) -> Self {
-        Matrix::new(4)
+        let mut out = Matrix::new(4);
+        out.set(0, 0, x);
+        out.set(1, 1, y);
+        out.set(2, 2, z);
+        out
     }
     pub fn shear(x_y: f64, x_z: f64, y_x: f64, y_z: f64, z_x: f64, z_y: f64) -> Self {
         Matrix::new(4)
