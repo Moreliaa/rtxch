@@ -1,11 +1,25 @@
 extern crate rtxch_lib;
 
-use std::fs;
-use rtxch_lib::Matrix;
+use std::{f64::consts::PI, fs};
+use rtxch_lib::{Matrix, Tuples};
 
 fn main() {
+    let mut canvas = rtxch_lib::Canvas::new(900, 550);
 
-    let mut m1 = Matrix::new(4);
+    let rot_angle = PI / 6.0;
+    let center = Tuples::point(0.0,0.0,0.0);
+    let translation_local = Matrix::translate(0.0, 250.0, 0.0);
+    let translation_canvas = Matrix::translate((canvas.width / 2) as f64, (canvas.height / 2) as f64, 0.0);
+    let color = Tuples::color(1.0, 1.0, 0.0);
+    for i in 0..12 {
+        let rotation = Matrix::rotate_z(rot_angle * i as f64);
+        let transform =  &translation_canvas * &rotation * &translation_local;
+        let pixel = transform * center;
+        println!("{:?}", pixel);
+        canvas.write_pixel(pixel.x as usize, pixel.y as usize, &color)
+    }
+
+    /*let mut m1 = Matrix::new(4);
     m1 = Matrix::inverse(&m1).unwrap();
 
     println!("Inverse of identity matrix {:?}", m1);
@@ -35,7 +49,7 @@ fn main() {
     println!("tuple * changed {:?}", res_tuple);
     
 
-    let mut canvas = rtxch_lib::Canvas::new(900, 550);
+    
 
     let mut proj_velocity = rtxch_lib::Tuples::vector(1.0, 1.8, 0.0);
     proj_velocity.normalize().scale(11.25);
@@ -51,7 +65,7 @@ fn main() {
     let (mut x_min, mut x_max, mut y_min, mut y_max) =
         (proj.position.x,proj.position.x,proj.position.y,proj.position.y);
     let mut ticks: Vec<(f64, f64)> = Vec::new();
-    for i in 0..100 {
+    for _ in 0..100 {
         proj.tick(&env);
         if proj.position.y < 0.0 {
             break;
@@ -82,7 +96,7 @@ fn main() {
             let y = pixel_1.1 as f64 + factor * y_size;
             canvas.write_pixel(x, y as usize, &proj_color);
         }
-    }
+    }*/
     
     
     let ppm = canvas.canvas_to_ppm();
