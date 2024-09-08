@@ -49,6 +49,26 @@ impl Matrix {
         }
         out
     }
+
+    pub fn translate(x: f64, y: f64, z: f64) -> Self {
+        Matrix::new(4)
+    }
+    pub fn rotate_x(angle_rad: f64) -> Self {
+        Matrix::new(4)
+    }
+    pub fn rotate_y(angle_rad: f64) -> Self {
+        Matrix::new(4)
+    }
+    pub fn rotate_z(angle_rad: f64) -> Self {
+        Matrix::new(4)
+    }
+    pub fn scale(x: f64, y: f64, z: f64) -> Self {
+        Matrix::new(4)
+    }
+    pub fn shear(x_y: f64, x_z: f64, y_x: f64, y_z: f64, z_x: f64, z_y: f64) -> Self {
+        Matrix::new(4)
+    }
+
     pub fn mul(a: &Self, b: &Self) -> Self {
         if a.dim() != b.dim() {
             panic!("Matrix.mul: dimensions don't match");

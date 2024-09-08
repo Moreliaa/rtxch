@@ -29,3 +29,8 @@ harness = false
 name = "matrices"
 path = "tests\\matrices_test.rs"
 harness = false
+
+[[test]]
+name = "transformations"
+path = "tests\\transformations_test.rs"
+harness = false
