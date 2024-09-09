@@ -10,5 +10,9 @@ pub mod canvas;
 pub use canvas::Canvas;
 pub mod ray;
 pub use ray::Ray;
+pub mod sphere;
+pub use sphere::Sphere;
 
 pub mod utils;
+//private
+mod intersections;

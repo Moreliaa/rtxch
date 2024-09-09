@@ -1,4 +1,6 @@
 use crate::Tuples;
+use crate::Sphere;
+use crate::intersections::Intersections;
 
 #[derive(Debug)]
 pub struct Ray {
@@ -12,7 +14,11 @@ impl Ray {
     }
 
     pub fn position(r: &Ray, time: f64) -> Tuples {
-        Tuples::point(0.0,0.0,0.0)
+        let mut scaled = r.direction().clone();
+        scaled.scale(time);
+        let mut out = r.origin().clone();
+        out.add(&scaled);
+        out
     }
 
     pub fn origin(&self) -> &Tuples {
@@ -21,5 +27,10 @@ impl Ray {
 
     pub fn direction(&self) -> &Tuples {
         &self.direction
+    }
+
+    pub fn intersect(s: &Sphere, r: &Ray) -> Intersections {
+        let xs = vec![0.0; 0];
+        Intersections::new(xs)
     }
 }

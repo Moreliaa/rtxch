@@ -5,8 +5,10 @@ use cucumber::{given, when, then, World};
 use rtxch_lib::utils::parse_values_f64;
 use rtxch_lib::Tuples;
 use rtxch_lib::Ray;
+use rtxch_lib::Sphere;
 
-#[given(regex = r"(.+) ← (point|vector|ray)\((.+)\)")]
+
+#[given(regex = r"(.+) ← (point|vector|ray|sphere)\((.*)\)")]
 fn given_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -32,6 +34,9 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             let r = Ray::new(o.clone(), d.clone());
             world.ray.insert(t, r);
         },
+        "sphere" => {
+            world.sphere.insert(t, Sphere::new());
+        }
         _ => panic!("{func} not implemented")
     }
 }
@@ -71,11 +76,12 @@ fn check_pos(world: &mut RaysWorld, matches: &[String]) {
 #[derive(Debug, Default, World)]
 struct RaysWorld {
     ray: HashMap<String, Ray>,
-    tuple: HashMap<String, Tuples>
+    tuple: HashMap<String, Tuples>,
+    sphere: HashMap<String, Sphere>,
 }
 
 fn main() {
     futures::executor::block_on(RaysWorld::run(
-        "tests/features/rays.feature",
+        "tests/features/intersections.feature",
     ));
 }
