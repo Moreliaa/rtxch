@@ -34,3 +34,8 @@ harness = false
 name = "transformations"
 path = "tests\\transformations_test.rs"
 harness = false
+
+[[test]]
+name = "rays"
+path = "tests\\rays_test.rs"
+harness = false

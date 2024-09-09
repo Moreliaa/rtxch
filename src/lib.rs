@@ -8,5 +8,7 @@ pub mod environment;
 pub use environment::Environment;
 pub mod canvas;
 pub use canvas::Canvas;
+pub mod ray;
+pub use ray::Ray;
 
 pub mod utils;
