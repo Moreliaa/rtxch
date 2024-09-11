@@ -7,7 +7,9 @@ Scenario: An intersection encapsulates t and object
     And i.object = s
 
 Scenario: Precomputing the state of an intersection
-  Given r ← ray(point(0, 0, -5), vector(0, 0, 1))
+  Given origin ← point(0, 0, -5)
+    And direction ← vector(0, 0, 1)
+  When r ← ray(origin, direction)
     And shape ← sphere()
     And i ← intersection(4, shape)
   When comps ← prepare_computations(i, r)
@@ -25,14 +27,18 @@ Scenario: Precomputing the reflection vector
   Then comps.reflectv = vector(0, √2/2, √2/2)                
 
 Scenario: The hit, when an intersection occurs on the outside
-  Given r ← ray(point(0, 0, -5), vector(0, 0, 1))
+  Given origin ← point(0, 0, -5)
+    And direction ← vector(0, 0, 1)
+  When r ← ray(origin, direction)
     And shape ← sphere()
     And i ← intersection(4, shape)
   When comps ← prepare_computations(i, r)
   Then comps.inside = false
 
 Scenario: The hit, when an intersection occurs on the inside
-  Given r ← ray(point(0, 0, 0), vector(0, 0, 1))
+  Given origin ← point(0, 0, 0)
+    And direction ← vector(0, 0, 1)
+  When r ← ray(origin, direction)
     And shape ← sphere()
     And i ← intersection(1, shape)
   When comps ← prepare_computations(i, r)
@@ -43,7 +49,9 @@ Scenario: The hit, when an intersection occurs on the inside
     And comps.normalv = vector(0, 0, -1)
 
 Scenario: The hit should offset the point
-  Given r ← ray(point(0, 0, -5), vector(0, 0, 1))
+  Given origin ← point(0, 0, -5)
+    And direction ← vector(0, 0, 1)
+  When r ← ray(origin, direction)
     And shape ← sphere() with:
       | transform | translation(0, 0, 1) |
     And i ← intersection(5, shape)
@@ -52,7 +60,9 @@ Scenario: The hit should offset the point
     And comps.point.z > comps.over_point.z
 
 Scenario: The under point is offset below the surface
-  Given r ← ray(point(0, 0, -5), vector(0, 0, 1))
+  Given origin ← point(0, 0, -5)
+    And direction ← vector(0, 0, 1)
+  When r ← ray(origin, direction)
     And shape ← glass_sphere() with:
       | transform | translation(0, 0, 1) |
     And i ← intersection(5, shape)

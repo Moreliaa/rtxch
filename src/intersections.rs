@@ -1,3 +1,6 @@
+use crate::Ray;
+
+#[derive(Debug)]
 pub struct Intersections {
     count: usize,
     xs: Vec<f64>,
@@ -16,4 +19,8 @@ impl Intersections {
     pub fn count(&self) -> usize {
         self.count
     }
+}
+
+pub trait Intersectable {
+    fn intersect(&self, r: &Ray) -> Intersections;
 }

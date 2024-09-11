@@ -12,7 +12,7 @@ pub mod ray;
 pub use ray::Ray;
 pub mod sphere;
 pub use sphere::Sphere;
+pub mod intersections;
+pub use intersections::Intersections;
 
 pub mod utils;
-//private
-mod intersections;

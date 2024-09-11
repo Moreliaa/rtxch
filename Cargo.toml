@@ -44,3 +44,8 @@ harness = false
 name = "intersections"
 path = "tests\\intersections_test.rs"
 harness = false
+
+[[test]]
+name = "spheres"
+path = "tests\\spheres_test.rs"
+harness = false
