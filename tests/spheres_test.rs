@@ -56,25 +56,35 @@ fn when_item(world: &mut RaysWorld, matches: &[String]) {
 
 #[then(regex = r"(.+)\.(origin|direction|count) = (.+)")]
 fn check_prop(world: &mut RaysWorld, matches: &[String]) {
-    let r = world.ray.get(&matches[0]).unwrap();
     let prop = matches[1].as_str();
     
     match prop {
         "origin" => {
+            let r = world.ray.get(&matches[0]).unwrap();
             let t = world.tuple.get(&matches[2]).unwrap();
             assert!(r.origin().is_equal(t));
         },
         "direction" => {
+            let r = world.ray.get(&matches[0]).unwrap();
             let t = world.tuple.get(&matches[2]).unwrap();
             assert!(r.direction().is_equal(t));
         },
         "count" => {
-            let xs = world.inter.get(&"xs".to_string()).unwrap();
+            let xs = world.inter.get(&matches[0]).unwrap();
             let t = &matches[2].parse::<usize>().unwrap();
             assert!(xs.count() == *t);
         },
         _ => panic!(),
     }
+}
+
+#[then(regex = r"xs\[(.+)\] = (.+)")]
+fn check_intersect_idx(world: &mut RaysWorld, matches: &[String]) {
+    let idx = &matches[0].parse::<usize>().unwrap();
+    let target = &matches[1].parse::<f64>().unwrap();
+    let xs = world.inter.get(&"xs".to_string()).unwrap();
+    let val = xs.xs().get(*idx).unwrap();
+    assert!(val == target);
 }
 
 #[then(regex = r"position\((.+), (.+)\) = point\((.+)\)")]
