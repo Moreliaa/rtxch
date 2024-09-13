@@ -1,6 +1,7 @@
 use crate::Tuples;
 use crate::Sphere;
 use crate::intersections::IntersectionList;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct Ray {
@@ -29,8 +30,8 @@ impl Ray {
         &self.direction
     }
 
-    pub fn intersect(s: &Sphere, r: &Ray) -> IntersectionList {
+    pub fn intersect(s: &Rc<Sphere>, r: &Ray) -> IntersectionList<Sphere> {
         let xs = vec![0.0; 0];
-        IntersectionList::new(xs)
+        IntersectionList::new(xs, s)
     }
 }

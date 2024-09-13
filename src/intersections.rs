@@ -1,19 +1,28 @@
 use crate::Ray;
 use std::rc::Rc;
 
-#[derive(Debug)]
-pub struct IntersectionList {
+#[derive(Debug, Clone)]
+pub struct IntersectionList<T: Shape> {
     count: usize,
-    xs: Vec<f64>,
+    xs: Vec<Intersection<T>>,
 }
 
-impl IntersectionList {
-    pub fn new(xs: Vec<f64>) -> IntersectionList {
+impl<T: Shape> IntersectionList<T> {
+    pub fn new(t: Vec<f64>, obj: &Rc<T>) -> IntersectionList<T> {
+        let count = t.len();
+        let xs = t.into_iter().map(|v| {
+            Intersection::new(v, &obj)
+        }).collect();
+        IntersectionList { xs, count }
+    }
+
+    pub fn intersections(i1: Intersection<T>, i2: Intersection<T>) -> IntersectionList<T> {
+        let xs = vec![i1, i2];
         let count = xs.len();
         IntersectionList { xs, count }
     }
 
-    pub fn xs(&self) -> &Vec<f64> {
+    pub fn xs(&self) -> &Vec<Intersection<T>> {
         &self.xs
     }
     
@@ -22,7 +31,7 @@ impl IntersectionList {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Intersection<T: Shape> {
     t: f64,
     object: Rc<T>,
@@ -43,5 +52,5 @@ impl<T: Shape> Intersection<T> {
 }
 
 pub trait Shape {
-    fn intersect(&self, r: &Ray) -> IntersectionList;
+    fn intersect(this: &Rc<Self>, r: &Ray) -> IntersectionList<Self> where Self: Sized;
 }
