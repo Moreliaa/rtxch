@@ -2,12 +2,12 @@ extern crate rtxch_lib;
 
 use std::collections::HashMap;
 use cucumber::{given, when, then, World};
-use rtxch_lib::intersections::Intersectable;
+use rtxch_lib::intersections::Shape;
 use rtxch_lib::utils::parse_values_f64;
 use rtxch_lib::Tuples;
 use rtxch_lib::Ray;
 use rtxch_lib::Sphere;
-use rtxch_lib::Intersections;
+use rtxch_lib::IntersectionList;
 
 
 #[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect)\((.*)\)")]
@@ -103,7 +103,7 @@ struct RaysWorld {
     ray: HashMap<String, Ray>,
     tuple: HashMap<String, Tuples>,
     sphere: HashMap<String, Sphere>,
-    inter:  HashMap<String, Intersections>,
+    inter:  HashMap<String, IntersectionList>,
 }
 
 fn main() {

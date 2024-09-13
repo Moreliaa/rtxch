@@ -3,12 +3,12 @@ extern crate rtxch_lib;
 use std::collections::HashMap;
 use cucumber::{given, when, then, World};
 use rtxch_lib::utils::parse_values_f64;
-use rtxch_lib::Tuples;
-use rtxch_lib::Ray;
-use rtxch_lib::Sphere;
+use rtxch_lib::utils::is_equal_f64;
+use rtxch_lib::*;
+use std::rc::Rc;
 
 
-#[given(regex = r"(.+) ← (point|vector|ray|sphere)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersection)\((.*)\)")]
 fn given_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -35,28 +35,47 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             world.ray.insert(t, r);
         },
         "sphere" => {
-            world.sphere.insert(t, Sphere::new());
-        }
+            world.sphere.insert(t, Rc::new(Sphere::new()));
+        },
+        "intersection" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let time = v[0].parse::<f64>().unwrap();
+            let obj = world.sphere.get(&v[1].to_string()).unwrap();
+            world.inter_sphere.insert(t, Intersection::new(time, obj));
+        },
         _ => panic!("{func} not implemented")
     }
 }
 
-#[when(regex = r"(.+) ← (point|vector|ray)\((.+)\)")]
+#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersection)\((.*)\)")]
 fn when_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
 
-#[then(regex = r"(.+)\.(origin|direction) = (.+)")]
+#[then(regex = r"(.+)\.(origin|direction|t|object) = (.+)")]
 fn check_prop(world: &mut RaysWorld, matches: &[String]) {
-    let r = world.ray.get(&matches[0]).unwrap();
     let prop = matches[1].as_str();
-    let t = world.tuple.get(&matches[2]).unwrap();
+    
     match prop {
         "origin" => {
-            assert!(r.origin().is_equal(t));
+            let r = world.ray.get(&matches[0]).unwrap();
+            let target = world.tuple.get(&matches[2]).unwrap();
+            assert!(r.origin().is_equal(target));
         },
         "direction" => {
-            assert!(r.direction().is_equal(t));
+            let r = world.ray.get(&matches[0]).unwrap();
+            let target = world.tuple.get(&matches[2]).unwrap();
+            assert!(r.direction().is_equal(target));
+        },
+        "t" => {
+            let i = world.inter_sphere.get(&matches[0]).unwrap();
+            let target = matches[2].parse::<f64>().unwrap();
+            assert!(is_equal_f64(i.t(), target));
+        },
+        "object" => {
+            let i = world.inter_sphere.get(&matches[0]).unwrap();
+            let target = world.sphere.get(&matches[2]).unwrap();
+            assert!(Rc::ptr_eq(i.object(), &target));
         },
         _ => panic!()
     }
@@ -77,7 +96,8 @@ fn check_pos(world: &mut RaysWorld, matches: &[String]) {
 struct RaysWorld {
     ray: HashMap<String, Ray>,
     tuple: HashMap<String, Tuples>,
-    sphere: HashMap<String, Sphere>,
+    sphere: HashMap<String, Rc<Sphere>>,
+    inter_sphere:  HashMap<String, Intersection<Sphere>>,
 }
 
 fn main() {
