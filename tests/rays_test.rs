@@ -5,8 +5,9 @@ use cucumber::{given, when, then, World};
 use rtxch_lib::utils::parse_values_f64;
 use rtxch_lib::Tuples;
 use rtxch_lib::Ray;
+use rtxch_lib::Matrix;
 
-#[given(regex = r"(.+) ← (point|vector|ray)\((.+)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|translation|scaling|transform)\((.+)\)")]
 fn given_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -32,11 +33,25 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             let r = Ray::new(o.clone(), d.clone());
             world.ray.insert(t, r);
         },
+        "translation" => {
+            let v: Vec<f64> = parse_values_f64(&matches[2]);
+            world.matrix.insert(t, Matrix::translate(v[0], v[1], v[2]));
+        },
+        "scaling" => {
+            let v: Vec<f64> = parse_values_f64(&matches[2]);
+            world.matrix.insert(t, Matrix::scale(v[0], v[1], v[2]));
+        },
+        "transform" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let r = world.ray.get(&v[0].to_string()).unwrap();
+            let m = world.matrix.get(&v[1].to_string()).unwrap();
+            world.ray.insert(t,Ray::transform(r, m));
+        }
         _ => panic!("{func} not implemented")
     }
 }
 
-#[when(regex = r"(.+) ← (point|vector|ray)\((.+)\)")]
+#[when(regex = r"(.+) ← (point|vector|ray|translation|scaling|transform)\((.+)\)")]
 fn when_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -71,7 +86,8 @@ fn check_pos(world: &mut RaysWorld, matches: &[String]) {
 #[derive(Debug, Default, World)]
 struct RaysWorld {
     ray: HashMap<String, Ray>,
-    tuple: HashMap<String, Tuples>
+    tuple: HashMap<String, Tuples>,
+    matrix: HashMap<String, Matrix>,
 }
 
 fn main() {

@@ -2,7 +2,7 @@ use std::fmt::Debug;
 use std::ops;
 use crate::Tuples;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Matrix {
     m: Vec<f64>,
     dim: usize,

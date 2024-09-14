@@ -1,4 +1,5 @@
 use crate::Ray;
+use crate::Matrix;
 use std::rc::Rc;
 
 #[derive(Debug, Clone)]
@@ -75,4 +76,5 @@ impl<T: Shape> Intersection<T> {
 
 pub trait Shape {
     fn intersect(this: &Rc<Self>, r: &Ray) -> IntersectionList<Self> where Self: Sized;
+    fn set_transform(this: &Rc<Self>, transform: &Matrix);
 }

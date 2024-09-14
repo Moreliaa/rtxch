@@ -1,11 +1,12 @@
 use crate::intersections::{Shape, IntersectionList};
 use crate::Ray;
 use crate::Tuples;
+use crate::Matrix;
 use std::rc::Rc;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Sphere {
-
+    //transform: Matrix,
 }
 
 impl Sphere {
@@ -31,5 +32,9 @@ impl Shape for Sphere {
         let t1 = (-b - discriminant_sqrt) / (2.0 * a);
         let t2 = (-b + discriminant_sqrt) / (2.0 * a);
         IntersectionList::new(vec![t1, t2], &this)
+    }
+
+    fn set_transform(this: &Rc<Self>, transform: &Matrix) {
+        //this.transform = transform.clone();
     }
 }
