@@ -45,16 +45,20 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
         },
         "intersections" => {
             let v: Vec<&str> = matches[2].split(", ").collect();
-            let i1 = world.inter_sphere.get(&v[0].to_string()).unwrap();
-            let i2 = world.inter_sphere.get(&v[1].to_string()).unwrap();
-            let l = IntersectionList::intersections(i1.clone(), i2.clone());
+            let i: Vec<Intersection<Sphere>> = v.into_iter().map(|val| world.inter_sphere.get(&val.to_string()).unwrap().clone()).collect();
+            let l = IntersectionList::intersections_from_vec(i);
             world.interlist_sphere.insert(t, l);
         },
+        "hit" => {
+            let il = world.interlist_sphere.get(&matches[2]).unwrap();
+            let hit = intersections::IntersectionList::hit(il);
+            world.hit.insert(t, hit.clone());
+        }
         _ => panic!("{func} not implemented")
     }
 }
 
-#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections)\((.*)\)")]
+#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections|hit)\((.*)\)")]
 fn when_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -113,6 +117,33 @@ fn check_sub_prop(world: &mut RaysWorld, matches: &[String]) {
     }
 }
 
+#[then(regex = r"i = (.+)")]
+fn check_hit(world: &mut RaysWorld, matches: &[String]) {
+    let i = world.hit.get("i").unwrap();
+    let other = world.inter_sphere.get(&matches[0]).unwrap();
+    match i {
+        None => {
+            assert!(false, "Expected other, got none.");
+        },
+        Some(result) => {
+            assert!(result.is_equal(other));
+        }
+    }
+}
+
+#[then(regex = r"i is nothing")]
+fn check_hit_nothing(world: &mut RaysWorld, matches: &[String]) {
+    let i = world.hit.get("i").unwrap();
+    match i {
+        None => {
+            assert!(true);
+        },
+        Some(result) => {
+            assert!(false);
+        }
+    }
+}
+
 #[then(regex = r"position\((.+), (.+)\) = point\((.+)\)")]
 fn check_pos(world: &mut RaysWorld, matches: &[String]) {
     let r = world.ray.get(&matches[0]).unwrap();
@@ -131,6 +162,7 @@ struct RaysWorld {
     sphere: HashMap<String, Rc<Sphere>>,
     inter_sphere:  HashMap<String, Intersection<Sphere>>,
     interlist_sphere: HashMap<String, IntersectionList<Sphere>>,
+    hit: HashMap<String, Option<Rc<Intersection<Sphere>>>>,
 }
 
 fn main() {
