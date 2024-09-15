@@ -40,7 +40,7 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             world.ray.insert(t, r);
         },
         "sphere" => {
-            world.sphere.insert(t, Rc::new(RefCell::new(Sphere::new())));
+            world.sphere.insert(t, Sphere::new());
         },
         "intersect" => {
             let v: Vec<&str> = matches[2].split(", ").collect();

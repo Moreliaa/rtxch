@@ -1,12 +1,34 @@
 extern crate rtxch_lib;
 
 use std::{f64::consts::PI, fs};
-use rtxch_lib::{Matrix, Tuples};
+use rtxch_lib::{intersections::Shape, Matrix, Sphere, Tuples, Ray, IntersectionList};
 
 fn main() {
     let mut canvas = rtxch_lib::Canvas::new(900, 550);
+    let megasphere = Sphere::new();
+    let scale_sphere = Matrix::scale(250.0, 250.0, 250.0);
+    let translation_canvas = Matrix::translate((canvas.width / 2) as f64, (canvas.height / 2) as f64, 0.0);
+    let transform = translation_canvas * scale_sphere;
+    Sphere::set_transform(&megasphere, &transform);
 
-    let rot_angle = PI / 6.0;
+    let color = Tuples::color(1.0, 1.0, 0.5);
+    let ray_direction = Tuples::vector(0.0, 0.0, 1.0);
+    for x in 0..canvas.width {
+        for y in 0..canvas.height {
+            let ray = Ray::new(Tuples::point(x as f64, y as f64, -1.0), ray_direction.clone());
+            let is = Sphere::intersect(&megasphere, &ray);
+            let hit = IntersectionList::hit(&is);
+            match hit {
+                Some(_) => {
+                    canvas.write_pixel(x, y, &color)
+                },
+                None => {}
+            }
+        }
+    }
+
+    // === Clock example
+    /*let rot_angle = PI / 6.0;
     let center = Tuples::point(0.0,0.0,0.0);
     let translation_local = Matrix::translate(0.0, 250.0, 0.0);
     let translation_canvas = Matrix::translate((canvas.width / 2) as f64, (canvas.height / 2) as f64, 0.0);
@@ -17,7 +39,11 @@ fn main() {
         let pixel = transform * center;
         println!("{:?}", pixel);
         canvas.write_pixel(pixel.x as usize, pixel.y as usize, &color)
-    }
+    }*/
+
+    // === Clock example end
+
+    // === random stuff
 
     /*let mut m1 = Matrix::new(4);
     m1 = Matrix::inverse(&m1).unwrap();

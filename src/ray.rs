@@ -1,8 +1,5 @@
 use crate::Tuples;
-use crate::Sphere;
-use crate::intersections::IntersectionList;
 use crate::Matrix;
-use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 pub struct Ray {

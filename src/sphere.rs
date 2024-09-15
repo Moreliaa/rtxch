@@ -12,8 +12,8 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new() -> Sphere {
-        Sphere { transform: Matrix::new(4), transform_inverse: Matrix::new(4) }
+    pub fn new() -> Rc<RefCell<Sphere>> {
+        Rc::new(RefCell::new(Sphere { transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
     }
 }
 
