@@ -10,9 +10,10 @@ use rtxch_lib::Sphere;
 use rtxch_lib::IntersectionList;
 use std::rc::Rc;
 use std::cell::RefCell;
+use rtxch_lib::Matrix;
 
 
-#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling)\((.*)\)")]
 fn given_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -47,16 +48,34 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             let r = world.ray.get(&v[1].to_string()).unwrap();
             world.inter.insert(t, Sphere::intersect(s, r));
         },
+        "translation" => {
+            let v = parse_values_f64(&matches[2]);
+            let m = Matrix::translate(v[0], v[1], v[2]);
+            world.matrix.insert(t, m);
+        },
+        "scaling" =>  {
+            let v = parse_values_f64(&matches[2]);
+            let m = Matrix::scale(v[0], v[1], v[2]);
+            world.matrix.insert(t, m);
+        },
         _ => panic!("{func} not implemented")
     }
 }
 
-#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect)\((.*)\)")]
+#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling)\((.*)\)")]
 fn when_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
 
-#[then(regex = r"(.+)\.(origin|direction|count) = (.+)")]
+#[when(regex = r"set_transform\((.+)\)")]
+fn when_set_transform(world: &mut RaysWorld, matches: &[String]) {
+    let v: Vec<&str> = matches[0].split(", ").collect();
+    let s = world.sphere.get(v[0]).unwrap();
+    let t = world.matrix.get(v[1]).unwrap();
+    Sphere::set_transform(s, t);
+}
+
+#[then(regex = r"(.+)\.(origin|direction|count|transform) = (.+)")]
 fn check_prop(world: &mut RaysWorld, matches: &[String]) {
     let prop = matches[1].as_str();
     
@@ -76,6 +95,19 @@ fn check_prop(world: &mut RaysWorld, matches: &[String]) {
             let t = &matches[2].parse::<usize>().unwrap();
             assert!(xs.count() == *t);
         },
+        "transform" => {
+            let s = world.sphere.get(&matches[0]).unwrap();
+            match matches[2].as_str() {
+                "identity_matrix" => {
+                    let ident = Matrix::new(4);
+                    s.borrow().get_transform().is_equal(&ident);
+                },
+                _ => {
+                    let m = world.matrix.get(&matches[2]).unwrap();
+                    s.borrow().get_transform().is_equal(m);
+                },
+            }
+        }
         _ => panic!(),
     }
 }
@@ -126,6 +158,7 @@ struct RaysWorld {
     tuple: HashMap<String, Tuples>,
     sphere: HashMap<String, Rc<RefCell<Sphere>>>,
     inter:  HashMap<String, IntersectionList<Sphere>>,
+    matrix: HashMap<String, Matrix>,
 }
 
 fn main() {

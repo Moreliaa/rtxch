@@ -5,19 +5,21 @@ use crate::Matrix;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct Sphere {
-    //transform: Matrix,
+    transform: Matrix,
+    transform_inverse: Matrix,
 }
 
 impl Sphere {
     pub fn new() -> Sphere {
-        Sphere {}
+        Sphere { transform: Matrix::new(4), transform_inverse: Matrix::new(4) }
     }
 }
 
 impl Shape for Sphere {
     fn intersect(this: &Rc<RefCell<Sphere>>, r: &Ray) -> IntersectionList<Sphere> {
+        let r = Ray::transform(r, this.borrow().get_transform_inverse());
         let sphere_origin = Tuples::point(0.0,0.0,0.0);
         let sphere_to_ray = r.origin().clone().subtract(&sphere_origin);
         // a = 1.0 only if direction is normalized
@@ -36,6 +38,15 @@ impl Shape for Sphere {
     }
 
     fn set_transform(this: &Rc<RefCell<Self>>, transform: &Matrix) {
-        //this.transform = transform.clone();
+        this.borrow_mut().transform = transform.clone();
+        this.borrow_mut().transform_inverse = Matrix::inverse(transform).unwrap();
+    }
+
+    fn get_transform(&self) -> &Matrix {
+        &self.transform
+    }
+
+    fn get_transform_inverse(&self) -> &Matrix {
+        &self.transform_inverse
     }
 }

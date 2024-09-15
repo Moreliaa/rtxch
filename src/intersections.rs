@@ -78,4 +78,6 @@ impl<T: Shape> Intersection<T> {
 pub trait Shape {
     fn intersect(this: &Rc<RefCell<Self>>, r: &Ray) -> IntersectionList<Self> where Self: Sized;
     fn set_transform(this: &Rc<RefCell<Self>>, transform: &Matrix);
+    fn get_transform(&self) -> &Matrix;
+    fn get_transform_inverse(&self) -> &Matrix;
 }

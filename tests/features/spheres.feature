@@ -71,9 +71,10 @@ Scenario: Changing a sphere's transformation
 Scenario: Intersecting a scaled sphere with a ray
   Given origin ← point(0, 0, -5)
     And direction ← vector(0, 0, 1)
+    And scaling ← scaling(2, 2, 2)
   When r ← ray(origin, direction)
     And s ← sphere()
-  When set_transform(s, scaling(2, 2, 2))
+  When set_transform(s, scaling)
     And xs ← intersect(s, r)
   Then xs.count = 2
     And xs[0].t = 3
@@ -82,9 +83,10 @@ Scenario: Intersecting a scaled sphere with a ray
 Scenario: Intersecting a translated sphere with a ray
   Given origin ← point(0, 0, -5)
     And direction ← vector(0, 0, 1)
+    And translation ← translation(5, 0, 0)
   When r ← ray(origin, direction)
     And s ← sphere()
-  When set_transform(s, translation(5, 0, 0))
+  When set_transform(s, translation)
     And xs ← intersect(s, r)
   Then xs.count = 0
 
