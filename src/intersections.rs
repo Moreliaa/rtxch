@@ -5,14 +5,14 @@ use std::rc::Rc;
 #[derive(Debug, Clone)]
 pub struct IntersectionList<T: Shape> {
     count: usize,
-    xs: Vec<Rc<Intersection<T>>>,
+    xs: Vec<Intersection<T>>,
 }
 
 impl<T: Shape> IntersectionList<T> {
     pub fn new(t: Vec<f64>, obj: &Rc<T>) -> IntersectionList<T> {
         let count = t.len();
         let xs = t.into_iter().map(|v| {
-            Rc::new(Intersection::new(v, &obj))
+            Intersection::new(v, &obj)
         }).collect();
         IntersectionList { xs, count }
     }
@@ -25,20 +25,20 @@ impl<T: Shape> IntersectionList<T> {
         // sort from lowest to highest t
         i.sort_by(|a, b| a.t().partial_cmp(&b.t()).unwrap());
         let count = i.len();
-        let xs = i.into_iter().map(|val| Rc::new(val)).collect();
+        let xs = i.into_iter().map(|val| val).collect();
         IntersectionList { xs, count }
     }
 
-    pub fn hit(il: &IntersectionList<T>) -> Option<Rc<Intersection<T>>> {
+    pub fn hit(il: &IntersectionList<T>) -> Option<&Intersection<T>> {
         for i in il.xs() {
             if i.t() >= 0.0 {
-                return Some(Rc::clone(i));
+                return Some(i);
             }
         }
         None
     }
 
-    pub fn xs(&self) -> &Vec<Rc<Intersection<T>>> {
+    pub fn xs(&self) -> &Vec<Intersection<T>> {
         &self.xs
     }
     

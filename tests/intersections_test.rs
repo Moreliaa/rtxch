@@ -52,7 +52,11 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
         "hit" => {
             let il = world.interlist_sphere.get(&matches[2]).unwrap();
             let hit = intersections::IntersectionList::hit(il);
-            world.hit.insert(t, hit.clone());
+            match hit {
+                Some(value) => world.hit.insert(t, Some(value.clone())),
+                None => world.hit.insert(t, None),
+            };
+            
         }
         _ => panic!("{func} not implemented")
     }
@@ -162,7 +166,7 @@ struct RaysWorld {
     sphere: HashMap<String, Rc<Sphere>>,
     inter_sphere:  HashMap<String, Intersection<Sphere>>,
     interlist_sphere: HashMap<String, IntersectionList<Sphere>>,
-    hit: HashMap<String, Option<Rc<Intersection<Sphere>>>>,
+    hit: HashMap<String, Option<Intersection<Sphere>>>,
 }
 
 fn main() {

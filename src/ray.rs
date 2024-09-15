@@ -36,9 +36,4 @@ impl Ray {
     pub fn direction(&self) -> &Tuples {
         &self.direction
     }
-
-    pub fn intersect(s: &Rc<Sphere>, r: &Ray) -> IntersectionList<Sphere> {
-        let xs = vec![0.0; 0];
-        IntersectionList::new(xs, s)
-    }
 }
