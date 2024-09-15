@@ -6,6 +6,7 @@ use rtxch_lib::utils::parse_values_f64;
 use rtxch_lib::utils::is_equal_f64;
 use rtxch_lib::*;
 use std::rc::Rc;
+use std::cell::RefCell;
 
 
 #[given(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections)\((.*)\)")]
@@ -35,7 +36,7 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             world.ray.insert(t, r);
         },
         "sphere" => {
-            world.sphere.insert(t, Rc::new(Sphere::new()));
+            world.sphere.insert(t, Rc::new(RefCell::new(Sphere::new())));
         },
         "intersection" => {
             let v: Vec<&str> = matches[2].split(", ").collect();
@@ -163,7 +164,7 @@ fn check_pos(world: &mut RaysWorld, matches: &[String]) {
 struct RaysWorld {
     ray: HashMap<String, Ray>,
     tuple: HashMap<String, Tuples>,
-    sphere: HashMap<String, Rc<Sphere>>,
+    sphere: HashMap<String, Rc<RefCell<Sphere>>>,
     inter_sphere:  HashMap<String, Intersection<Sphere>>,
     interlist_sphere: HashMap<String, IntersectionList<Sphere>>,
     hit: HashMap<String, Option<Intersection<Sphere>>>,

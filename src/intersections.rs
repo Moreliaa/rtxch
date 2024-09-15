@@ -1,6 +1,7 @@
 use crate::Ray;
 use crate::Matrix;
 use std::rc::Rc;
+use std::cell::RefCell;
 
 #[derive(Debug, Clone)]
 pub struct IntersectionList<T: Shape> {
@@ -9,7 +10,7 @@ pub struct IntersectionList<T: Shape> {
 }
 
 impl<T: Shape> IntersectionList<T> {
-    pub fn new(t: Vec<f64>, obj: &Rc<T>) -> IntersectionList<T> {
+    pub fn new(t: Vec<f64>, obj: &Rc<RefCell<T>>) -> IntersectionList<T> {
         let count = t.len();
         let xs = t.into_iter().map(|v| {
             Intersection::new(v, &obj)
@@ -50,11 +51,11 @@ impl<T: Shape> IntersectionList<T> {
 #[derive(Debug, Clone)]
 pub struct Intersection<T: Shape> {
     t: f64,
-    object: Rc<T>,
+    object: Rc<RefCell<T>>,
 }
 
 impl<T: Shape> Intersection<T> {
-    pub fn new(t: f64, object: &Rc<T>) -> Intersection<T> {
+    pub fn new(t: f64, object: &Rc<RefCell<T>>) -> Intersection<T> {
         Intersection { t, object: Rc::clone(object) }
     }
 
@@ -62,7 +63,7 @@ impl<T: Shape> Intersection<T> {
         self.t
     }
 
-    pub fn object(&self) -> &Rc<T> {
+    pub fn object(&self) -> &Rc<RefCell<T>> {
         &self.object
     }
 
@@ -75,6 +76,6 @@ impl<T: Shape> Intersection<T> {
 }
 
 pub trait Shape {
-    fn intersect(this: &Rc<Self>, r: &Ray) -> IntersectionList<Self> where Self: Sized;
-    fn set_transform(this: &Rc<Self>, transform: &Matrix);
+    fn intersect(this: &Rc<RefCell<Self>>, r: &Ray) -> IntersectionList<Self> where Self: Sized;
+    fn set_transform(this: &Rc<RefCell<Self>>, transform: &Matrix);
 }

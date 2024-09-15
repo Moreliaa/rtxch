@@ -3,6 +3,7 @@ use crate::Ray;
 use crate::Tuples;
 use crate::Matrix;
 use std::rc::Rc;
+use std::cell::RefCell;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Sphere {
@@ -16,7 +17,7 @@ impl Sphere {
 }
 
 impl Shape for Sphere {
-    fn intersect(this: &Rc<Sphere>, r: &Ray) -> IntersectionList<Sphere> {
+    fn intersect(this: &Rc<RefCell<Sphere>>, r: &Ray) -> IntersectionList<Sphere> {
         let sphere_origin = Tuples::point(0.0,0.0,0.0);
         let sphere_to_ray = r.origin().clone().subtract(&sphere_origin);
         // a = 1.0 only if direction is normalized
@@ -34,7 +35,7 @@ impl Shape for Sphere {
         IntersectionList::new(vec![t1, t2], &this)
     }
 
-    fn set_transform(this: &Rc<Self>, transform: &Matrix) {
+    fn set_transform(this: &Rc<RefCell<Self>>, transform: &Matrix) {
         //this.transform = transform.clone();
     }
 }
