@@ -7,8 +7,11 @@ fn main() {
     let mut canvas = rtxch_lib::Canvas::new(900, 550);
     let megasphere = Sphere::new();
     let scale_sphere = Matrix::scale(250.0, 250.0, 250.0);
+    let squash = Matrix::scale(1.0, 0.5, 1.0);
+    let rotate = Matrix::rotate_z(PI / 4.0);
     let translation_canvas = Matrix::translate((canvas.width / 2) as f64, (canvas.height / 2) as f64, 0.0);
-    let transform = translation_canvas * scale_sphere;
+    let shear = Matrix::shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    let transform = Matrix::transform_from_trs(&(translation_canvas * shear), &rotate, &(squash * scale_sphere));
     Sphere::set_transform(&megasphere, &transform);
 
     let color = Tuples::color(1.0, 1.0, 0.5);
@@ -124,7 +127,7 @@ fn main() {
         }
     }*/
     
-    
+    println!("Writing ppm...");
     let ppm = canvas.canvas_to_ppm();
     fs::write("./output.ppm", ppm).expect("Failed to write file.");
     

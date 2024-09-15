@@ -51,6 +51,10 @@ impl Matrix {
         out
     }
 
+    pub fn transform_from_trs(translation: &Matrix, rotation: &Matrix, scale: &Matrix) -> Matrix {
+        translation * rotation * scale
+    }
+
     pub fn translate(x: f64, y: f64, z: f64) -> Self {
         let mut out = Matrix::new(4);
         out.set(0, 3, x);
