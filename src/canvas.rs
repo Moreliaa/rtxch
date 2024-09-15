@@ -56,12 +56,16 @@ impl Canvas {
     }
 
     pub fn canvas_to_ppm(&self) -> String {
-        let mut output = String::new();
-        output.push_str("P3\n");
-        output.push_str(format!("{} {}\n", self.width, self.height).as_str());
-        output.push_str("255\n");
+        let mut output: Vec<String> = vec![];
+        output.push(String::from("P3\n"));
+        let canvas_dim = format!("{} {}\n", self.width, self.height);
+        output.push(String::from(&canvas_dim));
+        output.push(String::from("255\n"));
         
         let max_characters = 70;
+
+        let newline = String::from("\n");
+        let space = String::from(" ");
 
         for y in 0..self.height {
             let mut characters_in_line = 0;
@@ -69,10 +73,10 @@ impl Canvas {
                 if x > 0 {
                     characters_in_line += 1;
                     if characters_in_line > max_characters {
-                        output.push_str("\n");
+                        output.push(newline.clone());
                         characters_in_line = 0;
                     } else {
-                        output.push_str(" ");
+                        output.push(space.clone());
                     }
                 }
                 let pixel = self.pixel_at(x, y);
@@ -82,25 +86,27 @@ impl Canvas {
                     
                     characters_in_line += c_str.len();
                     if characters_in_line > max_characters {
-                        output = output.trim_end().to_string();
-                        output.push_str("\n");
+                        while output.last().unwrap() == &" " {
+                            output.pop();
+                        }
+                        output.push(newline.clone());
                         characters_in_line = c_str.len();
                     }
-                    output.push_str(c_str.as_str());
+                    output.push(c_str);
 
                     if i < colors.len() - 1 {
                         characters_in_line += 1;
                         if characters_in_line > max_characters {
-                            output.push_str("\n");
+                            output.push(newline.clone());
                             characters_in_line = 0;
                         } else {
-                            output.push_str(" ");
+                            output.push(space.clone());
                         }
                     }
                 }
             }
-            output.push_str("\n");
+            output.push(newline.clone());
         }
-        output
+        output.join("")
     }
 }
