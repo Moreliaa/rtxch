@@ -13,7 +13,7 @@ use std::cell::RefCell;
 use rtxch_lib::Matrix;
 
 
-#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|rotation_z)\((.*)\)")]
 fn given_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -58,6 +58,11 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             let m = Matrix::scale(v[0], v[1], v[2]);
             world.matrix.insert(t, m);
         },
+        "rotation_z" => {
+            let v = parse_values_f64(&matches[2]);
+            let m = Matrix::rotate_z(v[0]);
+            world.matrix.insert(t, m);
+        },
         "normal_at" => {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let s = world.sphere.get(&v[0].to_string()).unwrap();
@@ -73,12 +78,28 @@ fn when_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
 
-#[when(regex = r"set_transform\((.+)\)")]
-fn when_set_transform(world: &mut RaysWorld, matches: &[String]) {
+#[given(regex = r"m ← scale \* rot")]
+fn make_mat(world: &mut RaysWorld, _: &[String]) {
+    let scale = world.matrix.get(&"scale".to_string()).unwrap();
+    let rot = world.matrix.get(&"rot".to_string()).unwrap();
+    world.matrix.insert("m".to_string(), scale * rot);
+}
+
+fn set_transform(world: &mut RaysWorld, matches: &[String]) {
     let v: Vec<&str> = matches[0].split(", ").collect();
     let s = world.sphere.get(v[0]).unwrap();
     let t = world.matrix.get(v[1]).unwrap();
     Sphere::set_transform(s, t);
+}
+
+#[given(regex = r"set_transform\((.+)\)")]
+fn given_set_transform(world: &mut RaysWorld, matches: &[String]) {
+    set_transform(world, matches);
+}
+
+#[when(regex = r"set_transform\((.+)\)")]
+fn when_set_transform(world: &mut RaysWorld, matches: &[String]) {
+    set_transform(world, matches);
 }
 
 #[then(regex = r"(.+)\.(origin|direction|count|transform) = (.+)")]

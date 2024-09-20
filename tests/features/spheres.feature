@@ -122,15 +122,20 @@ Scenario: The normal is a normalized vector
 
 Scenario: Computing the normal on a translated sphere
   Given s ← sphere()
-    And set_transform(s, translation(0, 1, 0))
-  When n ← normal_at(s, point(0, 1.70711, -0.70711))
+    And t ← translation(0, 1, 0)
+    And set_transform(s, t)
+    And p ← point(0, 1.70711, -0.70711)
+  When n ← normal_at(s, p)
   Then n = vector(0, 0.70711, -0.70711)
 
 Scenario: Computing the normal on a transformed sphere
   Given s ← sphere()
-    And m ← scaling(1, 0.5, 1) * rotation_z(π/5)
+    And scale ← scaling(1, 0.5, 1)
+    And rot ← rotation_z(0.62832)
+    And m ← scale * rot
     And set_transform(s, m)
-  When n ← normal_at(s, point(0, √2/2, -√2/2))
+    And p ← point(0, 0.70711, -0.70711)
+  When n ← normal_at(s, p)
   Then n = vector(0, 0.97014, -0.24254)
 
 Scenario: A sphere has a default material
