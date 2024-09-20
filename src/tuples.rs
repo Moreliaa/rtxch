@@ -50,6 +50,11 @@ impl Tuples {
             v1.x * v2.y - v1.y * v2.x,
         )
     }
+
+    pub fn reflect(v_in: &Tuples, normal: &Tuples) -> Tuples {
+        let dot = Tuples::dot(v_in, normal);
+        v_in.clone().subtract(&normal.clone().scale(2.0 * dot))
+    }
 }
 
 // Methods

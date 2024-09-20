@@ -1,7 +1,8 @@
 extern crate rtxch_lib;
 
-use rtxch_lib::utils::is_equal_f64;
+use rtxch_lib::utils::{is_equal_f64, parse_values_f64};
 use cucumber::{given, when, then, World};
+use rtxch_lib::Tuples;
 
 #[given(regex = "a ← tuple\\((.+), (.+), (.+), (.+)\\)")]
 fn point_tuple(world: &mut TuplesWorld, matches: &[String]) {
@@ -65,6 +66,7 @@ fn create_vector_or_point(world: &mut TuplesWorld, matches: &[String]) {
         "v2" => world.vector2 = tuple,
         "c" | "c1" => world.color1 = tuple,
         "c2" => world.color2 = tuple,
+        "n" => world.norm = tuple,
         _ => panic!(),        
     };
 }
@@ -115,6 +117,18 @@ fn norm(world: &mut TuplesWorld, matches: &[String]) {
 #[when("norm ← normalize(v)")]
 fn normwhen(world: &mut TuplesWorld) {
     world.norm = world.vector1.normalize().clone();
+}
+
+#[when("r ← reflect(v, n)")]
+fn reflect(world: &mut TuplesWorld) {
+    world.vector2 = Tuples::reflect(&world.vector1, &world.norm);
+}
+
+#[then(regex = r"r = vector\((.+)\)")]
+fn reflect_result(world: &mut TuplesWorld, matches: &[String]) {
+    let v = parse_values_f64(&matches[0]);
+    let vec = Tuples::vector(v[0], v[1], v[2]);
+    assert!(world.vector2.is_equal(&vec));
 }
 
 #[then("dot(v1, v2) = 20")]
