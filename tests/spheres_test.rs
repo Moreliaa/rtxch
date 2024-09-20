@@ -13,7 +13,7 @@ use std::cell::RefCell;
 use rtxch_lib::Matrix;
 
 
-#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at)\((.*)\)")]
 fn given_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -58,11 +58,17 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             let m = Matrix::scale(v[0], v[1], v[2]);
             world.matrix.insert(t, m);
         },
+        "normal_at" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let s = world.sphere.get(&v[0].to_string()).unwrap();
+            let p = world.tuple.get(&v[1].to_string()).unwrap();
+            world.tuple.insert(t, Sphere::normal_at(s, p));
+        },
         _ => panic!("{func} not implemented")
     }
 }
 
-#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling)\((.*)\)")]
+#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at)\((.*)\)")]
 fn when_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -150,6 +156,21 @@ fn check_pos(world: &mut RaysWorld, matches: &[String]) {
 
     let result = Ray::position(r, time);
     assert!(result.is_equal(&p));
+}
+
+#[then(regex = r"(.+) = vector\((.+)\)")]
+fn check_vec(world: &mut RaysWorld, matches: &[String]) {
+    let r = world.tuple.get(&matches[0]).unwrap();
+    let v = parse_values_f64(&matches[1]);
+    let p = Tuples::vector(v[0], v[1], v[2]);
+    assert!(r.is_equal(&p));
+}
+
+#[then(regex = r"(n) = normalize\((n)\)")]
+fn check_norm(world: &mut RaysWorld, matches: &[String]) {
+    let n = world.tuple.get(&matches[0]).unwrap();
+    let norm = n.clone().normalize();
+    assert!(n.is_equal(&norm));
 }
 
 #[derive(Debug, Default, World)]

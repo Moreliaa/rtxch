@@ -1,5 +1,6 @@
 use crate::Ray;
 use crate::Matrix;
+use crate::Tuples;
 use std::rc::Rc;
 use std::cell::RefCell;
 
@@ -80,4 +81,5 @@ pub trait Shape {
     fn set_transform(this: &Rc<RefCell<Self>>, transform: &Matrix);
     fn get_transform(&self) -> &Matrix;
     fn get_transform_inverse(&self) -> &Matrix;
+    fn normal_at(this: &Rc<RefCell<Self>>, p: &Tuples) -> Tuples;
 }

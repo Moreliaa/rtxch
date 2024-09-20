@@ -49,4 +49,9 @@ impl Shape for Sphere {
     fn get_transform_inverse(&self) -> &Matrix {
         &self.transform_inverse
     }
+
+    fn normal_at(this: &Rc<RefCell<Self>>, p: &Tuples) -> Tuples {
+        let origin = Tuples::point(0.0,0.0, 0.0);
+        Tuples::vector(p.x - origin.x, p.y - origin.y, p.z - origin.z).normalize()
+    }
 }
