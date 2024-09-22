@@ -96,7 +96,7 @@ fn when_item(world: &mut MaterialsWorld, matches: &[String]) {
     create_item(world, matches);
 }
 
-#[then(regex = r"result = color((.+))")]
+#[then(regex = r"result = color\((.+)\)")]
 fn check_result(world: &mut MaterialsWorld, matches: &[String]) {
     let val = parse_values_f64(&matches[0]);
     let col = Tuples::color(val[0], val[1], val[2]);
