@@ -19,5 +19,7 @@ pub mod lights;
 pub use lights::PointLight;
 pub mod materials;
 pub use materials::Material;
+pub mod render;
+pub use render::lighting;
 
 pub mod utils;

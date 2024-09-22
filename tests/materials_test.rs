@@ -8,7 +8,7 @@ use rtxch_lib::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|rotation_z|material|color)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|rotation_z|material|color|point_light)\((.*)\)")]
 fn given_item(world: &mut MaterialsWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -72,13 +72,36 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
         "material" => {
             world.material.insert(t, Material::material());
         },
+        "point_light" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let pos = world.tuple.get(&v[0].to_string()).unwrap();
+            let intensity = world.tuple.get(&v[1].to_string()).unwrap();
+            world.plight.insert(t, lights::point_light(pos, intensity));
+        },
+        "lighting" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let m = world.material.get(&v[0].to_string()).unwrap();
+            let pl = world.plight.get(&v[1].to_string()).unwrap();
+            let position = world.tuple.get(&v[2].to_string()).unwrap();
+            let eyev = world.tuple.get(&v[3].to_string()).unwrap();
+            let normalv = world.tuple.get(&v[4].to_string()).unwrap();
+            world.tuple.insert(t, lighting(m, pl, position, eyev, normalv));
+        }
         _ => panic!("{func} not implemented")
     }
 }
 
-#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at)\((.*)\)")]
+#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|lighting)\((.*)\)")]
 fn when_item(world: &mut MaterialsWorld, matches: &[String]) {
     create_item(world, matches);
+}
+
+#[then(regex = r"result = color((.+))")]
+fn check_result(world: &mut MaterialsWorld, matches: &[String]) {
+    let val = parse_values_f64(&matches[0]);
+    let col = Tuples::color(val[0], val[1], val[2]);
+    let r = world.tuple.get(&"result".to_string()).unwrap();
+    r.is_equal(&col);
 }
 
 #[then(regex = r"([^\[\]]+)\.(origin|direction|t|object|count|position|intensity|color|ambient|diffuse|specular|shininess) = (.+)")]
