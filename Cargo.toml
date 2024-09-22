@@ -49,3 +49,13 @@ harness = false
 name = "spheres"
 path = "tests\\spheres_test.rs"
 harness = false
+
+[[test]]
+name = "lights"
+path = "tests\\lights_test.rs"
+harness = false
+
+[[test]]
+name = "materials"
+path = "tests\\materials_test.rs"
+harness = false

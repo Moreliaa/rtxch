@@ -4,16 +4,12 @@ use std::collections::HashMap;
 use cucumber::{given, when, then, World};
 use rtxch_lib::intersections::Shape;
 use rtxch_lib::utils::{parse_values_f64, is_equal_f64};
-use rtxch_lib::Tuples;
-use rtxch_lib::Ray;
-use rtxch_lib::Sphere;
-use rtxch_lib::IntersectionList;
+use rtxch_lib::*;
 use std::rc::Rc;
 use std::cell::RefCell;
-use rtxch_lib::Matrix;
 
 
-#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|rotation_z)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|rotation_z|material)\((.*)\)")]
 fn given_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -69,6 +65,9 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             let p = world.tuple.get(&v[1].to_string()).unwrap();
             world.tuple.insert(t, Sphere::normal_at(s, p));
         },
+        "material" => {
+            world.material.insert(t, Material::material());
+        },
         _ => panic!("{func} not implemented")
     }
 }
@@ -76,6 +75,19 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
 #[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at)\((.*)\)")]
 fn when_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
+}
+
+#[given(regex = r"m.ambient ← 1")]
+fn set_ambient(world: &mut RaysWorld, _: &[String]) {
+    let mat = world.material.get_mut(&"m".to_string()).unwrap();
+    mat.ambient = 1.0;
+}
+
+#[given(regex = r"s.material ← m")]
+fn set_mat(world: &mut RaysWorld, _: &[String]) {
+    let s = world.sphere.get(&"s".to_string()).unwrap();
+    let mat = world.material.get_mut(&"m".to_string()).unwrap();
+    Sphere::set_material(s, &mat);
 }
 
 #[given(regex = r"m ← scale \* rot")]
@@ -102,7 +114,7 @@ fn when_set_transform(world: &mut RaysWorld, matches: &[String]) {
     set_transform(world, matches);
 }
 
-#[then(regex = r"(.+)\.(origin|direction|count|transform) = (.+)")]
+#[then(regex = r"(.+)\.(origin|direction|count|transform|material|intensity|color|ambient|diffuse|specular|shininess) = (.+)")]
 fn check_prop(world: &mut RaysWorld, matches: &[String]) {
     let prop = matches[1].as_str();
     
@@ -134,27 +146,98 @@ fn check_prop(world: &mut RaysWorld, matches: &[String]) {
                     s.borrow().get_transform().is_equal(m);
                 },
             }
-        }
+        },
+        "material" => {
+            let obj = world.sphere.get(&matches[0]).unwrap();
+            let target = match matches[2].as_str() {
+                "material()" => &Material::material(),
+                _ => world.material.get(&matches[2]).unwrap(),
+            };
+            assert!(obj.borrow().get_material().is_equal(&target));
+        },
+    "color" => {
+        let i = world.material.get(&matches[0]).unwrap();
+        let target = world.tuple.get(&matches[2]).unwrap();
+        assert!(i.color.is_equal(target));
+    },
+    "ambient" => {
+        let i = world.material.get(&matches[0]).unwrap();
+        let target = &matches[2].parse::<f64>().unwrap();
+        assert!(is_equal_f64(i.ambient, *target));
+    },
+    "diffuse" => {
+        let i = world.material.get(&matches[0]).unwrap();
+        let target = &matches[2].parse::<f64>().unwrap();
+        assert!(is_equal_f64(i.diffuse, *target));
+    },
+    "specular" => {
+        let i = world.material.get(&matches[0]).unwrap();
+        let target = &matches[2].parse::<f64>().unwrap();
+        assert!(is_equal_f64(i.specular, *target));
+    },
+    "shininess" => {
+        let i = world.material.get(&matches[0]).unwrap();
+        let target = &matches[2].parse::<f64>().unwrap();
+        assert!(is_equal_f64(i.shininess, *target));
+    },
         _ => panic!(),
     }
 }
 
-#[then(regex = r"(.+)\[(.+)\]\.(origin|direction|t|object|count) = (.+)")]
+#[then(regex = r"(.+)\[(.+)\]\.(origin|direction|t|object|count|material|intensity|color|ambient|diffuse|specular|shininess) = (.+)")]
 fn check_sub_prop(world: &mut RaysWorld, matches: &[String]) {
     let prop = matches[2].as_str();
-    let i = world.inter.get(&matches[0]).unwrap();
+    
     let idx = matches[1].parse::<usize>().unwrap();
-    let obj = i.xs().get(idx).unwrap();
+    
 
     match prop {
         "t" => {
+            let i = world.inter.get(&matches[0]).unwrap();
+            let obj = i.xs().get(idx).unwrap();
             let target = matches[3].parse::<f64>().unwrap();
             assert!(is_equal_f64(obj.t(), target));
         },
         "object" => {
+            let i = world.inter.get(&matches[0]).unwrap();
+            let obj = i.xs().get(idx).unwrap();
             let target = world.sphere.get(&matches[3]).unwrap();
             assert!(Rc::ptr_eq(obj.object(), &target));
         },
+        "material" => {
+            let obj = world.sphere.get(&matches[0]).unwrap();
+            let target = match matches[3].as_str() {
+                "material()" => &Material::material(),
+                _ => world.material.get(&matches[3]).unwrap(),
+            };
+            assert!(obj.borrow().get_material().is_equal(&target));
+        },
+    "color" => {
+        let i = world.material.get(&matches[0]).unwrap();
+        let target = world.tuple.get(&matches[2]).unwrap();
+        assert!(i.color.is_equal(target));
+    },
+    "ambient" => {
+        let i = world.material.get(&matches[0]).unwrap();
+        let target = &matches[2].parse::<f64>().unwrap();
+        assert!(is_equal_f64(i.ambient, *target));
+    },
+    "diffuse" => {
+        let i = world.material.get(&matches[0]).unwrap();
+        let target = &matches[2].parse::<f64>().unwrap();
+        assert!(is_equal_f64(i.diffuse, *target));
+    },
+    "specular" => {
+        let i = world.material.get(&matches[0]).unwrap();
+        let target = &matches[2].parse::<f64>().unwrap();
+        assert!(is_equal_f64(i.specular, *target));
+    },
+    "shininess" => {
+        let i = world.material.get(&matches[0]).unwrap();
+        let target = &matches[2].parse::<f64>().unwrap();
+        assert!(is_equal_f64(i.shininess, *target));
+    },
+        
         _ => panic!()
     }
 }
@@ -201,6 +284,7 @@ struct RaysWorld {
     sphere: HashMap<String, Rc<RefCell<Sphere>>>,
     inter:  HashMap<String, IntersectionList<Sphere>>,
     matrix: HashMap<String, Matrix>,
+    material: HashMap<String, Material>,
 }
 
 fn main() {

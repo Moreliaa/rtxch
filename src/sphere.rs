@@ -2,18 +2,20 @@ use crate::intersections::{Shape, IntersectionList};
 use crate::Ray;
 use crate::Tuples;
 use crate::Matrix;
+use crate::Material;
 use std::rc::Rc;
 use std::cell::RefCell;
 
 #[derive(Debug, Clone)]
 pub struct Sphere {
+    material: Material,
     transform: Matrix,
     transform_inverse: Matrix,
 }
 
 impl Sphere {
     pub fn new() -> Rc<RefCell<Sphere>> {
-        Rc::new(RefCell::new(Sphere { transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
+        Rc::new(RefCell::new(Sphere { material: Material::material(), transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
     }
 }
 
@@ -40,6 +42,14 @@ impl Shape for Sphere {
     fn set_transform(s: &Rc<RefCell<Self>>, transform: &Matrix) {
         s.borrow_mut().transform = transform.clone();
         s.borrow_mut().transform_inverse = Matrix::inverse(transform).unwrap();
+    }
+
+    fn set_material(s: &Rc<RefCell<Self>>, material: &Material) {
+        s.borrow_mut().material = material.clone();
+    }
+
+    fn get_material(&self) -> &Material {
+        &self.material
     }
 
     fn get_transform(&self) -> &Matrix {

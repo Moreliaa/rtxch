@@ -140,14 +140,14 @@ Scenario: Computing the normal on a transformed sphere
 
 Scenario: A sphere has a default material
   Given s ← sphere()
-  When m ← s.material
-  Then m = material()
+    And m ← material()
+  Then s.material = material()
 
 Scenario: A sphere may be assigned a material
   Given s ← sphere()
     And m ← material()
     And m.ambient ← 1
-  When s.material ← m
+    And s.material ← m
   Then s.material = m
 
 Scenario: A helper for producing a sphere with a glassy material
