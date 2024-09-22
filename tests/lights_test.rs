@@ -3,7 +3,7 @@ extern crate rtxch_lib;
 use std::collections::HashMap;
 use cucumber::{given, when, then, World};
 use rtxch_lib::intersections::Shape;
-use rtxch_lib::utils::{parse_values_f64, is_equal_f64};
+use rtxch_lib::utils::parse_values_f64;
 use rtxch_lib::Tuples;
 use rtxch_lib::Ray;
 use rtxch_lib::Sphere;

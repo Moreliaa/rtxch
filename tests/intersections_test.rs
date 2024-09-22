@@ -137,13 +137,13 @@ fn check_hit(world: &mut RaysWorld, matches: &[String]) {
 }
 
 #[then(regex = r"i is nothing")]
-fn check_hit_nothing(world: &mut RaysWorld, matches: &[String]) {
+fn check_hit_nothing(world: &mut RaysWorld, _: &[String]) {
     let i = world.hit.get("i").unwrap();
     match i {
         None => {
             assert!(true);
         },
-        Some(result) => {
+        Some(_) => {
             assert!(false);
         }
     }
