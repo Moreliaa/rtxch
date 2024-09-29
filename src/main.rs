@@ -1,29 +1,47 @@
 extern crate rtxch_lib;
 
 use std::{f64::consts::PI, fs};
-use rtxch_lib::{intersections::Shape, Matrix, Sphere, Tuples, Ray, IntersectionList};
+use intersections::Shape;
+use rtxch_lib::*;
 
 fn main() {
-    let mut canvas = rtxch_lib::Canvas::new(900, 550);
+    let mut canvas = rtxch_lib::Canvas::new(500, 500);
     let megasphere = Sphere::new();
-    let scale_sphere = Matrix::scale(250.0, 250.0, 250.0);
-    let squash = Matrix::scale(1.0, 0.5, 1.0);
+    let mut material = Material::material();
+    material.color = Tuples::color(1.0, 0.2, 1.0);
+    let material = material;
+    Sphere::set_material(&megasphere, &material);
+    let scale_sphere = Matrix::scale(1.0, 1.0, 1.0);
+    let squash = Matrix::scale(1.0, 1.0, 1.0);
     let rotate = Matrix::rotate_z(PI / 4.0);
-    let translation_canvas = Matrix::translate((canvas.width / 2) as f64, (canvas.height / 2) as f64, 0.0);
-    let shear = Matrix::shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-    let transform = Matrix::transform_from_trs(&(translation_canvas * shear), &rotate, &(squash * scale_sphere));
+    let translation = Matrix::translate(0.0, 0.0, 0.0);
+    let shear = Matrix::shear(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    let transform = Matrix::transform_from_trs(&(translation * shear), &rotate, &(squash * scale_sphere));
     Sphere::set_transform(&megasphere, &transform);
 
-    let color = Tuples::color(1.0, 1.0, 0.5);
-    let ray_direction = Tuples::vector(0.0, 0.0, 1.0);
+    let point_light = lights::point_light(&Tuples::point(-10.0,10.0,-10.0), &Tuples::color(1.0,1.0,1.0));
+    let ray_origin = Tuples::point(0.0,0.0,-5.0);
+
+    let wall_z = 10.0;
+    let wall_size = 10.0;
+    let pixel_size = wall_size / (canvas.width as f64);
+    let half_size = wall_size / 2.0;
+
     for x in 0..canvas.width {
+        let world_x = -half_size + pixel_size * x as f64;
         for y in 0..canvas.height {
-            let ray = Ray::new(Tuples::point(x as f64, y as f64, -1.0), ray_direction.clone());
+            let world_y = half_size - pixel_size * y as f64;
+            let mut wall_pos = Tuples::point(world_x, world_y, wall_z);
+            let ray = Ray::new(ray_origin.clone(), wall_pos.subtract(&ray_origin.clone()).normalize());
             let is = Sphere::intersect(&megasphere, &ray);
             let hit = IntersectionList::hit(&is);
             match hit {
-                Some(_) => {
-                    canvas.write_pixel(x, y, &color)
+                Some(result) => {
+                    let hit_pos = Ray::position(&ray, result.t());
+                    let norm_v = Sphere::normal_at(&result.object(), &hit_pos);
+                    let eye_v = ray.direction().clone().negate().normalize();
+                    let color = lighting(result.object().borrow().get_material(), &point_light, &hit_pos, &eye_v, &norm_v);
+                    canvas.write_pixel(x, y, &color);
                 },
                 None => {}
             }
