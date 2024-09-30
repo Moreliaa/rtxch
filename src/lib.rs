@@ -21,5 +21,7 @@ pub mod materials;
 pub use materials::Material;
 pub mod render;
 pub use render::lighting;
+pub mod world;
+pub use world::World;
 
 pub mod utils;

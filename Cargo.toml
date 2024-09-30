@@ -59,3 +59,8 @@ harness = false
 name = "materials"
 path = "tests\\materials_test.rs"
 harness = false
+
+[[test]]
+name = "world"
+path = "tests\\world_test.rs"
+harness = false
