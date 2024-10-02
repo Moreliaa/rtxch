@@ -18,4 +18,8 @@ impl PointLight {
     pub fn intensity(&self) -> &Tuples {
         &self.intensity
     }
+
+    pub fn is_equal(&self, other: &PointLight) -> bool {
+        self.position().is_equal(other.position()) && self.intensity().is_equal(other.intensity()) 
+    }
 }

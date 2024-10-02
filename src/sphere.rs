@@ -17,6 +17,11 @@ impl Sphere {
     pub fn new() -> Rc<RefCell<Sphere>> {
         Rc::new(RefCell::new(Sphere { material: Material::material(), transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
     }
+
+    pub fn is_equal(&self, other: &Rc<RefCell<Self>>) -> bool {
+        self.material.is_equal(&other.borrow().material) &&
+        self.transform.is_equal(&other.borrow().transform)
+    }
 }
 
 impl Shape for Sphere {
