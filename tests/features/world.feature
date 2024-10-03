@@ -18,7 +18,9 @@ Scenario: The default world
 
 Scenario: Intersect a world with a ray
   Given w ← default_world()
-    And r ← ray(point(0, 0, -5), vector(0, 0, 1))
+    And p ← point(0, 0, -5)
+    And v ← vector(0, 0, 1)
+    And r ← ray(p, v)
   When xs ← intersect_world(w, r)
   Then xs.count = 4
     And xs[0].t = 4

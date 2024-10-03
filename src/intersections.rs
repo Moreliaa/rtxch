@@ -12,12 +12,23 @@ pub struct IntersectionList<T: Shape> {
 }
 
 impl<T: Shape> IntersectionList<T> {
+    pub fn create_empty() -> IntersectionList<T> {
+        IntersectionList { xs: vec![], count: 0 }
+    }
+
     pub fn new(t: Vec<f64>, obj: &Rc<RefCell<T>>) -> IntersectionList<T> {
         let count = t.len();
         let xs = t.into_iter().map(|v| {
             Intersection::new(v, &obj)
         }).collect();
         IntersectionList { xs, count }
+    }
+
+    pub fn merge(mut l1: IntersectionList<T>, mut l2: IntersectionList<T>) -> IntersectionList<T> {
+        l1.xs.append(&mut l2.xs);
+        l1.count = l1.xs.len();
+        l1.xs.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
+        l1
     }
 
     pub fn intersections(i1: Intersection<T>, i2: Intersection<T>) -> IntersectionList<T> {
@@ -43,6 +54,10 @@ impl<T: Shape> IntersectionList<T> {
 
     pub fn xs(&self) -> &Vec<Intersection<T>> {
         &self.xs
+    }
+
+    pub fn xs_mut(&mut self) -> &mut Vec<Intersection<T>> {
+        &mut self.xs
     }
     
     pub fn count(&self) -> usize {

@@ -7,6 +7,8 @@ use crate::Material;
 use crate::Tuples;
 use crate::intersections::Shape;
 use crate::Matrix;
+use crate::intersections::{Intersection, IntersectionList};
+use crate::Ray;
 
 #[derive(Debug, Default)]
 pub struct World {
@@ -17,6 +19,15 @@ pub struct World {
 impl World {
     pub fn new () -> World {
         World { objects: vec![], point_lights: vec![] }
+    }
+
+    pub fn intersect_world(w: &World, r: &Ray) -> IntersectionList<Sphere> {
+        let mut result: IntersectionList<Sphere> = IntersectionList::create_empty();
+        for s in w.get_objects() {
+            let xs = Sphere::intersect(s, r);
+            result = IntersectionList::merge(result, xs);
+        }
+        result
     }
 
     pub fn default_world () -> World {
