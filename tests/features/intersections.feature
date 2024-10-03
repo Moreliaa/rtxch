@@ -9,15 +9,18 @@ Scenario: An intersection encapsulates t and object
 Scenario: Precomputing the state of an intersection
   Given origin ← point(0, 0, -5)
     And direction ← vector(0, 0, 1)
+    And p ← point(0, 0, -1)
+    And eyev ← vector(0, 0, -1)
+    And normalv ← vector(0, 0, -1)
   When r ← ray(origin, direction)
     And shape ← sphere()
     And i ← intersection(4, shape)
   When comps ← prepare_computations(i, r)
   Then comps.t = i.t
     And comps.object = i.object
-    And comps.point = point(0, 0, -1)
-    And comps.eyev = vector(0, 0, -1)
-    And comps.normalv = vector(0, 0, -1)
+    And comps.point = p
+    And comps.eyev = eyev
+    And comps.normalv = normalv
 
 Scenario: Precomputing the reflection vector
   Given shape ← plane()

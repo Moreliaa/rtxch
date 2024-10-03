@@ -71,9 +71,28 @@ pub struct Intersection<T: Shape> {
     object: Rc<RefCell<T>>,
 }
 
+#[derive(Debug)]
+pub struct Computations<T: Shape> {
+    pub t: f64,
+    pub object: Rc<RefCell<T>>,
+    pub point: Tuples,
+    pub eye_v: Tuples,
+    pub normal_v: Tuples,
+}
+
 impl<T: Shape> Intersection<T> {
     pub fn new(t: f64, object: &Rc<RefCell<T>>) -> Intersection<T> {
         Intersection { t, object: Rc::clone(object) }
+    }
+
+    pub fn prep_computations(i: &Intersection<T>, r: &Ray) -> Computations<T> {
+        Computations {
+            t: i.t(),
+            object: Rc::clone(i.object()),
+            point: Tuples::point(0.0,0.0,0.0),
+            eye_v: Tuples::vector(0.0,0.0,0.0),
+            normal_v: Tuples::vector(0.0,0.0,0.0),
+        }
     }
 
     pub fn t(&self) -> f64 {

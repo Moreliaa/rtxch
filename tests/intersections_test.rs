@@ -7,9 +7,11 @@ use rtxch_lib::utils::is_equal_f64;
 use rtxch_lib::*;
 use std::rc::Rc;
 use std::cell::RefCell;
+use rtxch_lib::Computations;
 
 
-#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)")]
+#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)")]
 fn given_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -57,18 +59,19 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
                 Some(value) => world.hit.insert(t, Some(value.clone())),
                 None => world.hit.insert(t, None),
             };
-            
-        }
+        },
+        "prepare_computations" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let i = world.inter_sphere.get(&v[0].to_string()).unwrap();
+            let r = world.ray.get(&v[1].to_string()).unwrap();
+            let comps = Intersection::prep_computations(i, r);
+            world.comps.insert(t, comps);
+        },
         _ => panic!("{func} not implemented")
     }
 }
 
-#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections|hit)\((.*)\)")]
-fn when_item(world: &mut RaysWorld, matches: &[String]) {
-    create_item(world, matches);
-}
-
-#[then(regex = r"([^\[\]]+)\.(origin|direction|t|object|count) = (.+)")]
+#[then(regex = r"(i|i.|xs)\.(origin|direction|t|object|count) = (.+)")]
 fn check_prop(world: &mut RaysWorld, matches: &[String]) {
     let prop = matches[1].as_str();
     
@@ -98,6 +101,36 @@ fn check_prop(world: &mut RaysWorld, matches: &[String]) {
             let target = matches[2].parse::<usize>().unwrap();
             assert!(i.count() == target);
         }
+        _ => panic!()
+    }
+}
+
+#[then(regex = r"(comps)\.(t|object|point|eyev|normalv) = (.+)")]
+fn check_prop_comps(world: &mut RaysWorld, matches: &[String]) {
+    let comps = world.comps.get(&matches[0]).unwrap();
+    let prop = matches[1].as_str();
+    
+    match prop {
+        "t" => {
+            let i = world.inter_sphere.get(&"i".to_string()).unwrap();
+            assert!(is_equal_f64(comps.t, i.t()));
+        },
+        "object" => {
+            let i = world.inter_sphere.get(&"i".to_string()).unwrap();
+            assert!(Rc::ptr_eq(i.object(), &comps.object));
+        },
+        "point" => {
+            let target = world.tuple.get(&matches[2]).unwrap();
+            assert!(comps.point.is_equal(&target));
+        },
+        "eyev" => {
+            let target = world.tuple.get(&matches[2]).unwrap();
+            assert!(comps.eye_v.is_equal(&target));
+        },
+        "normalv" => {
+            let target = world.tuple.get(&matches[2]).unwrap();
+            assert!(comps.normal_v.is_equal(&target));
+        },
         _ => panic!()
     }
 }
@@ -168,6 +201,7 @@ struct RaysWorld {
     inter_sphere:  HashMap<String, Intersection<Sphere>>,
     interlist_sphere: HashMap<String, IntersectionList<Sphere>>,
     hit: HashMap<String, Option<Intersection<Sphere>>>,
+    comps: HashMap<String, Computations<Sphere>>,
 }
 
 fn main() {

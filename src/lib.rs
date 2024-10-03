@@ -15,6 +15,7 @@ pub use sphere::Sphere;
 pub mod intersections;
 pub use intersections::Intersection;
 pub use intersections::IntersectionList;
+pub use intersections::Computations;
 pub mod lights;
 pub use lights::PointLight;
 pub mod materials;
