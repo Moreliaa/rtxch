@@ -4,6 +4,7 @@ use crate::Tuples;
 use crate::Material;
 use std::rc::Rc;
 use std::cell::RefCell;
+use crate::Sphere;
 
 #[derive(Debug, Clone)]
 pub struct IntersectionList<T: Shape> {
@@ -86,12 +87,13 @@ impl<T: Shape> Intersection<T> {
     }
 
     pub fn prep_computations(i: &Intersection<T>, r: &Ray) -> Computations<T> {
+        let p = Ray::position(r,i.t());
         Computations {
             t: i.t(),
             object: Rc::clone(i.object()),
-            point: Tuples::point(0.0,0.0,0.0),
-            eye_v: Tuples::vector(0.0,0.0,0.0),
-            normal_v: Tuples::vector(0.0,0.0,0.0),
+            point: p,
+            eye_v: r.direction().clone().negate(),
+            normal_v: T::normal_at(&i.object(), &p),
         }
     }
 
