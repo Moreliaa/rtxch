@@ -83,6 +83,16 @@ fn mul_mat_chain(world: &mut TrafoWorld, matches: &[String]) {
     world.mat.insert(key_out, out);
 }
 
+#[when(regex = r"(.+) ← view_transform\((from), (to), (up)\)$")]
+fn view_transform(world: &mut TrafoWorld, matches: &[String]) {
+    let key_out = matches[0].clone();
+    let from = world.tuple.get(&matches[1]).unwrap();
+    let to = world.tuple.get(&matches[2]).unwrap();
+    let up = world.tuple.get(&matches[3]).unwrap();
+    let out = Matrix::view_transform(from, to, up);
+    world.mat.insert(key_out, out);
+}
+
 #[then(regex = r"^([a-z]|[a-z][0-9]) = point\((.+)\)$")]
 fn check_point(world: &mut TrafoWorld, matches: &[String]) {
     let t = world.tuple.get(&matches[0]).unwrap();
@@ -127,6 +137,33 @@ fn check_result_chain(world: &mut TrafoWorld, matches: &[String]) {
     let target = Tuples::point(values[0], values[1], values[2]);
 
     assert!(result.is_equal(&target), "Result does not match: {:?}", result);
+}
+
+#[then(regex = r"^t = (.+)$")]
+fn check_view_transform(world: &mut TrafoWorld, matches: &[String]) {
+    let t = world.mat.get(&"t".to_string()).unwrap();
+    let other = match matches[0].as_str() {
+        "identity_matrix" => {
+            Matrix::new(4)
+        },
+        "scaling(-1, 1, -1)" => {
+            Matrix::scale(-1.0,-1.0,-1.0)
+        },
+        "translation(0, 0, -8)" => {
+            Matrix::translate(0.0,0.0,-8.0)
+        },
+        _ => panic!(),
+    };
+    assert!(t.is_equal(&other));
+}
+
+#[then(regex = r"t is the following 4x4 matrix:(.+)")]
+fn check_4x4(world: &mut TrafoWorld, matches: &[String]) {
+    let t = world.mat.get(&"t".to_string()).unwrap();
+    let values: Vec<f64> = matches[0].split("|").map(|a| a.parse::<f64>().unwrap()).collect();
+    let other_mat = Matrix::from_values(&values);
+    
+    assert!(t.is_equal(&other_mat));
 }
 
 #[derive(Debug, Default, World)]

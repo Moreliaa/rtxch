@@ -55,6 +55,10 @@ impl Matrix {
         translation * rotation * scale
     }
 
+    pub fn view_transform(from: &Tuples, to: &Tuples, up: &Tuples) -> Matrix {
+        Matrix::new(4)
+    }
+
     pub fn translate(x: f64, y: f64, z: f64) -> Self {
         let mut out = Matrix::new(4);
         out.set(0, 3, x);

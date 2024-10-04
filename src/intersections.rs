@@ -4,7 +4,6 @@ use crate::Tuples;
 use crate::Material;
 use std::rc::Rc;
 use std::cell::RefCell;
-use crate::Sphere;
 
 #[derive(Debug, Clone)]
 pub struct IntersectionList<T: Shape> {
