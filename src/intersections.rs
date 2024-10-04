@@ -128,5 +128,6 @@ pub trait Shape {
     fn get_transform_inverse(&self) -> &Matrix;
     fn set_material(this: &Rc<RefCell<Self>>, material: &Material);
     fn get_material(&self) -> &Material;
+    fn get_mut_material(&mut self) -> &mut Material;
     fn normal_at(this: &Rc<RefCell<Self>>, p: &Tuples) -> Tuples;
 }

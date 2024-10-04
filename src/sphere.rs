@@ -57,6 +57,10 @@ impl Shape for Sphere {
         &self.material
     }
 
+    fn get_mut_material(&mut self) -> &mut Material {
+        &mut self.material
+    }
+
     fn get_transform(&self) -> &Matrix {
         &self.transform
     }

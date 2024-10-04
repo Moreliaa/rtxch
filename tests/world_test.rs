@@ -97,20 +97,33 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
             let hit = rtxch_lib::World::shade_hit(w, comps);
             world.tuple.insert(t, hit);
         },
+        "color_at" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let w = &world.world;
+            let r = world.ray.get(&v[1].to_string()).unwrap();
+            let color = rtxch_lib::World::color_at(w, r);
+            world.tuple.insert(t, color);
+        },
         _ => panic!("{func} not implemented")
     }
 }
 
-#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|point_light|intersect_world|prepare_computations|shade_hit)\((.*)\)")]
+#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|point_light|intersect_world|prepare_computations|shade_hit|color_at)\((.*)\)")]
 fn when_item(world: &mut WorldWorld, matches: &[String]) {
     create_item(world, matches);
 }
 
-#[given(regex = r"shape ← the (first|second) object in w")]
+#[given(regex = r"(.+) ← the (first|second) object in w")]
 fn first(world: &mut WorldWorld, matches: &[String]) {
-    let idx = if matches[0] == "first" { 0 } else { 1 };
+    let idx = if matches[1] == "first" { 0 } else { 1 };
     let shape = Rc::clone(world.world.get_objects().get(idx).unwrap());
-    world.sphere.insert("shape".to_string(), shape);
+    world.sphere.insert(matches[0].clone(), shape);
+}
+
+#[given(regex = r"(.+).material.ambient ← 1")]
+fn set_ambient(world: &mut WorldWorld, matches: &[String]) {
+    let sphere = world.sphere.get(&matches[0]).unwrap();
+    sphere.borrow_mut().get_mut_material().ambient = 1.0;
 }
 
 #[given(regex = r"w.light ← light")]
@@ -157,6 +170,13 @@ fn check_color(world: &mut WorldWorld, matches: &[String]) {
     let target_color = Tuples::color(values[0], values[1],values[2]);
     let c = world.tuple.get(&"c".to_string()).unwrap();
     assert!(c.is_equal(&target_color), "{:?}", c);
+}
+
+#[then(regex = r"c = inner.material.color")]
+fn check_inner_color(world: &mut WorldWorld, _: &[String]) {
+    let sphere = world.sphere.get(&"inner".to_string()).unwrap();
+    let c = world.tuple.get(&"c".to_string()).unwrap();
+    assert!(sphere.borrow().get_material().color.is_equal(c));
 }
 
 #[then(regex = r"(comps)\.(t|object|point|eyev|normalv|inside) = (.+)")]

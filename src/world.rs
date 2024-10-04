@@ -23,6 +23,11 @@ impl World {
         World { objects: vec![], point_lights: vec![] }
     }
 
+    pub fn color_at(w: &World, r: &Ray) -> Tuples {
+        let mut color = Tuples::color(0.0,0.0,0.0);
+        color
+    }
+
     pub fn shade_hit(w: &World, comps: &Computations<Sphere>) -> Tuples {
         let mut color = Tuples::color(0.0,0.0,0.0);
         for light in w.get_point_lights() {
