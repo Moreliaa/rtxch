@@ -79,6 +79,7 @@ pub struct Computations<T: Shape> {
     pub point: Tuples,
     pub eye_v: Tuples,
     pub normal_v: Tuples,
+    pub inside: bool,
 }
 
 impl<T: Shape> Intersection<T> {
@@ -88,12 +89,19 @@ impl<T: Shape> Intersection<T> {
 
     pub fn prep_computations(i: &Intersection<T>, r: &Ray) -> Computations<T> {
         let p = Ray::position(r,i.t());
+        let mut normal_v = T::normal_at(&i.object(), &p);
+        let eye_v = r.direction().clone().negate();
+        let inside = if Tuples::dot(&eye_v, &normal_v) < 0.0 { true } else { false };
+        if inside {
+            normal_v.negate();
+        }
         Computations {
             t: i.t(),
             object: Rc::clone(i.object()),
             point: p,
-            eye_v: r.direction().clone().negate(),
-            normal_v: T::normal_at(&i.object(), &p),
+            eye_v: eye_v,
+            normal_v: normal_v,
+            inside: inside,
         }
     }
 

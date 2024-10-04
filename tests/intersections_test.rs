@@ -105,7 +105,7 @@ fn check_prop(world: &mut RaysWorld, matches: &[String]) {
     }
 }
 
-#[then(regex = r"(comps)\.(t|object|point|eyev|normalv) = (.+)")]
+#[then(regex = r"(comps)\.(t|object|point|eyev|normalv|inside) = (.+)")]
 fn check_prop_comps(world: &mut RaysWorld, matches: &[String]) {
     let comps = world.comps.get(&matches[0]).unwrap();
     let prop = matches[1].as_str();
@@ -131,6 +131,15 @@ fn check_prop_comps(world: &mut RaysWorld, matches: &[String]) {
             let target = world.tuple.get(&matches[2]).unwrap();
             assert!(comps.normal_v.is_equal(&target));
         },
+        "inside" => {
+            let target = match matches[2].as_str() {
+                "false" => false,
+                "true" => true,
+                _ => panic!(),
+            };
+            assert!(comps.inside == target);
+
+        }
         _ => panic!()
     }
 }
