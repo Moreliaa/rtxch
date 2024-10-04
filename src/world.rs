@@ -1,4 +1,5 @@
 use crate::lights::point_light;
+use crate::Intersection;
 use crate::PointLight;
 use crate::Sphere;
 use std::rc::Rc;
@@ -24,8 +25,14 @@ impl World {
     }
 
     pub fn color_at(w: &World, r: &Ray) -> Tuples {
-        let mut color = Tuples::color(0.0,0.0,0.0);
-        color
+        let il = World::intersect_world(w, r);
+        let hit = IntersectionList::hit(&il);
+        if let Some(i) = hit {
+            let comps = Intersection::prep_computations(i, r);
+            return World::shade_hit(w, &comps);
+        } else {
+            return Tuples::color(0.0,0.0,0.0);
+        }
     }
 
     pub fn shade_hit(w: &World, comps: &Computations<Sphere>) -> Tuples {
