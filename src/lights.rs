@@ -4,7 +4,7 @@ pub fn point_light(position: &Tuples, intensity: &Tuples) -> PointLight {
     PointLight { position: position.clone(), intensity: intensity.clone() }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PointLight {
     position: Tuples,
     intensity: Tuples,

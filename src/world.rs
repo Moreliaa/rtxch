@@ -7,8 +7,10 @@ use crate::Material;
 use crate::Tuples;
 use crate::intersections::Shape;
 use crate::Matrix;
-use crate::intersections::{Intersection, IntersectionList};
+use crate::intersections::IntersectionList;
 use crate::Ray;
+use crate::Computations;
+use crate::render;
 
 #[derive(Debug, Default)]
 pub struct World {
@@ -19,6 +21,17 @@ pub struct World {
 impl World {
     pub fn new () -> World {
         World { objects: vec![], point_lights: vec![] }
+    }
+
+    pub fn shade_hit(w: &World, comps: &Computations<Sphere>) -> Tuples {
+        let mut color = Tuples::color(0.0,0.0,0.0);
+        for light in w.get_point_lights() {
+            let result = render::lighting(comps.object.borrow().get_material(), light,
+            &comps.point, &comps.eye_v, &comps.normal_v);
+            color.add(&result);
+        }
+        
+        color
     }
 
     pub fn intersect_world(w: &World, r: &Ray) -> IntersectionList<Sphere> {
@@ -59,6 +72,10 @@ impl World {
 
     pub fn add_point_light(&mut self, point_light: PointLight) {
         let _ = &self.point_lights.push(point_light);
+    }
+
+    pub fn remove_lights(&mut self) {
+        self.point_lights = vec![];
     }
 
     pub fn get_objects(&self) -> &Vec<Rc<RefCell<Sphere>>> {

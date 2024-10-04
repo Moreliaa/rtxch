@@ -82,15 +82,52 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
             let w = &world.world;
             let r = world.ray.get(&v[1].to_string()).unwrap();
             let intersections = rtxch_lib::World::intersect_world(w, &r);
-            world.inter.insert(t, intersections);
+            world.inter_list.insert(t, intersections);
+        },
+        "prepare_computations" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let i = world.inter.get(&v[0].to_string()).unwrap();
+            let r = world.ray.get(&v[1].to_string()).unwrap();
+            let comps = Intersection::prep_computations(i, r);
+            world.comps.insert(t, comps);
+        },
+        "shade_hit" => {
+            let w = &world.world;
+            let comps = world.comps.get(&"comps".to_string()).unwrap();
+            let hit = rtxch_lib::World::shade_hit(w, comps);
+            world.tuple.insert(t, hit);
         },
         _ => panic!("{func} not implemented")
     }
 }
 
-#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|point_light|intersect_world)\((.*)\)")]
+#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|point_light|intersect_world|prepare_computations|shade_hit)\((.*)\)")]
 fn when_item(world: &mut WorldWorld, matches: &[String]) {
     create_item(world, matches);
+}
+
+#[given(regex = r"shape ← the (first|second) object in w")]
+fn first(world: &mut WorldWorld, matches: &[String]) {
+    let idx = if matches[0] == "first" { 0 } else { 1 };
+    let shape = Rc::clone(world.world.get_objects().get(idx).unwrap());
+    world.sphere.insert("shape".to_string(), shape);
+}
+
+#[given(regex = r"w.light ← light")]
+fn set_light(world: &mut WorldWorld, _: &[String]) {
+    let light = world.plight.get(&"light".to_string()).unwrap();
+    world.world.remove_lights();
+    world.world.add_point_light(light.clone());
+}
+
+
+
+#[given(regex = r"i ← intersection\((.+), shape\)")]
+fn intershape(world: &mut WorldWorld, matches: &[String]) {
+    let t = matches[0].parse::<f64>().unwrap();
+    let shape = world.sphere.get(&"shape".to_string()).unwrap();
+    let i = Intersection::new(t, shape);
+    world.inter.insert("i".to_string(), i);
 }
 
 #[then(regex = r"w.light = light")]
@@ -114,6 +151,53 @@ fn contains(world: &mut WorldWorld, matches: &[String]) {
     assert!(result);
 }
 
+#[then(regex = r"c = color\((.+)\)")]
+fn check_color(world: &mut WorldWorld, matches: &[String]) {
+    let values = parse_values_f64(&matches[0]);
+    let target_color = Tuples::color(values[0], values[1],values[2]);
+    let c = world.tuple.get(&"c".to_string()).unwrap();
+    assert!(c.is_equal(&target_color), "{:?}", c);
+}
+
+#[then(regex = r"(comps)\.(t|object|point|eyev|normalv|inside) = (.+)")]
+fn check_prop_comps(world: &mut WorldWorld, matches: &[String]) {
+    let comps = world.comps.get(&matches[0]).unwrap();
+    let prop = matches[1].as_str();
+    
+    match prop {
+        "t" => {
+            let i = world.inter.get(&"i".to_string()).unwrap();
+            assert!(rtxch_lib::utils::is_equal_f64(comps.t, i.t()));
+        },
+        "object" => {
+            let i = world.inter.get(&"i".to_string()).unwrap();
+            assert!(Rc::ptr_eq(i.object(), &comps.object));
+        },
+        "point" => {
+            let target = world.tuple.get(&matches[2]).unwrap();
+            assert!(comps.point.is_equal(&target));
+        },
+        "eyev" => {
+            let target = world.tuple.get(&matches[2]).unwrap();
+            assert!(comps.eye_v.is_equal(&target));
+        },
+        "normalv" => {
+            let target = world.tuple.get(&matches[2]).unwrap();
+            assert!(comps.normal_v.is_equal(&target));
+        },
+        "inside" => {
+            let target = match matches[2].as_str() {
+                "false" => false,
+                "true" => true,
+                _ => panic!(),
+            };
+            assert!(comps.inside == target);
+
+        }
+        _ => panic!()
+    }
+}
+
 #[then(regex = r"w contains no objects")]
 fn no_obj(world: &mut WorldWorld, _: &[String]) {
     assert!(world.world.get_objects().len() == 0);
@@ -126,7 +210,7 @@ fn no_light(world: &mut WorldWorld, _: &[String]) {
 
 #[then(regex = r"xs\.(count) = (.+)")]
 fn check_prop_intersection(world: &mut WorldWorld, matches: &[String]) {
-    let xs = world.inter.get(&"xs".to_string()).unwrap();
+    let xs = world.inter_list.get(&"xs".to_string()).unwrap();
     let prop = matches[0].as_str();
     match prop {
         "count" => {
@@ -139,7 +223,7 @@ fn check_prop_intersection(world: &mut WorldWorld, matches: &[String]) {
 
 #[then(regex = r"xs\[(\d)\]\.(t) = (.+)")]
 fn check_prop_intersection_idx(world: &mut WorldWorld, matches: &[String]) {
-    let xs = world.inter.get(&"xs".to_string()).unwrap();
+    let xs = world.inter_list.get(&"xs".to_string()).unwrap();
     let idx = matches[0].parse::<usize>().unwrap();
     let entry = xs.xs().get(idx).unwrap();
     let prop = matches[1].as_str();
@@ -160,7 +244,9 @@ struct WorldWorld {
     tuple: HashMap<String, Tuples>,
     sphere: HashMap<String, Rc<RefCell<Sphere>>>,
     ray: HashMap<String, Ray>,
-    inter: HashMap<String, IntersectionList<Sphere>>
+    inter_list: HashMap<String, IntersectionList<Sphere>>,
+    inter: HashMap<String, Intersection<Sphere>>,
+    comps: HashMap<String, Computations<Sphere>>,
 }
 
 

@@ -30,22 +30,31 @@ Scenario: Intersect a world with a ray
 
 Scenario: Shading an intersection
   Given w ← default_world()
-    And r ← ray(point(0, 0, -5), vector(0, 0, 1))
+    And p ← point(0, 0, -5)
+    And v ← vector(0, 0, 1)
+    And r ← ray(p, v)
     And shape ← the first object in w
     And i ← intersection(4, shape)
   When comps ← prepare_computations(i, r)
     And c ← shade_hit(w, comps)
-  Then c = color(0.38066, 0.47583, 0.2855)
+  Then comps.inside = false
+    And c = color(0.38066, 0.47583, 0.2855)
 
 Scenario: Shading an intersection from the inside
   Given w ← default_world()
-    And w.light ← point_light(point(0, 0.25, 0), color(1, 1, 1))
-    And r ← ray(point(0, 0, 0), vector(0, 0, 1))
+    And pl ← point(0, 0.25, 0)
+    And cl ← color(1, 1, 1)
+    And light ← point_light(pl, cl)
+    And w.light ← light
+    And pr ← point(0, 0, 0)
+    And vr ← vector(0, 0, 1)
+    And r ← ray(pr, vr)
     And shape ← the second object in w
     And i ← intersection(0.5, shape)
   When comps ← prepare_computations(i, r)
     And c ← shade_hit(w, comps)
-  Then c = color(0.90498, 0.90498, 0.90498)
+  Then comps.inside = true
+    And c = color(0.90498, 0.90498, 0.90498)
 
 Scenario: The color when a ray misses
   Given w ← default_world()
