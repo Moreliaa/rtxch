@@ -1,9 +1,13 @@
 use crate::*;
 
-pub fn lighting(material: &Material, point_light: &PointLight, pos: &Tuples, eye_v: &Tuples, normal_v: &Tuples) -> Tuples {
+pub fn lighting(material: &Material, point_light: &PointLight, pos: &Tuples, eye_v: &Tuples, normal_v: &Tuples, in_shadow: bool) -> Tuples {
     let eff_color = material.color.clone().multiply(point_light.intensity());
-    let light_v = Tuples::normalize(&mut point_light.position().clone().subtract(&pos));
     let mut ambient = eff_color.clone().scale(material.ambient);
+    if in_shadow {
+        return ambient;
+    }
+    
+    let light_v = Tuples::normalize(&mut point_light.position().clone().subtract(&pos));
     let light_dot_normal = Tuples::dot(&light_v, &normal_v);
     if light_dot_normal < 0.0 {
         return ambient;

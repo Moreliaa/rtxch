@@ -3,6 +3,7 @@ Feature: Materials
 Background:
   Given m ← material()
     And position ← point(0, 0, 0)
+    And in_shadow ← false
 
 Scenario: The default material
   Given m ← material()

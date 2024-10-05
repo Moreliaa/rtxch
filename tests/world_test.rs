@@ -172,6 +172,17 @@ fn check_color(world: &mut WorldWorld, matches: &[String]) {
     assert!(c.is_equal(&target_color), "{:?}", c);
 }
 
+#[then(regex = r"is_shadowed\(w, p\) is (true|false)")]
+fn check_shadow(world: &mut WorldWorld, matches: &[String]) {
+    let p = world.tuple.get(&"p".to_string()).unwrap();
+    let target = match matches[0].as_str() {
+        "true" => true,
+        "false" => false,
+        _ => panic!(),
+    };
+    assert!(rtxch_lib::World::is_shadowed(&world.world, p) == target);
+}
+
 #[then(regex = r"c = inner.material.color")]
 fn check_inner_color(world: &mut WorldWorld, _: &[String]) {
     let sphere = world.sphere.get(&"inner".to_string()).unwrap();

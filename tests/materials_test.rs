@@ -13,6 +13,15 @@ fn given_item(world: &mut MaterialsWorld, matches: &[String]) {
     create_item(world, matches);
 }
 
+#[given(regex = r"in_shadow ← (.+)")]
+fn in_shadow_set(world: &mut MaterialsWorld, matches: &[String]) {
+    match matches[0].as_str() {
+        "false" => world.in_shadow = false,
+        "true" => world.in_shadow = true,
+        _ =>  panic!()
+    };
+}
+
 fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
     let t = matches[0].clone();
     let func = matches[1].as_str();
@@ -85,7 +94,7 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
             let position = world.tuple.get(&v[2].to_string()).unwrap();
             let eyev = world.tuple.get(&v[3].to_string()).unwrap();
             let normalv = world.tuple.get(&v[4].to_string()).unwrap();
-            world.tuple.insert(t, lighting(m, pl, position, eyev, normalv));
+            world.tuple.insert(t, lighting(m, pl, position, eyev, normalv, world.in_shadow));
         }
         _ => panic!("{func} not implemented")
     }
@@ -167,6 +176,7 @@ struct MaterialsWorld {
     matrix: HashMap<String, Matrix>,
     material: HashMap<String, Material>,
     plight: HashMap<String, PointLight>,
+    in_shadow: bool,
 }
 
 fn main() {

@@ -24,6 +24,25 @@ impl World {
         World { objects: vec![], point_lights: vec![] }
     }
 
+    pub fn is_shadowed(w: &World, point: &Tuples) -> bool {
+        // TODO correctly calculate influences from multiple point lights
+        for light in w.get_point_lights() {
+            let mut vector = light.position().clone().subtract(point);
+            let distance = vector.clone().magnitude();
+            let direction = vector.normalize();
+            let ray = Ray::new(point.clone(),  direction);
+            let is = World::intersect_world(&w, &ray);
+            let hit = IntersectionList::hit(&is);
+            if let Some(h) = hit {
+                if h.t() < distance {
+                    return true;
+                }
+            }
+
+        }
+        return false;
+    }
+
     pub fn color_at(w: &World, r: &Ray) -> Tuples {
         let il = World::intersect_world(w, r);
         let hit = IntersectionList::hit(&il);
@@ -39,7 +58,7 @@ impl World {
         let mut color = Tuples::color(0.0,0.0,0.0);
         for light in w.get_point_lights() {
             let result = render::lighting(comps.object.borrow().get_material(), light,
-            &comps.point, &comps.eye_v, &comps.normal_v);
+            &comps.point, &comps.eye_v, &comps.normal_v, false);
             color.add(&result);
         }
         
