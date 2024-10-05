@@ -56,7 +56,18 @@ impl Matrix {
     }
 
     pub fn view_transform(from: &Tuples, to: &Tuples, up: &Tuples) -> Matrix {
-        Matrix::new(4)
+        let forward = to.clone().subtract(from).normalize();
+        let left = Tuples::cross(&forward, &up.clone().normalize());
+        let true_up = Tuples::cross(&left, &forward);
+        let orientation = Matrix::from_values(&vec![
+            left.x, left.y, left.z, 0.0,
+            true_up.x, true_up.y, true_up.z, 0.0,
+            -forward.x, -forward.y, -forward.z, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        ]);
+        let translation = Matrix::translate(-from.x, -from.y, -from.z);
+        let out = Matrix::mul(&orientation, &translation);
+        out
     }
 
     pub fn translate(x: f64, y: f64, z: f64) -> Self {

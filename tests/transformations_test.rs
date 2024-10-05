@@ -147,7 +147,7 @@ fn check_view_transform(world: &mut TrafoWorld, matches: &[String]) {
             Matrix::new(4)
         },
         "scaling(-1, 1, -1)" => {
-            Matrix::scale(-1.0,-1.0,-1.0)
+            Matrix::scale(-1.0,1.0,-1.0)
         },
         "translation(0, 0, -8)" => {
             Matrix::translate(0.0,0.0,-8.0)
