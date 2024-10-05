@@ -19,7 +19,7 @@ fn given_default_world(world: &mut WorldWorld, _: &[String]) {
     world.world = rtxch_lib::World::default_world();
 }
 
-#[given(regex = r"(.+) ← (point|vector|ray|intersect|translation|scaling|normal_at|rotation_z|color|point_light)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|intersect|translation|scaling|normal_at|rotation_z|color|point_light|sphere|intersection|prepare_computations)\((.*)\)$")]
 fn given_item(world: &mut WorldWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -45,6 +45,15 @@ fn sphere2(world: &mut WorldWorld) {
     world.sphere.insert("s2".to_string(), sphere);
 }
 
+#[given("s2 ← sphere() with: | transform | translation(0, 0, 10) |")]
+fn sphere2_alter(world: &mut WorldWorld) {
+    let sphere = Sphere::new();
+    let transform = Matrix::translate(0.0,0.0,10.0);
+    Sphere::set_transform(&sphere, &transform);
+
+    world.sphere.insert("s2".to_string(), sphere);
+}
+
 fn create_item(world: &mut WorldWorld, matches: &[String]) {
     let t = matches[0].clone();
     let func = matches[1].as_str();
@@ -59,6 +68,12 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
             let p = Tuples::vector(v[0], v[1], v[2]);
             world.tuple.insert(t, p);
         },
+        "intersection" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let time = v[0].parse::<f64>().unwrap();
+            let obj = world.sphere.get(&v[1].to_string()).unwrap();
+            world.inter_sphere.insert(t, Intersection::new(time, obj));
+        },
         "color" => {
             let v = parse_values_f64(&matches[2]);
             let p = Tuples::color(v[0], v[1], v[2]);
@@ -69,6 +84,13 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
             let pos = world.tuple.get(&v[0].to_string()).unwrap();
             let intensity = world.tuple.get(&v[1].to_string()).unwrap();
             world.plight.insert(t, lights::point_light(pos, intensity));
+        },
+        "prepare_computations" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let i = world.inter_sphere.get(&v[0].to_string()).unwrap();
+            let r = world.ray.get(&v[1].to_string()).unwrap();
+            let comps = Intersection::prep_computations(i, r);
+            world.comps.insert(t, comps);
         },
         "ray" => {
             let v: Vec<&str> = matches[2].split(", ").collect();
@@ -104,8 +126,17 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
             let color = rtxch_lib::World::color_at(w, r);
             world.tuple.insert(t, color);
         },
+        "sphere" => {
+            world.sphere.insert(t, Sphere::new());
+        }
         _ => panic!("{func} not implemented")
     }
+}
+
+#[given(regex = r"(s|s.) is added to w")]
+fn add_sphere(world: &mut WorldWorld, matches: &[String]) {
+    let sphere = world.sphere.get(&matches[0]).unwrap();
+    world.world.add_object(Rc::clone(sphere));
 }
 
 #[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|point_light|intersect_world|prepare_computations|shade_hit|color_at)\((.*)\)")]
@@ -278,6 +309,7 @@ struct WorldWorld {
     inter_list: HashMap<String, IntersectionList<Sphere>>,
     inter: HashMap<String, Intersection<Sphere>>,
     comps: HashMap<String, Computations<Sphere>>,
+    inter_sphere: HashMap<String, Intersection<Sphere>>,
 }
 
 
