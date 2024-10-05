@@ -20,3 +20,17 @@ pub fn lighting(material: &Material, point_light: &PointLight, pos: &Tuples, eye
         return ambient.add(&diffuse).add(&specular);
     }
 }
+
+
+
+pub fn render(camera: &Camera, world: &World) -> Canvas {
+    let mut canvas = Canvas::new(camera.h_size, camera.v_size);
+    for y in 0..camera.v_size {
+        for x in 0..camera.h_size {
+            let ray = Camera::ray_for_pixel(camera, x, y);
+            let color = World::color_at(world, &ray);
+            canvas.write_pixel(x, y, &color);
+        }
+    }
+    canvas
+}

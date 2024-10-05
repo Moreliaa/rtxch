@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::f64::consts::PI;
 use cucumber::{given, when, then, World};
 use intersections::Shape;
+use render::render;
 use rtxch_lib::*;
 use rtxch_lib::utils::*;
 use std::rc::Rc;
@@ -40,10 +41,32 @@ fn check_prop(world: &mut CameraWorld, matches: &[String]) {
     }
 }
 
+#[given("c.transform ← view_transform(from, to, up)")]
+fn transform_2(world: &mut CameraWorld) {
+    let from = world.tuple.get(&"from".to_string()).unwrap();
+    let to = world.tuple.get(&"to".to_string()).unwrap();
+    let up = world.tuple.get(&"up".to_string()).unwrap();
+    let t = Matrix::view_transform(from, to, up);
+    world.camera.transform = t;
+}
+
 #[when("c.transform ← rotation_y(π/4) * translation(0, -2, 5)")]
 fn transform(world: &mut CameraWorld) {
     let mat = Matrix::rotate_y(PI / 4.0) * Matrix::translate(0.0,-2.0,5.0);
     world.camera.transform = mat;
+}
+
+#[when("image ← render(c, w)")]
+fn render_image(world: &mut CameraWorld) {
+    let image = render(&world.camera, &world.world);
+    world.image = image;
+}
+
+#[then("pixel_at(image, 5, 5) = color(0.38066, 0.47583, 0.2855)")]
+fn pixel_at(world: &mut CameraWorld) {
+    let pixel = world.image.pixel_at(5, 5);
+    let c = Tuples::color(0.38066, 0.47583, 0.2855);
+    assert!(pixel.is_equal(&c));
 }
 
 #[then(regex = r"^c.(.+) = (.+)")]
@@ -111,6 +134,12 @@ fn create_item(world: &mut CameraWorld, matches: &[String]) {
     }
 }
 
+#[when(regex = r"w ← default_world()")]
+#[given(regex = r"w ← default_world()")]
+fn given_default_world(world: &mut CameraWorld, _: &[String]) {
+    world.world = rtxch_lib::World::default_world();
+}
+
 #[derive(Debug, Default, World)]
 struct CameraWorld {
     camera: Camera,
@@ -119,6 +148,8 @@ struct CameraWorld {
     tuple: HashMap<String, Tuples>,
     mat: HashMap<String, Matrix>,
     ray: HashMap<String, Ray>,
+    world: rtxch_lib::World,
+    image: Canvas,
 }
 
 
