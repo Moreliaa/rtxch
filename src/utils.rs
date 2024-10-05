@@ -1,3 +1,5 @@
+use std::f64::consts::PI;
+
 const EPSILON: f64 = 0.00001;
 
 pub fn is_equal_f64(a: f64, b: f64) -> bool {
@@ -14,6 +16,10 @@ pub fn parse_values_u64(input: &String) -> Vec<u64> {
 
 pub fn parse_values_usize(input: &String) -> Vec<usize> {
     input.split(", ").map(|m| m.parse::<usize>().unwrap()).collect()
+}
+
+pub fn deg_to_rad(n: f64) -> f64 {
+    n * PI / 180.0
 }
 
 pub fn color_to_256(input: f64) -> u8 {

@@ -4,6 +4,7 @@ use std::{f64::consts::PI, fs};
 use intersections::Shape;
 use lights::point_light;
 use rtxch_lib::*;
+use utils::deg_to_rad;
 
 fn main() {
     let mut world = World::new();
@@ -70,7 +71,7 @@ fn main() {
     );
     world.add_point_light(light);
 
-    let mut camera = Camera::new(500, 500, PI / 3.0);
+    let mut camera = Camera::new(300, 300, deg_to_rad(90.0));
     let from = Tuples::point(0.0,1.5, -5.0);
     let to = Tuples::point(0.0,1.0,0.0);
     let up = Tuples::vector(0.0,1.0,0.0);
