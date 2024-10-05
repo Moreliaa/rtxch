@@ -3,12 +3,9 @@ extern crate rtxch_lib;
 use std::collections::HashMap;
 use std::f64::consts::PI;
 use cucumber::{given, when, then, World};
-use intersections::Shape;
 use render::render;
 use rtxch_lib::*;
 use rtxch_lib::utils::*;
-use std::rc::Rc;
-use std::cell::RefCell;
 
 #[given(regex = r"c ← camera\((.+)\)")]
 #[when(regex = r"c ← camera\((.+)\)")]
@@ -143,10 +140,7 @@ fn given_default_world(world: &mut CameraWorld, _: &[String]) {
 #[derive(Debug, Default, World)]
 struct CameraWorld {
     camera: Camera,
-    usizes: HashMap<String, usize>,
-    f64s: HashMap<String, f64>,
     tuple: HashMap<String, Tuples>,
-    mat: HashMap<String, Matrix>,
     ray: HashMap<String, Ray>,
     world: rtxch_lib::World,
     image: Canvas,
