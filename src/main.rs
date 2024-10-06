@@ -7,12 +7,19 @@ use rtxch_lib::*;
 use utils::deg_to_rad;
 
 fn main() {
+    let mut camera = Camera::new(500, 500, deg_to_rad(60.0));
+    let from = Tuples::point(0.0,1.5, -5.0);
+    let to = Tuples::point(0.0,1.0,0.0);
+    let up = Tuples::vector(0.0,1.0,0.0);
+    camera.transform = Matrix::view_transform(&from, &to, &up);
+
     let mut world = World::new();
     let floor = Sphere::new();
     Sphere::set_transform(&floor, &Matrix::scale(10.0,0.01,10.0));
     let mut floor_material = Material::material();
     floor_material.color = Tuples::color(1.0,0.9,0.9);
     floor_material.specular = 0.0;
+    floor_material.ambient = 0.3;
     Sphere::set_material(&floor, &floor_material);
     world.add_object(floor);
 
@@ -67,16 +74,16 @@ fn main() {
     world.add_object(left);
 
     let light = point_light(
-        &Tuples::point(-10.0,10.0,-10.0), &Tuples::color(1.0,1.0,1.0)
+        &Tuples::point(-10.0,10.0,-10.0),
+         &Tuples::color(0.5,0.5,0.5)
     );
     world.add_point_light(light);
 
-    let mut camera = Camera::new(300, 300, deg_to_rad(90.0));
-    let from = Tuples::point(0.0,1.5, -5.0);
-    let to = Tuples::point(0.0,1.0,0.0);
-    let up = Tuples::vector(0.0,1.0,0.0);
-    camera.transform = Matrix::view_transform(&from, &to, &up);
-
+    let light2 = point_light(
+        &Tuples::point(5.0,10.0,-10.0), 
+        &Tuples::color(0.5,0.5,0.5)
+    );
+    world.add_point_light(light2);
 
     let canvas = render::render(&camera, &world);
     
