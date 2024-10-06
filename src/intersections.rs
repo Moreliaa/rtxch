@@ -1,3 +1,4 @@
+use crate::utils::EPSILON;
 use crate::Ray;
 use crate::Matrix;
 use crate::Tuples;
@@ -79,6 +80,7 @@ pub struct Computations<T: Shape> {
     pub eye_v: Tuples,
     pub normal_v: Tuples,
     pub inside: bool,
+    pub over_point: Tuples,
 }
 
 impl<T: Shape> Intersection<T> {
@@ -94,6 +96,8 @@ impl<T: Shape> Intersection<T> {
         if inside {
             normal_v.negate();
         }
+        let normal_v_offset = normal_v.clone().scale(EPSILON);
+        let over_point = p.clone().add(&normal_v_offset);
         Computations {
             t: i.t(),
             object: Rc::clone(i.object()),
@@ -101,6 +105,7 @@ impl<T: Shape> Intersection<T> {
             eye_v: eye_v,
             normal_v: normal_v,
             inside: inside,
+            over_point,
         }
     }
 

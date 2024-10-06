@@ -5,13 +5,15 @@ use cucumber::{given, when, then, World};
 use rtxch_lib::utils::parse_values_f64;
 use rtxch_lib::utils::is_equal_f64;
 use rtxch_lib::*;
+use rtxch_lib::intersections::Shape;
+use utils::EPSILON;
 use std::rc::Rc;
 use std::cell::RefCell;
 use rtxch_lib::Computations;
 
 
-#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)")]
-#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)$")]
+#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)$")]
 fn given_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -139,9 +141,41 @@ fn check_prop_comps(world: &mut RaysWorld, matches: &[String]) {
             };
             assert!(comps.inside == target);
 
-        }
+        },
         _ => panic!()
     }
+}
+
+#[then(regex = r"(comps)\.(point.z|over_point.z) (<|>) (.+)")]
+fn check_prop_less_than_comps(world: &mut RaysWorld, matches: &[String]) {
+    let comps = world.comps.get(&matches[0]).unwrap();
+    let prop = matches[1].as_str();
+    let operator = matches[2].as_str();
+    
+    let prop_val = match prop {
+        "over_point.z" => comps.over_point.z,
+        "point.z" => comps.point.z,
+        _ => panic!()
+    };
+    let target = match matches[3].as_str() {
+        "-EPSILON/2" => -EPSILON / 2.0,
+        "comps.over_point.z" => comps.over_point.z,
+        _ => panic!(),
+    };
+    match operator {
+        ">" => assert!(prop_val > target, "{:#?} {}", comps, target),
+        "<" => assert!(prop_val < target, "{:#?} {}", comps, target),
+        _ => panic!(),
+    };
+}
+
+#[when("shape ← sphere() with: | transform | translation(0, 0, 1) |")]
+fn sphere2_alter(world: &mut RaysWorld) {
+    let sphere = Sphere::new();
+    let transform = Matrix::translate(0.0,0.0,1.0);
+    Sphere::set_transform(&sphere, &transform);
+
+    world.sphere.insert("shape".to_string(), sphere);
 }
 
 #[then(regex = r"(.+)\[(.+)\]\.(origin|direction|t|object|count) = (.+)")]

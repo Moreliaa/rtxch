@@ -24,21 +24,17 @@ impl World {
         World { objects: vec![], point_lights: vec![] }
     }
 
-    pub fn is_shadowed(w: &World, point: &Tuples) -> bool {
-        // TODO correctly calculate influences from multiple point lights
-        for light in w.get_point_lights() {
-            let mut vector = light.position().clone().subtract(point);
-            let distance = vector.clone().magnitude();
-            let direction = vector.normalize();
-            let ray = Ray::new(point.clone(),  direction);
-            let is = World::intersect_world(&w, &ray);
-            let hit = IntersectionList::hit(&is);
-            if let Some(h) = hit {
-                if h.t() < distance {
-                    return true;
-                }
+    pub fn is_shadowed(w: &World, point: &Tuples, light: &PointLight) -> bool {
+        let mut vector = light.position().clone().subtract(point);
+        let distance = vector.clone().magnitude();
+        let direction = vector.normalize();
+        let ray = Ray::new(point.clone(),  direction);
+        let is = World::intersect_world(&w, &ray);
+        let hit = IntersectionList::hit(&is);
+        if let Some(h) = hit {
+            if h.t() < distance {
+                return true;
             }
-
         }
         return false;
     }
@@ -57,8 +53,9 @@ impl World {
     pub fn shade_hit(w: &World, comps: &Computations<Sphere>) -> Tuples {
         let mut color = Tuples::color(0.0,0.0,0.0);
         for light in w.get_point_lights() {
+            let in_shadow = World::is_shadowed(w, &comps.over_point, light);
             let result = render::lighting(comps.object.borrow().get_material(), light,
-            &comps.point, &comps.eye_v, &comps.normal_v, false);
+            &comps.point, &comps.eye_v, &comps.normal_v, in_shadow);
             color.add(&result);
         }
         
