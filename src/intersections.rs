@@ -1,8 +1,6 @@
 use crate::utils::EPSILON;
 use crate::Ray;
-use crate::Matrix;
 use crate::Tuples;
-use crate::Material;
 use std::rc::Rc;
 use std::cell::RefCell;
 use crate::Shape;
