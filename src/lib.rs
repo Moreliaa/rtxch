@@ -26,5 +26,7 @@ pub mod world;
 pub use world::World;
 pub mod camera;
 pub use camera::Camera;
+pub mod shape;
+pub use shape::Shape;
 
 pub mod utils;

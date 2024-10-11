@@ -1,7 +1,7 @@
 extern crate rtxch_lib;
 
 use std::{f64::consts::PI, fs};
-use intersections::Shape;
+use rtxch_lib::Shape;
 use lights::point_light;
 use rtxch_lib::*;
 use utils::deg_to_rad;

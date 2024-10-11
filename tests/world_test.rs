@@ -2,7 +2,6 @@ extern crate rtxch_lib;
 
 use std::collections::HashMap;
 use cucumber::{given, when, then, World};
-use intersections::Shape;
 use rtxch_lib::*;
 use rtxch_lib::utils::parse_values_f64;
 use std::rc::Rc;
@@ -105,13 +104,6 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
             let r = world.ray.get(&v[1].to_string()).unwrap();
             let intersections = rtxch_lib::World::intersect_world(w, &r);
             world.inter_list.insert(t, intersections);
-        },
-        "prepare_computations" => {
-            let v: Vec<&str> = matches[2].split(", ").collect();
-            let i = world.inter.get(&v[0].to_string()).unwrap();
-            let r = world.ray.get(&v[1].to_string()).unwrap();
-            let comps = Intersection::prep_computations(i, r);
-            world.comps.insert(t, comps);
         },
         "shade_hit" => {
             let w = &world.world;

@@ -6,7 +6,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use crate::Material;
 use crate::Tuples;
-use crate::intersections::Shape;
+use crate::Shape;
 use crate::Matrix;
 use crate::intersections::IntersectionList;
 use crate::Ray;

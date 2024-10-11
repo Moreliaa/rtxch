@@ -5,7 +5,6 @@ use cucumber::{given, when, then, World};
 use rtxch_lib::utils::parse_values_f64;
 use rtxch_lib::utils::is_equal_f64;
 use rtxch_lib::*;
-use rtxch_lib::intersections::Shape;
 use utils::EPSILON;
 use std::rc::Rc;
 use std::cell::RefCell;

@@ -1,4 +1,5 @@
-use crate::intersections::{Shape, IntersectionList};
+use crate::intersections::IntersectionList;
+use crate::Shape;
 use crate::Ray;
 use crate::Tuples;
 use crate::Matrix;
