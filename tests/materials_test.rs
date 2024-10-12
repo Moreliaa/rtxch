@@ -7,7 +7,7 @@ use rtxch_lib::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|rotation_z|material|color|point_light)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|stripe_pattern|vector|ray|sphere|intersect|translation|scaling|normal_at|rotation_z|material|color|point_light)\((.*)\)")]
 fn given_item(world: &mut MaterialsWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -25,6 +25,13 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
     let t = matches[0].clone();
     let func = matches[1].as_str();
     match func {
+        "stripe_pattern" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let o = world.tuple.get(&v[0].to_string()).unwrap();
+            let d = world.tuple.get(&v[1].to_string()).unwrap();
+            let sp = StripePattern::new(o.clone(), d.clone());
+            world.patterns.insert(t, Rc::new(sp));
+        },
         "point" => {
             let v = parse_values_f64(&matches[2]);
             let p = Tuples::point(v[0], v[1], v[2]);
@@ -94,7 +101,7 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
             let eyev = world.tuple.get(&v[3].to_string()).unwrap();
             let normalv = world.tuple.get(&v[4].to_string()).unwrap();
             world.tuple.insert(t, lighting(m, pl, position, eyev, normalv, world.in_shadow));
-        }
+        },
         _ => panic!("{func} not implemented")
     }
 }
@@ -104,12 +111,37 @@ fn when_item(world: &mut MaterialsWorld, matches: &[String]) {
     create_item(world, matches);
 }
 
-#[then(regex = r"result = color\((.+)\)")]
+#[then(regex = r"(result|c1|c2) = color\((.+)\)")]
 fn check_result(world: &mut MaterialsWorld, matches: &[String]) {
-    let val = parse_values_f64(&matches[0]);
+    let val = parse_values_f64(&matches[1]);
     let col = Tuples::color(val[0], val[1], val[2]);
-    let r = world.tuple.get(&"result".to_string()).unwrap();
-    r.is_equal(&col);
+    let r = world.tuple.get(&matches[0]).unwrap();
+    assert!(r.is_equal(&col));
+}
+
+#[given(regex = r"m.(ambient|diffuse|specular|pattern) ← (.+)")]
+fn set_ambient(world: &mut MaterialsWorld, matches: &[String]) {
+    let mat = world.material.get_mut(&"m".to_string()).unwrap();
+    match matches[0].as_str() {
+        "ambient" => {
+            let v = matches[1].parse::<f64>().unwrap();
+            mat.ambient = v;
+        },
+        "diffuse" => {
+            let v = matches[1].parse::<f64>().unwrap();
+            mat.diffuse = v;
+        },
+        "specular" => {
+            let v = matches[1].parse::<f64>().unwrap();
+            mat.specular = v;
+        },
+        "pattern" => {
+            let v = world.patterns.get(&matches[1].to_string()).unwrap();
+            mat.pattern = Rc::clone(v);
+        },
+        _ => panic!(),
+    }
+    
 }
 
 #[then(regex = r"([^\[\]]+)\.(origin|direction|t|object|count|position|intensity|color|ambient|diffuse|specular|shininess) = (.+)")]
@@ -176,6 +208,7 @@ struct MaterialsWorld {
     material: HashMap<String, Material>,
     plight: HashMap<String, PointLight>,
     in_shadow: bool,
+    patterns: HashMap<String, Rc<dyn Pattern>>,
 }
 
 fn main() {

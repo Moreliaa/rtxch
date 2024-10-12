@@ -79,7 +79,10 @@ Scenario: Lighting with the surface in shadow
   Then result = color(0.1, 0.1, 0.1)
 
 Scenario: Lighting with a pattern applied
-  Given m.pattern ← stripe_pattern(color(1, 1, 1), color(0, 0, 0))
+  Given ca ← color(1, 1, 1)
+    And cb ← color(0, 0, 0)
+    And pattern ← stripe_pattern(ca, cb)
+    And m.pattern ← pattern
     And m.ambient ← 1
     And m.diffuse ← 0
     And m.specular ← 0
@@ -88,7 +91,9 @@ Scenario: Lighting with a pattern applied
     And lightpos ← point(0, 0, -10)
     And lightcolor ← color(1, 1, 1)
     And light ← point_light(lightpos, lightcolor)
-  When c1 ← lighting(m, light, point(0.9, 0, 0), eyev, normalv, false)
-    And c2 ← lighting(m, light, point(1.1, 0, 0), eyev, normalv, false)
+    And pos1 ← point(0.9, 0, 0)
+    And pos2 ← point(1.1, 0, 0)
+  When c1 ← lighting(m, light, pos1, eyev, normalv, in_shadow)
+    And c2 ← lighting(m, light, pos2, eyev, normalv, in_shadow)
   Then c1 = color(1, 1, 1)
     And c2 = color(0, 0, 0)
