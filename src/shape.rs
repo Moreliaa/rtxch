@@ -16,6 +16,7 @@ pub trait Shape: Debug {
     fn get_material(&self) -> &Material;
     fn get_mut_material(&mut self) -> &mut Material;
     fn normal_at_local(&self, p: &Tuples) -> Tuples;
+    fn get_type(&self) -> &str;
 }
 
 impl dyn Shape {
@@ -35,6 +36,7 @@ impl dyn Shape {
     }
 
     pub fn is_equal(a: &Rc<RefCell<dyn Shape>>, b: &Rc<RefCell<dyn Shape>>) -> bool {
+        a.borrow().get_type() == b.borrow().get_type() &&
         a.borrow().get_material().is_equal(&b.borrow().get_material()) &&
         a.borrow().get_transform().is_equal(&b.borrow().get_transform())
     }

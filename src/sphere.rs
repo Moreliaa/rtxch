@@ -67,4 +67,8 @@ impl Shape for Sphere {
         let origin = Tuples::point(0.0,0.0, 0.0);
         Tuples::vector(p_object_space.x - origin.x, p_object_space.y - origin.y, p_object_space.z - origin.z)
     }
+
+    fn get_type(&self) -> &str {
+        "Sphere"
+    }
 }
