@@ -49,7 +49,7 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
         },
         "intersections" => {
             let v: Vec<&str> = matches[2].split(", ").collect();
-            let i: Vec<Intersection<Sphere>> = v.into_iter().map(|val| world.inter_sphere.get(&val.to_string()).unwrap().clone()).collect();
+            let i: Vec<Intersection> = v.into_iter().map(|val| world.inter_sphere.get(&val.to_string()).unwrap().clone()).collect();
             let l = IntersectionList::intersections_from_vec(i);
             world.interlist_sphere.insert(t, l);
         },
@@ -172,7 +172,7 @@ fn check_prop_less_than_comps(world: &mut RaysWorld, matches: &[String]) {
 fn sphere2_alter(world: &mut RaysWorld) {
     let sphere = Sphere::new();
     let transform = Matrix::translate(0.0,0.0,1.0);
-    Sphere::set_transform(&sphere, &transform);
+    sphere.borrow_mut().set_transform(&transform);
 
     world.sphere.insert("shape".to_string(), sphere);
 }
@@ -239,11 +239,11 @@ fn check_pos(world: &mut RaysWorld, matches: &[String]) {
 struct RaysWorld {
     ray: HashMap<String, Ray>,
     tuple: HashMap<String, Tuples>,
-    sphere: HashMap<String, Rc<RefCell<Sphere>>>,
-    inter_sphere:  HashMap<String, Intersection<Sphere>>,
-    interlist_sphere: HashMap<String, IntersectionList<Sphere>>,
-    hit: HashMap<String, Option<Intersection<Sphere>>>,
-    comps: HashMap<String, Computations<Sphere>>,
+    sphere: HashMap<String, Rc<RefCell<dyn Shape>>>,
+    inter_sphere:  HashMap<String, Intersection>,
+    interlist_sphere: HashMap<String, IntersectionList>,
+    hit: HashMap<String, Option<Intersection>>,
+    comps: HashMap<String, Computations>,
 }
 
 fn main() {

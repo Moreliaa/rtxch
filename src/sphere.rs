@@ -1,4 +1,3 @@
-use crate::intersections::IntersectionList;
 use crate::Shape;
 use crate::Ray;
 use crate::Tuples;
@@ -18,16 +17,10 @@ impl Sphere {
     pub fn new() -> Rc<RefCell<Sphere>> {
         Rc::new(RefCell::new(Sphere { material: Material::material(), transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
     }
-
-    pub fn is_equal(&self, other: &Rc<RefCell<Self>>) -> bool {
-        self.material.is_equal(&other.borrow().material) &&
-        self.transform.is_equal(&other.borrow().transform)
-    }
 }
 
 impl Shape for Sphere {
-    fn intersect(s: &Rc<RefCell<Sphere>>, r: &Ray) -> IntersectionList<Sphere> {
-        let r = Ray::transform(r, s.borrow().get_transform_inverse());
+    fn intersect_local(&self, r: &Ray) -> Vec<f64> {
         let sphere_origin = Tuples::point(0.0,0.0,0.0);
         let sphere_to_ray = r.origin().clone().subtract(&sphere_origin);
         // a = 1.0 only if direction is normalized
@@ -36,22 +29,22 @@ impl Shape for Sphere {
         let c = Tuples::dot(&sphere_to_ray, &sphere_to_ray) - 1.0;
         let discriminant = b * b - 4.0 * a * c;
         if discriminant < 0.0 {
-            return IntersectionList::new(vec![], &s);
+            return vec![];
         }
 
         let discriminant_sqrt = discriminant.sqrt();
         let t1 = (-b - discriminant_sqrt) / (2.0 * a);
         let t2 = (-b + discriminant_sqrt) / (2.0 * a);
-        IntersectionList::new(vec![t1, t2], &s)
+        vec![t1, t2]
     }
 
-    fn set_transform(s: &Rc<RefCell<Self>>, transform: &Matrix) {
-        s.borrow_mut().transform = transform.clone();
-        s.borrow_mut().transform_inverse = Matrix::inverse(transform).unwrap();
+    fn set_transform(&mut self, transform: &Matrix) {
+        self.transform = transform.clone();
+        self.transform_inverse = Matrix::inverse(transform).unwrap();
     }
 
-    fn set_material(s: &Rc<RefCell<Self>>, material: &Material) {
-        s.borrow_mut().material = material.clone();
+    fn set_material(&mut self, material: &Material) {
+        self.material = material.clone();
     }
 
     fn get_material(&self) -> &Material {
@@ -70,14 +63,13 @@ impl Shape for Sphere {
         &self.transform_inverse
     }
 
-    fn normal_at(s: &Rc<RefCell<Self>>, p: &Tuples) -> Tuples {
+    fn normal_at_local(&self, p: &Tuples) -> Tuples {
         let origin = Tuples::point(0.0,0.0, 0.0);
-        let inverse_transform = Matrix::inverse(s.borrow().get_transform()).unwrap();
+        let inverse_transform = Matrix::inverse(self.get_transform()).unwrap();
         let p_object_space = &inverse_transform * p;
         let n = Tuples::vector(p_object_space.x - origin.x, p_object_space.y - origin.y, p_object_space.z - origin.z);
         let mut n_world = Matrix::transpose(&inverse_transform) * n;
         n_world.w = 0.0; // remove influence from translation
         n_world.normalize()
-
     }
 }

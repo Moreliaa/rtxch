@@ -54,7 +54,7 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let s = world.sphere.get(&v[0].to_string()).unwrap();
             let r = world.ray.get(&v[1].to_string()).unwrap();
-            world.inter.insert(t, Sphere::intersect(s, r));
+            world.inter.insert(t, <dyn Shape>::intersect(s, r));
         },
         "translation" => {
             let v = parse_values_f64(&matches[2]);
@@ -75,7 +75,7 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let s = world.sphere.get(&v[0].to_string()).unwrap();
             let p = world.tuple.get(&v[1].to_string()).unwrap();
-            world.tuple.insert(t, Sphere::normal_at(s, p));
+            world.tuple.insert(t, <dyn Shape>::normal_at(s, p));
         },
         "material" => {
             world.material.insert(t, Material::material());
@@ -170,8 +170,8 @@ fn check_prop(world: &mut MaterialsWorld, matches: &[String]) {
 struct MaterialsWorld {
     ray: HashMap<String, Ray>,
     tuple: HashMap<String, Tuples>,
-    sphere: HashMap<String, Rc<RefCell<Sphere>>>,
-    inter:  HashMap<String, IntersectionList<Sphere>>,
+    sphere: HashMap<String, Rc<RefCell<dyn Shape>>>,
+    inter:  HashMap<String, IntersectionList>,
     matrix: HashMap<String, Matrix>,
     material: HashMap<String, Material>,
     plight: HashMap<String, PointLight>,

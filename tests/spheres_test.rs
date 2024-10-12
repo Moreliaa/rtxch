@@ -41,7 +41,7 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let s = world.sphere.get(&v[0].to_string()).unwrap();
             let r = world.ray.get(&v[1].to_string()).unwrap();
-            world.inter.insert(t, Sphere::intersect(s, r));
+            world.inter.insert(t, <dyn Shape>::intersect(s, r));
         },
         "translation" => {
             let v = parse_values_f64(&matches[2]);
@@ -62,7 +62,7 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let s = world.sphere.get(&v[0].to_string()).unwrap();
             let p = world.tuple.get(&v[1].to_string()).unwrap();
-            world.tuple.insert(t, Sphere::normal_at(s, p));
+            world.tuple.insert(t, <dyn Shape>::normal_at(s, p));
         },
         "material" => {
             world.material.insert(t, Material::material());
@@ -86,7 +86,7 @@ fn set_ambient(world: &mut RaysWorld, _: &[String]) {
 fn set_mat(world: &mut RaysWorld, _: &[String]) {
     let s = world.sphere.get(&"s".to_string()).unwrap();
     let mat = world.material.get_mut(&"m".to_string()).unwrap();
-    Sphere::set_material(s, &mat);
+    s.borrow_mut().set_material(&mat);
 }
 
 #[given(regex = r"m ← scale \* rot")]
@@ -100,7 +100,7 @@ fn set_transform(world: &mut RaysWorld, matches: &[String]) {
     let v: Vec<&str> = matches[0].split(", ").collect();
     let s = world.sphere.get(v[0]).unwrap();
     let t = world.matrix.get(v[1]).unwrap();
-    Sphere::set_transform(s, t);
+    s.borrow_mut().set_transform(t);
 }
 
 #[given(regex = r"set_transform\((.+)\)")]
@@ -280,8 +280,8 @@ fn check_norm(world: &mut RaysWorld, matches: &[String]) {
 struct RaysWorld {
     ray: HashMap<String, Ray>,
     tuple: HashMap<String, Tuples>,
-    sphere: HashMap<String, Rc<RefCell<Sphere>>>,
-    inter:  HashMap<String, IntersectionList<Sphere>>,
+    sphere: HashMap<String, Rc<RefCell<dyn Shape>>>,
+    inter:  HashMap<String, IntersectionList>,
     matrix: HashMap<String, Matrix>,
     material: HashMap<String, Material>,
 }

@@ -30,7 +30,7 @@ fn sphere1(world: &mut WorldWorld) {
     material.color = Tuples::color(0.8,1.0,0.6);
     material.diffuse = 0.7;
     material.specular = 0.2;
-    Sphere::set_material(&sphere, &material);
+    sphere.borrow_mut().set_material(&material);
 
     world.sphere.insert("s1".to_string(), sphere);
 }
@@ -39,7 +39,7 @@ fn sphere1(world: &mut WorldWorld) {
 fn sphere2(world: &mut WorldWorld) {
     let sphere = Sphere::new();
     let transform = Matrix::scale(0.5, 0.5, 0.5);
-    Sphere::set_transform(&sphere, &transform);
+    sphere.borrow_mut().set_transform(&transform);
 
     world.sphere.insert("s2".to_string(), sphere);
 }
@@ -48,7 +48,7 @@ fn sphere2(world: &mut WorldWorld) {
 fn sphere2_alter(world: &mut WorldWorld) {
     let sphere = Sphere::new();
     let transform = Matrix::translate(0.0,0.0,10.0);
-    Sphere::set_transform(&sphere, &transform);
+    sphere.borrow_mut().set_transform(&transform);
 
     world.sphere.insert("s2".to_string(), sphere);
 }
@@ -179,7 +179,7 @@ fn contains(world: &mut WorldWorld, matches: &[String]) {
     let world_objects = world.world.get_objects();
     let mut result = false;
     for o in world_objects {
-        if o.borrow().is_equal(&sphere) {
+        if <dyn Shape>::is_equal(o, sphere) {
             result = true;
             break;
         }
@@ -296,11 +296,11 @@ struct WorldWorld {
     world: rtxch_lib::World,
     plight: HashMap<String, PointLight>,
     tuple: HashMap<String, Tuples>,
-    sphere: HashMap<String, Rc<RefCell<Sphere>>>,
+    sphere: HashMap<String, Rc<RefCell<dyn Shape>>>,
     ray: HashMap<String, Ray>,
-    inter_list: HashMap<String, IntersectionList<Sphere>>,
-    inter: HashMap<String, Intersection<Sphere>>,
-    comps: HashMap<String, Computations<Sphere>>,
+    inter_list: HashMap<String, IntersectionList>,
+    inter: HashMap<String, Intersection>,
+    comps: HashMap<String, Computations>,
 }
 
 

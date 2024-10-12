@@ -15,7 +15,7 @@ use crate::render;
 
 #[derive(Debug, Default)]
 pub struct World {
-    objects: Vec<Rc<RefCell<Sphere>>>,
+    objects: Vec<Rc<RefCell<dyn Shape>>>,
     point_lights: Vec<PointLight>,
 }
 
@@ -50,7 +50,7 @@ impl World {
         }
     }
 
-    pub fn shade_hit(w: &World, comps: &Computations<Sphere>) -> Tuples {
+    pub fn shade_hit(w: &World, comps: &Computations) -> Tuples {
         let mut color = Tuples::color(0.0,0.0,0.0);
         for light in w.get_point_lights() {
             let in_shadow = World::is_shadowed(w, &comps.over_point, light);
@@ -62,10 +62,10 @@ impl World {
         color
     }
 
-    pub fn intersect_world(w: &World, r: &Ray) -> IntersectionList<Sphere> {
-        let mut result: IntersectionList<Sphere> = IntersectionList::create_empty();
+    pub fn intersect_world(w: &World, r: &Ray) -> IntersectionList {
+        let mut result: IntersectionList = IntersectionList::create_empty();
         for s in w.get_objects() {
-            let xs = Sphere::intersect(s, r);
+            let xs = <dyn Shape>::intersect(s, r);
             result = IntersectionList::merge(result, xs);
         }
         result
@@ -78,12 +78,12 @@ impl World {
         material.color = Tuples::color(0.8,1.0,0.6);
         material.diffuse = 0.7;
         material.specular = 0.2;
-        Sphere::set_material(&s1, &material);
+        s1.borrow_mut().set_material(&material);
         world.add_object(s1);
         
         let s2 = Sphere::new();
         let transform = Matrix::scale(0.5, 0.5, 0.5);
-        Sphere::set_transform(&s2, &transform);
+        s2.borrow_mut().set_transform(&transform);
         world.add_object(s2);
 
         let p = Tuples::point(-10.0,10.0,-10.0);
@@ -94,7 +94,7 @@ impl World {
         world
     }
 
-    pub fn add_object(&mut self, sphere: Rc<RefCell<Sphere>>) {
+    pub fn add_object(&mut self, sphere: Rc<RefCell<dyn Shape>>) {
         let _ = &self.objects.push(sphere);
     }
 
@@ -106,7 +106,7 @@ impl World {
         self.point_lights = vec![];
     }
 
-    pub fn get_objects(&self) -> &Vec<Rc<RefCell<Sphere>>> {
+    pub fn get_objects(&self) -> &Vec<Rc<RefCell<dyn Shape>>> {
         &self.objects
     }
 
