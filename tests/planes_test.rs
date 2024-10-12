@@ -265,7 +265,7 @@ fn check_vec(world: &mut RaysWorld, matches: &[String]) {
     let r = world.tuple.get(&matches[0]).unwrap();
     let v = parse_values_f64(&matches[1]);
     let p = Tuples::vector(v[0], v[1], v[2]);
-    assert!(r.is_equal(&p));
+    assert!(r.is_equal(&p), "{:?} {:?}", r, p);
 }
 
 #[then(regex = r"(n) = normalize\((n)\)")]

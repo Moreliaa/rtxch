@@ -3,6 +3,7 @@ use crate::Ray;
 use crate::Tuples;
 use crate::Matrix;
 use crate::Material;
+use std::f64::EPSILON;
 use std::rc::Rc;
 use std::cell::RefCell;
 
@@ -21,7 +22,12 @@ impl Plane {
 
 impl Shape for Plane {
     fn intersect_local(&self, r: &Ray) -> Vec<f64> {
-        vec![]
+        // xz plane -> y up in local space
+        if r.direction().y.abs() < EPSILON {
+            return vec![];
+        }
+        let t = -r.origin().y / r.direction().y;
+        vec![t]
     }
 
     fn set_transform(&mut self, transform: &Matrix) {
@@ -49,8 +55,9 @@ impl Shape for Plane {
         &self.transform_inverse
     }
 
-    fn normal_at_local(&self, p_object_space: &Tuples) -> Tuples {
-        Tuples::vector(1.0,0.0, 0.0)
+    fn normal_at_local(&self, _: &Tuples) -> Tuples {
+        // xz plane -> y up in local space
+        Tuples::vector(0.0,1.0, 0.0)
     }
 
     fn get_type(&self) -> &str {
