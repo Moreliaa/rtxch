@@ -14,8 +14,8 @@ fn main() {
     camera.transform = Matrix::view_transform(&from, &to, &up);
 
     let mut world = World::new();
-    let floor = Sphere::new();
-    floor.borrow_mut().set_transform(&Matrix::scale(10.0,0.01,10.0));
+    let floor = Plane::new();
+    floor.borrow_mut().set_transform(&Matrix::new(4));
     let mut floor_material = Material::material();
     floor_material.color = Tuples::color(1.0,0.9,0.9);
     floor_material.specular = 0.0;
@@ -23,22 +23,22 @@ fn main() {
     floor.borrow_mut().set_material(&floor_material);
     world.add_object(floor);
 
-    let left_wall = Sphere::new();
+    let left_wall = Plane::new();
     left_wall.borrow_mut().set_transform(
         &Matrix::transform_from_trs(
             &Matrix::translate(0.0,0.0,5.0),
             &(Matrix::rotate_y(-PI / 4.0) * Matrix::rotate_x(PI / 2.0)),
-    &Matrix::scale(10.0,0.01,10.0)
+    &Matrix::scale(1.0,1.0,1.0)
     ));
     left_wall.borrow_mut().set_material(&floor_material);
     world.add_object(left_wall);
 
-    let right_wall = Sphere::new();
+    let right_wall = Plane::new();
     right_wall.borrow_mut().set_transform( 
         &Matrix::transform_from_trs(
             &Matrix::translate(0.0,0.0,5.0),
             &(Matrix::rotate_y(PI / 4.0) * Matrix::rotate_x(PI / 2.0)),
-    &Matrix::scale(10.0,0.01,10.0)
+            &Matrix::scale(1.0,1.0,1.0)
     ));
     right_wall.borrow_mut().set_material(&floor_material);
     world.add_object(right_wall);
@@ -62,7 +62,6 @@ fn main() {
     right.borrow_mut().set_material(&right_material);
     world.add_object(right);
 
-    // left tood
     let left = Sphere::new();
     left.borrow_mut().set_transform( 
         &(Matrix::translate(-1.5,0.33,-0.75) * Matrix::scale(0.33,0.33,0.33)));

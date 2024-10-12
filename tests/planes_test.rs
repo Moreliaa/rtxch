@@ -283,7 +283,6 @@ struct RaysWorld {
     inter:  HashMap<String, IntersectionList>,
     matrix: HashMap<String, Matrix>,
     material: HashMap<String, Material>,
-    xs: HashMap<String, Vec<f64>>,
 }
 
 fn main() {
