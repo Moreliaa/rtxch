@@ -1,7 +1,10 @@
 use crate::{utils::is_equal_f64, Tuples};
+use crate::patterns::*;
+use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 pub struct Material {
+    pub pattern: Rc<dyn Pattern>,
     pub color: Tuples,
     pub ambient: f64,
     pub diffuse: f64,
@@ -12,6 +15,7 @@ pub struct Material {
 impl Material {
     pub fn material() -> Material {
         Material {
+            pattern: Rc::new(SingleColorPattern {color: Tuples::color(1.0,1.0,1.0)}),
             color: Tuples::color(1.0,1.0,1.0),
             ambient: 0.1,
             diffuse: 0.9,

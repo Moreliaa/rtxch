@@ -74,3 +74,8 @@ harness = false
 name = "planes"
 path = "tests\\planes_test.rs"
 harness = false
+
+[[test]]
+name = "patterns"
+path = "tests\\patterns_test.rs"
+harness = false
