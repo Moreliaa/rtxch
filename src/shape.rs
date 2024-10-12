@@ -26,7 +26,12 @@ impl dyn Shape {
     }
 
     pub fn normal_at(s: &Rc<RefCell<dyn Shape>>, p: &Tuples) -> Tuples {
-        s.borrow().normal_at_local(p)
+        let inverse_transform = Matrix::inverse(s.borrow().get_transform()).unwrap();
+        let p_object_space = &inverse_transform * p;
+        let n_local = s.borrow().normal_at_local(&p_object_space);
+        let mut n_world = Matrix::transpose(&inverse_transform) * n_local;
+        n_world.w = 0.0; // remove influence from translation
+        n_world.normalize()
     }
 
     pub fn is_equal(a: &Rc<RefCell<dyn Shape>>, b: &Rc<RefCell<dyn Shape>>) -> bool {

@@ -63,13 +63,8 @@ impl Shape for Sphere {
         &self.transform_inverse
     }
 
-    fn normal_at_local(&self, p: &Tuples) -> Tuples {
+    fn normal_at_local(&self, p_object_space: &Tuples) -> Tuples {
         let origin = Tuples::point(0.0,0.0, 0.0);
-        let inverse_transform = Matrix::inverse(self.get_transform()).unwrap();
-        let p_object_space = &inverse_transform * p;
-        let n = Tuples::vector(p_object_space.x - origin.x, p_object_space.y - origin.y, p_object_space.z - origin.z);
-        let mut n_world = Matrix::transpose(&inverse_transform) * n;
-        n_world.w = 0.0; // remove influence from translation
-        n_world.normalize()
+        Tuples::vector(p_object_space.x - origin.x, p_object_space.y - origin.y, p_object_space.z - origin.z)
     }
 }
