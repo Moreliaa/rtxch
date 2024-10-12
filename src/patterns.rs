@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 use crate::Tuples;
+use std::rc::Rc;
 
 pub trait Pattern: Debug {
     fn color_a(&self) -> &Tuples;
@@ -10,6 +11,12 @@ pub trait Pattern: Debug {
 #[derive(Debug, Clone)]
 pub struct SingleColorPattern {
     pub color: Tuples,
+}
+
+impl SingleColorPattern {
+    pub fn new(color: Tuples) -> Rc<SingleColorPattern> {
+        Rc::new(SingleColorPattern { color })
+    }
 }
 
 impl Pattern for SingleColorPattern {
@@ -31,8 +38,8 @@ pub struct StripePattern {
 }
 
 impl StripePattern {
-    pub fn new(a: Tuples, b: Tuples) -> StripePattern {
-        StripePattern { a, b }
+    pub fn new(a: Tuples, b: Tuples) -> Rc<StripePattern> {
+        Rc::new(StripePattern { a, b })
     }
 }
 

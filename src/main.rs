@@ -17,7 +17,7 @@ fn main() {
     let floor = Plane::new();
     floor.borrow_mut().set_transform(&Matrix::new(4));
     let mut floor_material = Material::material();
-    floor_material.color = Tuples::color(1.0,0.9,0.9);
+    floor_material.pattern = SingleColorPattern::new(Tuples::color(1.0,0.9,0.9));
     floor_material.specular = 0.0;
     floor_material.ambient = 0.3;
     floor.borrow_mut().set_material(&floor_material);
@@ -46,7 +46,7 @@ fn main() {
     let middle = Sphere::new();
     middle.borrow_mut().set_transform(&Matrix::translate(-0.5,1.0,0.5));
     let mut middle_material = Material::material();
-    middle_material.color = Tuples::color(0.1,1.0,0.5);
+    middle_material.pattern = StripePattern::new(Tuples::color(0.1,1.0,0.5), Tuples::color(1.0,0.5,0.5));
     middle_material.diffuse = 0.7;
     middle_material.specular = 0.3;
     middle.borrow_mut().set_material(&middle_material);
@@ -56,7 +56,7 @@ fn main() {
     right.borrow_mut().set_transform(
         &(Matrix::translate(1.5,0.5,-0.5) * Matrix::scale(0.5,0.5,0.5)));
     let mut right_material = Material::material();
-    right_material.color = Tuples::color(0.5,1.0,0.1);
+    right_material.pattern = SingleColorPattern::new(Tuples::color(0.5,1.0,0.1));
     right_material.diffuse = 0.7;
     right_material.specular = 0.3;
     right.borrow_mut().set_material(&right_material);
@@ -66,7 +66,7 @@ fn main() {
     left.borrow_mut().set_transform( 
         &(Matrix::translate(-1.5,0.33,-0.75) * Matrix::scale(0.33,0.33,0.33)));
     let mut left_material = Material::material();
-    left_material.color = Tuples::color(1.0,0.8,0.1);
+    left_material.pattern = SingleColorPattern::new(Tuples::color(1.0,0.8,0.1));
     left_material.diffuse = 0.7;
     left_material.specular = 0.3;
     left.borrow_mut().set_material(&left_material);

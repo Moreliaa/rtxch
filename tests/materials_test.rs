@@ -29,8 +29,7 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let o = world.tuple.get(&v[0].to_string()).unwrap();
             let d = world.tuple.get(&v[1].to_string()).unwrap();
-            let sp = StripePattern::new(o.clone(), d.clone());
-            world.patterns.insert(t, Rc::new(sp));
+            world.patterns.insert(t, StripePattern::new(o.clone(), d.clone()));
         },
         "point" => {
             let v = parse_values_f64(&matches[2]);
@@ -172,7 +171,7 @@ fn check_prop(world: &mut MaterialsWorld, matches: &[String]) {
         "color" => {
             let i = world.material.get(&matches[0]).unwrap();
             let target = world.tuple.get(&matches[2]).unwrap();
-            assert!(i.color.is_equal(target));
+            assert!(i.pattern.color_a().is_equal(target));
         },
         "ambient" => {
             let i = world.material.get(&matches[0]).unwrap();

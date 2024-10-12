@@ -156,7 +156,7 @@ fn check_prop(world: &mut RaysWorld, matches: &[String]) {
     "color" => {
         let i = world.material.get(&matches[0]).unwrap();
         let target = world.tuple.get(&matches[2]).unwrap();
-        assert!(i.color.is_equal(target));
+        assert!(i.pattern.color_a().is_equal(target));
     },
     "ambient" => {
         let i = world.material.get(&matches[0]).unwrap();
@@ -213,7 +213,7 @@ fn check_sub_prop(world: &mut RaysWorld, matches: &[String]) {
     "color" => {
         let i = world.material.get(&matches[0]).unwrap();
         let target = world.tuple.get(&matches[2]).unwrap();
-        assert!(i.color.is_equal(target));
+        assert!(i.pattern.color_a().is_equal(target));
     },
     "ambient" => {
         let i = world.material.get(&matches[0]).unwrap();

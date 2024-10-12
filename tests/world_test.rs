@@ -27,7 +27,7 @@ fn given_item(world: &mut WorldWorld, matches: &[String]) {
 fn sphere1(world: &mut WorldWorld) {
     let sphere = Sphere::new();
     let mut material = Material::material();
-    material.color = Tuples::color(0.8,1.0,0.6);
+    material.pattern = SingleColorPattern::new(Tuples::color(0.8,1.0,0.6));
     material.diffuse = 0.7;
     material.specular = 0.2;
     sphere.borrow_mut().set_material(&material);
@@ -210,7 +210,7 @@ fn check_shadow(world: &mut WorldWorld, matches: &[String]) {
 fn check_inner_color(world: &mut WorldWorld, _: &[String]) {
     let sphere = world.sphere.get(&"inner".to_string()).unwrap();
     let c = world.tuple.get(&"c".to_string()).unwrap();
-    assert!(sphere.borrow().get_material().color.is_equal(c));
+    assert!(sphere.borrow().get_material().pattern.color_a().is_equal(c));
 }
 
 #[then(regex = r"(comps)\.(t|object|point|eyev|normalv|inside) = (.+)")]

@@ -29,8 +29,7 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let o = world.tuple.get(&v[0].to_string()).unwrap();
             let d = world.tuple.get(&v[1].to_string()).unwrap();
-            let sp = StripePattern::new(o.clone(), d.clone());
-            world.patterns.insert(t, Rc::new(RefCell::new(sp)));
+            world.patterns.insert(t, StripePattern::new(o.clone(), d.clone()));
         },
         "point" => {
             let v = parse_values_f64(&matches[2]);
@@ -124,7 +123,7 @@ fn check_color_at(world: &mut MaterialsWorld, matches: &[String]) {
     let pattern = world.patterns.get(&matches[0]).unwrap();
     let val = parse_values_f64(&matches[1]);
     let point = Tuples::point(val[0],val[1],val[2]);
-    let bound_pattern = pattern.borrow();
+    let bound_pattern = pattern;
     let result = bound_pattern.color_at(&point);
     let target = world.tuple.get(&matches[2]).unwrap();
     assert!(result.is_equal(target));
@@ -138,12 +137,12 @@ fn check_prop(world: &mut MaterialsWorld, matches: &[String]) {
     
     match prop {
         "a" => {
-            let prop = pattern.borrow().color_a().clone();
+            let prop = pattern.color_a().clone();
             let target = world.tuple.get(&matches[2]).unwrap();
             assert!(prop.is_equal(target));
         },
         "b" => {
-            let prop = pattern.borrow().color_b().clone();
+            let prop = pattern.color_b().clone();
             let target = world.tuple.get(&matches[2]).unwrap();
             assert!(prop.is_equal(target));
         },
@@ -161,7 +160,7 @@ struct MaterialsWorld {
     material: HashMap<String, Material>,
     plight: HashMap<String, PointLight>,
     in_shadow: bool,
-    patterns: HashMap<String, Rc<RefCell<dyn Pattern>>>,
+    patterns: HashMap<String, Rc<dyn Pattern>>,
 }
 
 fn main() {
