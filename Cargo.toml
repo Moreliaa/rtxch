@@ -69,3 +69,8 @@ harness = false
 name = "camera"
 path = "tests\\camera_test.rs"
 harness = false
+
+[[test]]
+name = "planes"
+path = "tests\\planes_test.rs"
+harness = false
