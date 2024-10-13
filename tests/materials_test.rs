@@ -171,7 +171,7 @@ fn check_prop(world: &mut MaterialsWorld, matches: &[String]) {
         "color" => {
             let i = world.material.get(&matches[0]).unwrap();
             let target = world.tuple.get(&matches[2]).unwrap();
-            assert!(i.pattern.color_a().is_equal(target));
+            assert!(i.pattern.borrow().color_a().is_equal(target));
         },
         "ambient" => {
             let i = world.material.get(&matches[0]).unwrap();
@@ -207,7 +207,7 @@ struct MaterialsWorld {
     material: HashMap<String, Material>,
     plight: HashMap<String, PointLight>,
     in_shadow: bool,
-    patterns: HashMap<String, Rc<dyn Pattern>>,
+    patterns: HashMap<String, Rc<RefCell<dyn Pattern>>>,
 }
 
 fn main() {

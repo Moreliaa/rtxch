@@ -29,3 +29,26 @@ Scenario: A stripe pattern alternates in x
     And color_at(pattern, point(-0.1, 0, 0)) = black
     And color_at(pattern, point(-1, 0, 0)) = black
     And color_at(pattern, point(-1.1, 0, 0)) = white
+
+Scenario: Stripes with an object transformation
+  Given object ← sphere()
+    And scale ← scaling(2, 2, 2)
+    And set_transform(object, scale)
+    And pattern ← stripe_pattern(white, black)
+  Then color_at_object(pattern, object, point(1.5, 0, 0)) = white
+
+Scenario: Stripes with a pattern transformation
+  Given object ← sphere()
+    And scale ← scaling(2, 2, 2)
+    And pattern ← stripe_pattern(white, black)
+    And set_pattern_transform(pattern, scale)
+  Then color_at_object(pattern, object, point(1.5, 0, 0)) = white
+
+Scenario: Stripes with both an object and a pattern transformation
+  Given object ← sphere()
+    And scale ← scaling(2, 2, 2)
+    And set_transform(object, scale)
+    And pattern ← stripe_pattern(white, black)
+    And trans ← translation(0.5, 0, 0)
+    And set_pattern_transform(pattern, trans)
+  Then color_at_object(pattern, object, point(2.5, 0, 0)) = white

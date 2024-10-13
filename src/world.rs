@@ -76,7 +76,7 @@ impl World {
         let mut world = World::new();
         let s1 = Sphere::new();
         let mut material = Material::material();
-        material.pattern = Rc::new(SingleColorPattern {color: Tuples::color(0.8,1.0,0.6)});
+        material.pattern =SingleColorPattern::new(Tuples::color(0.8,1.0,0.6));
         material.diffuse = 0.7;
         material.specular = 0.2;
         s1.borrow_mut().set_material(&material);

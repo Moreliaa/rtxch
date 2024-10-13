@@ -17,7 +17,7 @@ fn main() {
     let floor = Plane::new();
     floor.borrow_mut().set_transform(&Matrix::new(4));
     let mut floor_material = Material::material();
-    floor_material.pattern = SingleColorPattern::new(Tuples::color(1.0,0.9,0.9));
+    floor_material.pattern = StripePattern::new(Tuples::color(1.0,0.9,0.9), Tuples::color(0.2,0.2,0.2));
     floor_material.specular = 0.0;
     floor_material.ambient = 0.3;
     floor.borrow_mut().set_material(&floor_material);
