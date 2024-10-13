@@ -99,7 +99,8 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
             let position = world.tuple.get(&v[2].to_string()).unwrap();
             let eyev = world.tuple.get(&v[3].to_string()).unwrap();
             let normalv = world.tuple.get(&v[4].to_string()).unwrap();
-            world.tuple.insert(t, lighting(m, pl, position, eyev, normalv, world.in_shadow));
+            let obj: Rc<RefCell<dyn Shape>> = Sphere::new();
+            world.tuple.insert(t, lighting(m, &obj, pl, position, eyev, normalv, world.in_shadow));
         },
         _ => panic!("{func} not implemented")
     }

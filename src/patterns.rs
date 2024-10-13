@@ -9,8 +9,13 @@ pub trait Pattern: Debug {
     fn color_a(&self) -> &Tuples;
     fn color_b(&self) -> &Tuples;
     fn color_at(&self, point: &Tuples) -> &Tuples;
-    fn color_at_object(&self, object: &Rc<RefCell<dyn Shape>>, point: &Tuples) -> &Tuples;
+    fn color_at_object(&self, object: &Rc<RefCell<dyn Shape>>, point_world: &Tuples) -> &Tuples {
+        let point_object = object.borrow().get_transform_inverse() * point_world;
+        let point_pattern = self.get_transform_inverse() * &point_object;
+        self.color_at(&point_pattern)
+    }
     fn get_transform(&self) -> &Matrix;
+    fn get_transform_inverse(&self) -> &Matrix;
     fn set_transform(&mut self, mat: Matrix);
 }
 
@@ -18,11 +23,12 @@ pub trait Pattern: Debug {
 pub struct SingleColorPattern {
     pub color: Tuples,
     transform: Matrix,
+    transform_inverse: Matrix,
 }
 
 impl SingleColorPattern {
     pub fn new(color: Tuples) -> Rc<RefCell<SingleColorPattern>> {
-        Rc::new(RefCell::new(SingleColorPattern { color, transform: Matrix::new(4) }))
+        Rc::new(RefCell::new(SingleColorPattern { color, transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
     }
 }
 
@@ -35,15 +41,16 @@ impl Pattern for SingleColorPattern {
     }
     fn color_at(&self, _: &Tuples) -> &Tuples {
         &self.color
-    }   
-    fn color_at_object(&self, _: &Rc<RefCell<dyn Shape>>, _: &Tuples) -> &Tuples {
-        &self.color
     }
     fn get_transform(&self) -> &Matrix {
         &self.transform
     }
+    fn get_transform_inverse(&self) -> &Matrix {
+        &self.transform_inverse
+    }
     fn set_transform(&mut self, mat: Matrix) {
         self.transform = mat;
+        self.transform_inverse = Matrix::inverse(&self.transform).unwrap();
     }
 }
 
@@ -52,11 +59,12 @@ pub struct StripePattern {
     pub a: Tuples,
     pub b: Tuples,
     transform: Matrix,
+    transform_inverse: Matrix,
 }
 
 impl StripePattern {
     pub fn new(a: Tuples, b: Tuples) -> Rc<RefCell<StripePattern>> {
-        Rc::new(RefCell::new(StripePattern { a, b, transform: Matrix::new(4) }))
+        Rc::new(RefCell::new(StripePattern { a, b, transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
     }
 }
 
@@ -74,13 +82,14 @@ impl Pattern for StripePattern {
             &self.b
         }
     }
-    fn color_at_object(&self, object: &Rc<RefCell<dyn Shape>>, point: &Tuples) -> &Tuples {
-        &self.b
-    }
     fn get_transform(&self) -> &Matrix {
         &self.transform
     }
+    fn get_transform_inverse(&self) -> &Matrix {
+        &self.transform_inverse
+    }
     fn set_transform(&mut self, mat: Matrix) {
         self.transform = mat;
+        self.transform_inverse = Matrix::inverse(&self.transform).unwrap();
     }
 }

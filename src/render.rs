@@ -1,7 +1,9 @@
 use crate::*;
+use std::rc::Rc;
+use std::cell::RefCell;
 
-pub fn lighting(material: &Material, point_light: &PointLight, pos: &Tuples, eye_v: &Tuples, normal_v: &Tuples, in_shadow: bool) -> Tuples {
-    let eff_color = material.pattern.borrow().color_at(pos).clone().multiply(point_light.intensity());
+pub fn lighting(material: &Material, object: &Rc<RefCell<dyn Shape>>, point_light: &PointLight, pos: &Tuples, eye_v: &Tuples, normal_v: &Tuples, in_shadow: bool) -> Tuples {
+    let eff_color = material.pattern.borrow().color_at_object(object, pos).clone().multiply(point_light.intensity());
     let mut ambient = eff_color.clone().scale(material.ambient);
     if in_shadow {
         return ambient;

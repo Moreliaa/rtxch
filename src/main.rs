@@ -47,6 +47,12 @@ fn main() {
     middle.borrow_mut().set_transform(&Matrix::translate(-0.5,1.0,0.5));
     let mut middle_material = Material::material();
     middle_material.pattern = StripePattern::new(Tuples::color(0.1,1.0,0.5), Tuples::color(1.0,0.5,0.5));
+    middle_material.pattern.borrow_mut().set_transform(
+        Matrix::transform_from_trs(
+            &Matrix::translate(0.0,0.0,0.0),
+            &(Matrix::rotate_y(PI / 4.0) * Matrix::rotate_x(PI / 2.0)),
+            &Matrix::scale(0.5,0.5,0.5)
+    ));
     middle_material.diffuse = 0.7;
     middle_material.specular = 0.3;
     middle.borrow_mut().set_material(&middle_material);

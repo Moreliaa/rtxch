@@ -55,7 +55,7 @@ impl World {
         let mut color = Tuples::color(0.0,0.0,0.0);
         for light in w.get_point_lights() {
             let in_shadow = World::is_shadowed(w, &comps.over_point, light);
-            let result = render::lighting(comps.object.borrow().get_material(), light,
+            let result = render::lighting(comps.object.borrow().get_material(), &comps.object, light,
             &comps.point, &comps.eye_v, &comps.normal_v, in_shadow);
             color.add(&result);
         }
