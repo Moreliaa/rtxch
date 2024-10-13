@@ -7,7 +7,7 @@ use rtxch_lib::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-#[given(regex = r"(.+) ← (point|vector|ray|test_pattern|stripe_pattern|gradient_pattern|ring_pattern|sphere|intersect|translation|scaling|normal_at|rotation_z|material|color|point_light)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|test_pattern|stripe_pattern|checkers_pattern|gradient_pattern|ring_pattern|sphere|intersect|translation|scaling|normal_at|rotation_z|material|color|point_light)\((.*)\)")]
 fn given_item(world: &mut MaterialsWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -27,6 +27,12 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
     match func {
         "test_pattern" => {
             world.patterns.insert(t, TestPattern::new());
+        },
+        "checkers_pattern" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let o = world.tuple.get(&v[0].to_string()).unwrap();
+            let d = world.tuple.get(&v[1].to_string()).unwrap();
+            world.patterns.insert(t, CheckersPattern::new(o.clone(), d.clone()));
         },
         "stripe_pattern" => {
             let v: Vec<&str> = matches[2].split(", ").collect();

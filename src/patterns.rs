@@ -212,3 +212,41 @@ impl Pattern for RingPattern {
         self.transform_inverse = Matrix::inverse(&self.transform).unwrap();
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct CheckersPattern {
+    pub a: Tuples,
+    pub b: Tuples,
+    transform: Matrix,
+    transform_inverse: Matrix,
+}
+
+impl CheckersPattern {
+    pub fn new(a: Tuples, b: Tuples) -> Rc<RefCell<CheckersPattern>> {
+        Rc::new(RefCell::new(CheckersPattern { a, b, transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
+    }
+}
+
+impl Pattern for CheckersPattern {
+    fn color_a(&self) -> &Tuples {
+        &self.a
+    }
+    fn color_b(&self) -> &Tuples {
+        &self.b
+    }
+    fn color_at(&self, point: &Tuples) -> Tuples {
+        // should include point.y.floor() but breaks xz planes
+        let dist = (point.x.floor() + point.z.floor()) as i32;
+        if dist % 2 == 0 { self.a.clone() } else { self.b.clone() }
+    }
+    fn get_transform(&self) -> &Matrix {
+        &self.transform
+    }
+    fn get_transform_inverse(&self) -> &Matrix {
+        &self.transform_inverse
+    }
+    fn set_transform(&mut self, mat: Matrix) {
+        self.transform = mat;
+        self.transform_inverse = Matrix::inverse(&self.transform).unwrap();
+    }
+}

@@ -106,3 +106,21 @@ Scenario: A pattern with both an object and a pattern transformation
     And set_pattern_transform(pattern, trans)
     And c ← color(0.75, 0.5, 0.25)
   Then color_at_object(pattern, shape, point(2.5, 3, 3.5)) = c
+
+Scenario: Checkers should repeat in x
+  Given pattern ← checkers_pattern(white, black)
+  Then color_at(pattern, point(0, 0, 0)) = white
+    And color_at(pattern, point(0.99, 0, 0)) = white
+    And color_at(pattern, point(1.01, 0, 0)) = black
+
+Scenario: Checkers should repeat in y
+  Given pattern ← checkers_pattern(white, black)
+  Then color_at(pattern, point(0, 0, 0)) = white
+    And color_at(pattern, point(0, 0.99, 0)) = white
+    And color_at(pattern, point(0, 1.01, 0)) = black
+
+Scenario: Checkers should repeat in z
+  Given pattern ← checkers_pattern(white, black)
+  Then color_at(pattern, point(0, 0, 0)) = white
+    And color_at(pattern, point(0, 0, 0.99)) = white
+    And color_at(pattern, point(0, 0, 1.01)) = black
