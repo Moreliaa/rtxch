@@ -154,7 +154,12 @@ impl Pattern for GradientPattern {
     }
     fn color_at(&self, point: &Tuples) -> Tuples {
         let x = point.x.abs();
-        let f = x - x.floor();
+        let floored = x.floor();
+        let reverse = floored as i32 % 2 != 0;
+        let mut f = x - x.floor();
+        if reverse {
+            f = 1.0 - f;
+        }
         let grad = self.color_distance.clone().scale(f);
         self.a.clone().add(&grad)
     }
