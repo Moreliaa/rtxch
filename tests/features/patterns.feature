@@ -62,3 +62,47 @@ Scenario: A gradient linearly interpolates between colors
     And color_at(pattern, point(0.25, 0, 0)) = c1
     And color_at(pattern, point(0.5, 0, 0)) = c2
     And color_at(pattern, point(0.75, 0, 0)) = c3
+
+Scenario: A ring should extend in both x and z
+  Given pattern ← ring_pattern(white, black)
+  Then color_at(pattern, point(0, 0, 0)) = white
+    And color_at(pattern, point(1, 0, 0)) = black
+    And color_at(pattern, point(0, 0, 1)) = black
+    # 0.708 = just slightly more than √2/2
+    And color_at(pattern, point(0.708, 0, 0.708)) = black
+
+Scenario: The default pattern transformation
+  Given pattern ← test_pattern(white, black)
+  Then pattern.transform = identity_matrix
+
+Scenario: Assigning a transformation
+  Given pattern ← test_pattern(white, black)
+    And trans ← translation(1, 2, 3)
+  When set_pattern_transform(pattern, trans)
+  Then pattern.transform = trans
+
+Scenario: A pattern with an object transformation
+  Given shape ← sphere()
+    And scale ← scaling(2, 2, 2)
+    And set_transform(shape, scale)
+    And pattern ← test_pattern(white, black)
+    And c ← color(1, 1.5, 2)
+  Then color_at_object(pattern, shape, point(2, 3, 4)) = c
+
+Scenario: A pattern with a pattern transformation
+  Given shape ← sphere()
+    And scale ← scaling(2, 2, 2)
+    And pattern ← test_pattern(white, black)
+    And set_pattern_transform(pattern, scale)
+    And c ← color(1, 1.5, 2)
+  Then color_at_object(pattern, shape, point(2, 3, 4)) = c
+
+Scenario: A pattern with both an object and a pattern transformation
+  Given shape ← sphere()
+    And scale ← scaling(2, 2, 2)
+    And set_transform(shape, scale)
+    And pattern ← test_pattern(white, black)
+    And trans ← translation(0.5, 1, 1.5)
+    And set_pattern_transform(pattern, trans)
+    And c ← color(0.75, 0.5, 0.25)
+  Then color_at_object(pattern, shape, point(2.5, 3, 3.5)) = c

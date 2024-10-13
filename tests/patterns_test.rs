@@ -7,7 +7,7 @@ use rtxch_lib::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-#[given(regex = r"(.+) ← (point|vector|ray|stripe_pattern|gradient_pattern|sphere|intersect|translation|scaling|normal_at|rotation_z|material|color|point_light)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|test_pattern|stripe_pattern|gradient_pattern|ring_pattern|sphere|intersect|translation|scaling|normal_at|rotation_z|material|color|point_light)\((.*)\)")]
 fn given_item(world: &mut MaterialsWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -25,6 +25,9 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
     let t = matches[0].clone();
     let func = matches[1].as_str();
     match func {
+        "test_pattern" => {
+            world.patterns.insert(t, TestPattern::new());
+        },
         "stripe_pattern" => {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let o = world.tuple.get(&v[0].to_string()).unwrap();
@@ -36,6 +39,12 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
             let o = world.tuple.get(&v[0].to_string()).unwrap();
             let d = world.tuple.get(&v[1].to_string()).unwrap();
             world.patterns.insert(t, GradientPattern::new(o.clone(), d.clone()));
+        },
+        "ring_pattern" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let o = world.tuple.get(&v[0].to_string()).unwrap();
+            let d = world.tuple.get(&v[1].to_string()).unwrap();
+            world.patterns.insert(t, RingPattern::new(o.clone(), d.clone()));
         },
         "point" => {
             let v = parse_values_f64(&matches[2]);
@@ -136,7 +145,7 @@ fn check_color_at(world: &mut MaterialsWorld, matches: &[String]) {
     assert!(result.is_equal(target));
 }
 
-#[then(regex = r"color_at_object\((pattern), (object), point\((.+)\)\) = (white|black)")]
+#[then(regex = r"color_at_object\((pattern), (object|shape), point\((.+)\)\) = (.+)")]
 fn check_color_at_obj(world: &mut MaterialsWorld, matches: &[String]) {
     let obj = world.sphere.get(&matches[1]).unwrap();
     let pattern = world.patterns.get(&matches[0]).unwrap();
@@ -149,7 +158,7 @@ fn check_color_at_obj(world: &mut MaterialsWorld, matches: &[String]) {
 }
 
 
-#[then(regex = r"(pattern)\.(a|b) = (.+)")]
+#[then(regex = r"(pattern)\.(a|b|transform) = (.+)")]
 fn check_prop(world: &mut MaterialsWorld, matches: &[String]) {
     let prop = matches[1].as_str();
     let pattern = world.patterns.get(&matches[0]).unwrap();
@@ -164,6 +173,19 @@ fn check_prop(world: &mut MaterialsWorld, matches: &[String]) {
             let prop = pattern.borrow().color_b().clone();
             let target = world.tuple.get(&matches[2]).unwrap();
             assert!(prop.is_equal(target));
+        },
+        "transform" => {
+            let ident = match matches[2].as_str() {
+                "identity_matrix" => {
+                    Matrix::new(4)
+                },
+                _ => {
+                    world.matrix.get(&matches[2].to_string()).unwrap().clone()
+                },
+            };
+            let borrowed = pattern.borrow();
+            let target = borrowed.get_transform();
+            assert!(ident.is_equal(&target));
         },
         _ => panic!()
     }
@@ -182,6 +204,7 @@ fn given_set_transform(world: &mut MaterialsWorld, matches: &[String]) {
 }
 
 #[given(regex = r"set_pattern_transform\((.+)\)")]
+#[when(regex = r"set_pattern_transform\((.+)\)")]
 fn given_set_pattern_transform(world: &mut MaterialsWorld, matches: &[String]) {
     let v: Vec<&str> = matches[0].split(", ").collect();
     let s = world.patterns.get(v[0]).unwrap();

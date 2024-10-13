@@ -7,7 +7,7 @@ use rtxch_lib::*;
 use utils::deg_to_rad;
 
 fn main() {
-    let mut camera = Camera::new(500, 500, deg_to_rad(60.0));
+    let mut camera = Camera::new(100, 100, deg_to_rad(60.0));
     let from = Tuples::point(0.0,1.5, -5.0);
     let to = Tuples::point(0.0,1.0,0.0);
     let up = Tuples::vector(0.0,1.0,0.0);
@@ -63,11 +63,6 @@ fn main() {
         &(Matrix::translate(1.5,0.5,-0.5) * Matrix::scale(0.5,0.5,0.5)));
     let mut right_material = Material::material();
     right_material.pattern = GradientPattern::new(Tuples::color(0.5,1.0,0.1), Tuples::color(1.0,0.5,1.0));
-    right_material.pattern.borrow_mut().set_transform(
-        Matrix::new(4)
-        //Matrix::rotate_y(PI/ 2.0) *
-//    Matrix::scale(5.0, 5.0, 5.0)
-);
     right_material.diffuse = 0.7;
     right_material.specular = 0.3;
     right.borrow_mut().set_material(&right_material);
@@ -77,7 +72,7 @@ fn main() {
     left.borrow_mut().set_transform( 
         &(Matrix::translate(-1.5,0.33,-0.75) * Matrix::scale(0.33,0.33,0.33)));
     let mut left_material = Material::material();
-    left_material.pattern = SingleColorPattern::new(Tuples::color(1.0,0.8,0.1));
+    left_material.pattern = RingPattern::new(Tuples::color(1.0,1.0,1.0), Tuples::color(0.2,0.8,0.1));
     left_material.diffuse = 0.7;
     left_material.specular = 0.3;
     left.borrow_mut().set_material(&left_material);

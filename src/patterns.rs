@@ -20,6 +20,41 @@ pub trait Pattern: Debug {
 }
 
 #[derive(Debug, Clone)]
+pub struct TestPattern {
+    color: Tuples,
+    transform: Matrix,
+    transform_inverse: Matrix,
+}
+
+impl TestPattern {
+    pub fn new() -> Rc<RefCell<TestPattern>> {
+        Rc::new(RefCell::new(TestPattern { color: Tuples::color(0.0,0.0,0.0), transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
+    }
+}
+
+impl Pattern for TestPattern {
+    fn color_a(&self) -> &Tuples {
+        &self.color
+    }
+    fn color_b(&self) -> &Tuples {
+        &self.color
+    }
+    fn color_at(&self, position: &Tuples) -> Tuples {
+        Tuples::color(position.x,position.y,position.z)
+    }
+    fn get_transform(&self) -> &Matrix {
+        &self.transform
+    }
+    fn get_transform_inverse(&self) -> &Matrix {
+        &self.transform_inverse
+    }
+    fn set_transform(&mut self, mat: Matrix) {
+        self.transform = mat;
+        self.transform_inverse = Matrix::inverse(&self.transform).unwrap();
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct SingleColorPattern {
     pub color: Tuples,
     transform: Matrix,
@@ -122,6 +157,44 @@ impl Pattern for GradientPattern {
         let f = x - x.floor();
         let grad = self.color_distance.clone().scale(f);
         self.a.clone().add(&grad)
+    }
+    fn get_transform(&self) -> &Matrix {
+        &self.transform
+    }
+    fn get_transform_inverse(&self) -> &Matrix {
+        &self.transform_inverse
+    }
+    fn set_transform(&mut self, mat: Matrix) {
+        self.transform = mat;
+        self.transform_inverse = Matrix::inverse(&self.transform).unwrap();
+    }
+}
+
+
+#[derive(Debug, Clone)]
+pub struct RingPattern {
+    pub a: Tuples,
+    pub b: Tuples,
+    transform: Matrix,
+    transform_inverse: Matrix,
+}
+
+impl RingPattern {
+    pub fn new(a: Tuples, b: Tuples) -> Rc<RefCell<RingPattern>> {
+        Rc::new(RefCell::new(RingPattern { a, b, transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
+    }
+}
+
+impl Pattern for RingPattern {
+    fn color_a(&self) -> &Tuples {
+        &self.a
+    }
+    fn color_b(&self) -> &Tuples {
+        &self.b
+    }
+    fn color_at(&self, point: &Tuples) -> Tuples {
+        let dist = (point.x.powf(2.0) + point.z.powf(2.0)).sqrt().floor() as i32;
+        if dist % 2 == 0 { self.a.clone() } else { self.b.clone() }
     }
     fn get_transform(&self) -> &Matrix {
         &self.transform
