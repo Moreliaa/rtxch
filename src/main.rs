@@ -62,7 +62,12 @@ fn main() {
     right.borrow_mut().set_transform(
         &(Matrix::translate(1.5,0.5,-0.5) * Matrix::scale(0.5,0.5,0.5)));
     let mut right_material = Material::material();
-    right_material.pattern = SingleColorPattern::new(Tuples::color(0.5,1.0,0.1));
+    right_material.pattern = GradientPattern::new(Tuples::color(0.5,1.0,0.1), Tuples::color(1.0,0.5,1.0));
+    right_material.pattern.borrow_mut().set_transform(
+        Matrix::new(4)
+        //Matrix::rotate_y(PI/ 2.0) *
+//    Matrix::scale(5.0, 5.0, 5.0)
+);
     right_material.diffuse = 0.7;
     right_material.specular = 0.3;
     right.borrow_mut().set_material(&right_material);

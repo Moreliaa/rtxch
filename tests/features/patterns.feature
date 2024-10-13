@@ -52,3 +52,13 @@ Scenario: Stripes with both an object and a pattern transformation
     And trans ← translation(0.5, 0, 0)
     And set_pattern_transform(pattern, trans)
   Then color_at_object(pattern, object, point(2.5, 0, 0)) = white
+
+Scenario: A gradient linearly interpolates between colors
+  Given pattern ← gradient_pattern(white, black)
+    And c1 ← color(0.75, 0.75, 0.75)
+    And c2 ← color(0.5, 0.5, 0.5)
+    And c3 ← color(0.25, 0.25, 0.25)
+  Then color_at(pattern, point(0, 0, 0)) = white
+    And color_at(pattern, point(0.25, 0, 0)) = c1
+    And color_at(pattern, point(0.5, 0, 0)) = c2
+    And color_at(pattern, point(0.75, 0, 0)) = c3

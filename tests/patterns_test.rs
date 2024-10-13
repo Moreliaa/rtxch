@@ -7,7 +7,7 @@ use rtxch_lib::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-#[given(regex = r"(.+) ← (point|vector|ray|stripe_pattern|sphere|intersect|translation|scaling|normal_at|rotation_z|material|color|point_light)\((.*)\)")]
+#[given(regex = r"(.+) ← (point|vector|ray|stripe_pattern|gradient_pattern|sphere|intersect|translation|scaling|normal_at|rotation_z|material|color|point_light)\((.*)\)")]
 fn given_item(world: &mut MaterialsWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -30,6 +30,12 @@ fn create_item(world: &mut MaterialsWorld, matches: &[String]) {
             let o = world.tuple.get(&v[0].to_string()).unwrap();
             let d = world.tuple.get(&v[1].to_string()).unwrap();
             world.patterns.insert(t, StripePattern::new(o.clone(), d.clone()));
+        },
+        "gradient_pattern" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let o = world.tuple.get(&v[0].to_string()).unwrap();
+            let d = world.tuple.get(&v[1].to_string()).unwrap();
+            world.patterns.insert(t, GradientPattern::new(o.clone(), d.clone()));
         },
         "point" => {
             let v = parse_values_f64(&matches[2]);
@@ -119,7 +125,7 @@ fn check_result(world: &mut MaterialsWorld, matches: &[String]) {
     r.is_equal(&col);
 
 }
-#[then(regex = r"color_at\((pattern), point\((.+)\)\) = (white|black)")]
+#[then(regex = r"color_at\((pattern), point\((.+)\)\) = (.+)")]
 fn check_color_at(world: &mut MaterialsWorld, matches: &[String]) {
     let pattern = world.patterns.get(&matches[0]).unwrap();
     let val = parse_values_f64(&matches[1]);

@@ -26,6 +26,7 @@ pub mod patterns;
 pub use patterns::Pattern;
 pub use patterns::SingleColorPattern;
 pub use patterns::StripePattern;
+pub use patterns::GradientPattern;
 pub mod materials;
 pub use materials::Material;
 pub mod render;
