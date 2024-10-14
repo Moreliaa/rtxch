@@ -7,7 +7,7 @@ use rtxch_lib::*;
 use utils::deg_to_rad;
 
 fn main() {
-    let mut camera = Camera::new(150, 150, deg_to_rad(60.0));
+    let mut camera = Camera::new(500, 500, deg_to_rad(60.0));
     let from = Tuples::point(0.0,1.5, -5.0);
     let to = Tuples::point(0.0,1.0,0.0);
     let up = Tuples::vector(0.0,1.0,0.0);
@@ -18,7 +18,19 @@ fn main() {
     let floor = Plane::new();
     floor.borrow_mut().set_transform(&Matrix::new(4));
     let mut floor_material = Material::material();
-    floor_material.pattern = RadialGradientPattern::new(Tuples::color(1.0,1.0,0.0), Tuples::color(0.0,0.0,1.0));
+    //floor_material.pattern = RadialGradientPattern::new(Tuples::color(1.0,1.0,0.0), Tuples::color(0.0,0.0,1.0));
+    let sub_pattern1 = CheckersPattern::new(Tuples::color(0.8,0.0,0.0), Tuples::color(0.8,0.8,0.0));
+    sub_pattern1.borrow_mut().set_transform(
+        Matrix::scale(0.5,0.5,0.5)
+    );
+    let sub_pattern2 = CheckersPattern::new(Tuples::color(0.0,0.0,1.0), Tuples::color(0.8,0.4,0.3));
+    sub_pattern2.borrow_mut().set_transform(
+        Matrix::scale(0.25,0.25,0.25)
+    );
+    floor_material.pattern = NestedCheckersPattern::new(
+        sub_pattern1,
+        sub_pattern2
+    );
     floor_material.pattern.borrow_mut().set_transform(
         Matrix::scale(0.5,0.5,0.5)
     );
