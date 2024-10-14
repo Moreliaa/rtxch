@@ -63,7 +63,16 @@ fn main() {
     let middle = Sphere::new();
     middle.borrow_mut().set_transform(&Matrix::translate(-0.5,1.0,0.5));
     let mut middle_material = Material::material();
-    middle_material.pattern = CheckersPattern::new(Tuples::color(0.1,1.0,0.5), Tuples::color(1.0,0.5,0.5));
+    let sub_pattern1 = StripePattern::new(Tuples::color(0.1,1.0,0.5), Tuples::color(1.0,0.5,0.5));
+    let sub_pattern2 = StripePattern::new(Tuples::color(0.1,1.0,0.5), Tuples::color(1.0,0.5,0.5));
+    sub_pattern2.borrow_mut().set_transform(
+        Matrix::transform_from_trs(
+            &Matrix::translate(0.0,0.0,0.0),
+             &Matrix::rotate_y(PI / 3.0),
+            &Matrix::scale(1.0,1.0,1.0)
+    ));
+
+    middle_material.pattern = BlendedPattern::new(sub_pattern1, sub_pattern2);
     middle_material.pattern.borrow_mut().set_transform(
         Matrix::transform_from_trs(
             &Matrix::translate(-0.5,1.0,0.5),

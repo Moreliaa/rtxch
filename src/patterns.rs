@@ -347,3 +347,51 @@ impl Pattern for NestedCheckersPattern {
         self.transform_inverse = Matrix::inverse(&self.transform).unwrap();
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct BlendedPattern {
+    pub a: Rc<RefCell<dyn Pattern>>,
+    pub b: Rc<RefCell<dyn Pattern>>,
+    test_color: Tuples,
+    transform: Matrix,
+    transform_inverse: Matrix,
+}
+
+impl BlendedPattern {
+    pub fn new(a: Rc<RefCell<dyn Pattern>>, b: Rc<RefCell<dyn Pattern>>) -> Rc<RefCell<BlendedPattern>> {
+        Rc::new(RefCell::new(BlendedPattern {
+            a: Rc::clone(&a),
+            b: Rc::clone(&b),
+            test_color: Tuples::color(0.0,0.0,0.0),
+            transform: Matrix::new(4),
+            transform_inverse: Matrix::new(4)
+        }))
+    }
+}
+
+impl Pattern for BlendedPattern {
+    fn color_a(&self) -> &Tuples {
+        &self.test_color
+    }
+    fn color_b(&self) -> &Tuples {
+        &self.test_color
+    }
+    fn color_at(&self, point: &Tuples) -> Tuples {
+        // should include point.y.floor() but breaks xz planes
+        let point_sub_pattern = self.a.borrow().get_transform_inverse() * point;
+        let mut color = self.a.borrow().color_at(&point_sub_pattern).clone();
+        let point_sub_pattern = self.b.borrow().get_transform_inverse() * point;
+        let color_b = self.b.borrow().color_at(&point_sub_pattern).clone();
+        color.add(&color_b).scale(0.5)
+    }
+    fn get_transform(&self) -> &Matrix {
+        &self.transform
+    }
+    fn get_transform_inverse(&self) -> &Matrix {
+        &self.transform_inverse
+    }
+    fn set_transform(&mut self, mat: Matrix) {
+        self.transform = mat;
+        self.transform_inverse = Matrix::inverse(&self.transform).unwrap();
+    }
+}
