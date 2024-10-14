@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use crate::utils::perlin_noise;
 use crate::Tuples;
 use crate::Shape;
 use crate::Matrix;
@@ -377,12 +378,54 @@ impl Pattern for BlendedPattern {
         &self.test_color
     }
     fn color_at(&self, point: &Tuples) -> Tuples {
-        // should include point.y.floor() but breaks xz planes
         let point_sub_pattern = self.a.borrow().get_transform_inverse() * point;
         let mut color = self.a.borrow().color_at(&point_sub_pattern).clone();
         let point_sub_pattern = self.b.borrow().get_transform_inverse() * point;
         let color_b = self.b.borrow().color_at(&point_sub_pattern).clone();
         color.add(&color_b).scale(0.5)
+    }
+    fn get_transform(&self) -> &Matrix {
+        &self.transform
+    }
+    fn get_transform_inverse(&self) -> &Matrix {
+        &self.transform_inverse
+    }
+    fn set_transform(&mut self, mat: Matrix) {
+        self.transform = mat;
+        self.transform_inverse = Matrix::inverse(&self.transform).unwrap();
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct PerturbedPattern {
+    pub pattern: Rc<RefCell<dyn Pattern>>,
+    test_color: Tuples,
+    transform: Matrix,
+    transform_inverse: Matrix,
+}
+
+impl PerturbedPattern {
+    pub fn new(pattern: Rc<RefCell<dyn Pattern>>) -> Rc<RefCell<PerturbedPattern>> {
+        Rc::new(RefCell::new(PerturbedPattern {
+            pattern: Rc::clone(&pattern),
+            test_color: Tuples::color(0.0,0.0,0.0),
+            transform: Matrix::new(4),
+            transform_inverse: Matrix::new(4)
+        }))
+    }
+}
+
+impl Pattern for PerturbedPattern {
+    fn color_a(&self) -> &Tuples {
+        &self.test_color
+    }
+    fn color_b(&self) -> &Tuples {
+        &self.test_color
+    }
+    fn color_at(&self, point: &Tuples) -> Tuples {
+        let perturbed_point = perlin_noise(point);
+        let point_sub_pattern = self.pattern.borrow().get_transform_inverse() * &perturbed_point;
+        self.pattern.borrow().color_at(&point_sub_pattern).clone()
     }
     fn get_transform(&self) -> &Matrix {
         &self.transform

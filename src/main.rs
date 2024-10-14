@@ -72,7 +72,8 @@ fn main() {
             &Matrix::scale(1.0,1.0,1.0)
     ));
 
-    middle_material.pattern = BlendedPattern::new(sub_pattern1, sub_pattern2);
+    middle_material.pattern = PerturbedPattern::new(BlendedPattern::new(sub_pattern1, sub_pattern2));
+    //middle_material.pattern = PerturbedPattern::new(sub_pattern1);
     middle_material.pattern.borrow_mut().set_transform(
         Matrix::transform_from_trs(
             &Matrix::translate(-0.5,1.0,0.5),

@@ -33,6 +33,7 @@ pub use patterns::RadialGradientPattern;
 pub use patterns::CheckersPattern;
 pub use patterns::NestedCheckersPattern;
 pub use patterns::BlendedPattern;
+pub use patterns::PerturbedPattern;
 pub mod materials;
 pub use materials::Material;
 pub mod render;
