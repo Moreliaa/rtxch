@@ -2,7 +2,6 @@ use crate::lights::point_light;
 use crate::Intersection;
 use crate::PointLight;
 use crate::Sphere;
-use crate::MAX_REFLECTIONS;
 use std::rc::Rc;
 use std::cell::RefCell;
 use crate::Material;

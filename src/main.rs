@@ -39,6 +39,26 @@ fn main() {
     floor.borrow_mut().set_material(&floor_material);
     world.add_object(floor);
 
+    /*let behind_camera_wall_left = Plane::new();
+    behind_camera_wall_left.borrow_mut().set_transform(
+        &Matrix::transform_from_trs(
+            &Matrix::translate(0.0,0.0,-20.0),
+            &(Matrix::rotate_y(-PI / 4.0) * Matrix::rotate_x(PI / 2.0)),
+    &Matrix::scale(1.0,1.0,1.0)
+    ));
+    behind_camera_wall_left.borrow_mut().set_material(&floor_material);
+    world.add_object(behind_camera_wall_left);
+
+    let behind_camera_wall_right = Plane::new();
+    behind_camera_wall_right.borrow_mut().set_transform( 
+        &Matrix::transform_from_trs(
+            &Matrix::translate(0.0,0.0,-20.0),
+            &(Matrix::rotate_y(PI / 4.0) * Matrix::rotate_x(PI / 2.0)),
+            &Matrix::scale(1.0,1.0,1.0)
+    ));
+    behind_camera_wall_right.borrow_mut().set_material(&floor_material);
+    world.add_object(behind_camera_wall_right);*/
+
 
     let left_wall = Plane::new();
     left_wall.borrow_mut().set_transform(
@@ -87,10 +107,11 @@ fn main() {
 
     let right = Sphere::new();
     right.borrow_mut().set_transform(
-        &(Matrix::translate(1.5,0.5,-0.5) * Matrix::scale(0.5,0.5,0.5)));
+        &(Matrix::translate(1.5,0.5,-0.5) * Matrix::scale(1.2,1.2,1.2)));
     let mut right_material = Material::material();
-    right_material.pattern = GradientPattern::new(Tuples::color(0.5,1.0,0.1), Tuples::color(1.0,0.5,1.0));
+    right_material.pattern = SingleColorPattern::new(Tuples::color(0.1, 0.1, 0.1));
     right_material.diffuse = 0.7;
+    right_material.reflective = 0.1;
     right_material.specular = 0.3;
     right.borrow_mut().set_material(&right_material);
     world.add_object(right);
