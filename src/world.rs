@@ -2,6 +2,7 @@ use crate::lights::point_light;
 use crate::Intersection;
 use crate::PointLight;
 use crate::Sphere;
+use crate::MAX_REFLECTIONS;
 use std::rc::Rc;
 use std::cell::RefCell;
 use crate::Material;
@@ -40,18 +41,18 @@ impl World {
         return false;
     }
 
-    pub fn color_at(w: &World, r: &Ray) -> Tuples {
+    pub fn color_at(w: &World, r: &Ray, remaining: i32) -> Tuples {
         let il = World::intersect_world(w, r);
         let hit = IntersectionList::hit(&il);
         if let Some(i) = hit {
             let comps = Intersection::prep_computations(i, r);
-            return World::shade_hit(w, &comps);
+            return World::shade_hit(w, &comps, remaining);
         } else {
             return Tuples::color(0.0,0.0,0.0);
         }
     }
 
-    pub fn shade_hit(w: &World, comps: &Computations) -> Tuples {
+    pub fn shade_hit(w: &World, comps: &Computations, remaining: i32) -> Tuples {
         let mut color = Tuples::color(0.0,0.0,0.0);
         for light in w.get_point_lights() {
             let in_shadow = World::is_shadowed(w, &comps.over_point, light);
@@ -59,18 +60,21 @@ impl World {
             &comps.point, &comps.eye_v, &comps.normal_v, in_shadow);
             color.add(&surface);
         }
-        let reflected = World::reflected_color(w, comps);
+        let reflected = World::reflected_color(w, comps, remaining);
         color.add(&reflected);
         color
     }
 
-    pub fn reflected_color(w: &World, comps: &Computations) -> Tuples {
+    pub fn reflected_color(w: &World, comps: &Computations, remaining: i32) -> Tuples {
+        if remaining == 0 {
+            return Tuples::color(0.0,0.0,0.0);
+        }
         let reflective = comps.object.borrow().get_material().reflective;
-        if  reflective == 0.0 {
+        if reflective == 0.0 {
             Tuples::color(0.0,0.0,0.0)
         } else {
             let reflected_ray = Ray::new(comps.over_point.clone(), comps.reflect_v.clone());
-            let mut reflected_color = World::color_at(w, &reflected_ray);
+            let mut reflected_color = World::color_at(w, &reflected_ray, remaining - 1);
             reflected_color.scale(reflective)
         }
     }

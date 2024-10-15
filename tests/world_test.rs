@@ -94,7 +94,8 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let w = &world.world;
             let comps = world.comps.get(&v[1].to_string()).unwrap();
-            world.tuple.insert(t, rtxch_lib::World::reflected_color(w, comps));
+            let remaining= if v.len() == 3 { 0 } else { MAX_REFLECTIONS };
+            world.tuple.insert(t, rtxch_lib::World::reflected_color(w, comps, remaining));
         },
         "point" => {
             let v = parse_values_f64(&matches[2]);
@@ -147,14 +148,14 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
         "shade_hit" => {
             let w = &world.world;
             let comps = world.comps.get(&"comps".to_string()).unwrap();
-            let hit = rtxch_lib::World::shade_hit(w, comps);
+            let hit = rtxch_lib::World::shade_hit(w, comps, MAX_REFLECTIONS);
             world.tuple.insert(t, hit);
         },
         "color_at" => {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let w = &world.world;
             let r = world.ray.get(&v[1].to_string()).unwrap();
-            let color = rtxch_lib::World::color_at(w, r);
+            let color = rtxch_lib::World::color_at(w, r, MAX_REFLECTIONS);
             world.tuple.insert(t, color);
         },
         "sphere" => {
@@ -209,9 +210,8 @@ fn then_light(world: &mut WorldWorld, _: &[String]) {
 
 #[then(regex = r"color_at\(w, r\) should terminate successfully")]
 fn check_inf(world: &mut WorldWorld, _: &[String]) {
-    assert!(false);
     let r = world.ray.get(&"r".to_string()).unwrap();
-    let _ = rtxch_lib::World::color_at(&world.world, r);
+    let _ = rtxch_lib::World::color_at(&world.world, r, MAX_REFLECTIONS);
     assert!(true);
 }
 
