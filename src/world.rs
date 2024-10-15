@@ -63,6 +63,15 @@ impl World {
         color
     }
 
+    pub fn reflected_color(w: &World, comps: &Computations) -> Tuples {
+        if comps.object.borrow().get_material().reflective == 0.0 {
+            Tuples::color(0.0,0.0,0.0)
+        } else {
+            let mut color = Tuples::color(0.0,0.5,0.0);
+            color
+        }
+    }
+
     pub fn intersect_world(w: &World, r: &Ray) -> IntersectionList {
         let mut result: IntersectionList = IntersectionList::create_empty();
         for s in w.get_objects() {

@@ -138,7 +138,6 @@ fn check_result(world: &mut MaterialsWorld, matches: &[String]) {
     let col = Tuples::color(val[0], val[1], val[2]);
     let r = world.tuple.get(&"result".to_string()).unwrap();
     r.is_equal(&col);
-
 }
 #[then(regex = r"color_at\((pattern), point\((.+)\)\) = (.+)")]
 fn check_color_at(world: &mut MaterialsWorld, matches: &[String]) {

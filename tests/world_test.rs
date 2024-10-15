@@ -18,7 +18,8 @@ fn given_default_world(world: &mut WorldWorld, _: &[String]) {
     world.world = rtxch_lib::World::default_world();
 }
 
-#[given(regex = r"(.+) ← (point|vector|ray|intersect|translation|scaling|normal_at|rotation_z|color|point_light|sphere|prepare_computations)\((.*)\)$")]
+#[given(regex = r"(.+) ← (reflected_color|point|vector|ray|intersect|translation|scaling|normal_at|rotation_z|color|point_light|sphere|prepare_computations)\((.*)\)$")]
+#[when(regex = r"(.+) ← (reflected_color|point|vector|ray|sphere|intersect|translation|scaling|normal_at|point_light|intersect_world|prepare_computations|shade_hit|color_at)\((.*)\)")]
 fn given_item(world: &mut WorldWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -53,10 +54,24 @@ fn sphere2_alter(world: &mut WorldWorld) {
     world.sphere.insert("s2".to_string(), sphere);
 }
 
+#[then(regex = r"(.+) = color\((.+)\)")]
+fn check_result(world: &mut WorldWorld, matches: &[String]) {
+    let val = parse_values_f64(&matches[1]);
+    let col = Tuples::color(val[0], val[1], val[2]);
+    let r = world.tuple.get(&matches[0].to_string()).unwrap();
+    assert!(r.is_equal(&col));
+}
+
 fn create_item(world: &mut WorldWorld, matches: &[String]) {
     let t = matches[0].clone();
     let func = matches[1].as_str();
     match func {
+        "reflected_color" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let w = &world.world;
+            let comps = world.comps.get(&v[1].to_string()).unwrap();
+            world.tuple.insert(t, rtxch_lib::World::reflected_color(w, comps));
+        },
         "point" => {
             let v = parse_values_f64(&matches[2]);
             let p = Tuples::point(v[0], v[1], v[2]);
@@ -131,11 +146,6 @@ fn add_sphere(world: &mut WorldWorld, matches: &[String]) {
     world.world.add_object(Rc::clone(sphere));
 }
 
-#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|point_light|intersect_world|prepare_computations|shade_hit|color_at)\((.*)\)")]
-fn when_item(world: &mut WorldWorld, matches: &[String]) {
-    create_item(world, matches);
-}
-
 #[given(regex = r"(.+) ← the (first|second) object in w")]
 fn first(world: &mut WorldWorld, matches: &[String]) {
     let idx = if matches[1] == "first" { 0 } else { 1 };
@@ -185,14 +195,6 @@ fn contains(world: &mut WorldWorld, matches: &[String]) {
         }
     }
     assert!(result);
-}
-
-#[then(regex = r"c = color\((.+)\)")]
-fn check_color(world: &mut WorldWorld, matches: &[String]) {
-    let values = parse_values_f64(&matches[0]);
-    let target_color = Tuples::color(values[0], values[1],values[2]);
-    let c = world.tuple.get(&"c".to_string()).unwrap();
-    assert!(c.is_equal(&target_color), "{:?}", c);
 }
 
 #[then(regex = r"is_shadowed\(w, p\) is (true|false)")]

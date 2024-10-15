@@ -124,7 +124,9 @@ Scenario: shade_hit() is given an intersection in shadow
 
 Scenario: The reflected color for a nonreflective material
   Given w ← default_world()
-    And r ← ray(point(0, 0, 0), vector(0, 0, 1))
+    And rayp ← point(0, 0, 0)
+    And rayv ← vector(0, 0, 1)
+    And r ← ray(rayp, rayv)
     And shape ← the second object in w
     And shape.material.ambient ← 1
     And i ← intersection(1, shape)
