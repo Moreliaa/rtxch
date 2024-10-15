@@ -31,8 +31,8 @@ pub fn color_to_256(input: f64) -> u8 {
 }
 
 pub fn perlin_noise(point: &Tuples) -> Tuples {
-    let octaves = 6;
-    let amplitude = 1.0;
+    let octaves = 2;
+    let amplitude = 5.0;
     let frequency = 4.0;
     let persistence = 1.0;
     let lacunarity = 2.0;

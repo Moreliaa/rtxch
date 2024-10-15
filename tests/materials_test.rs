@@ -144,7 +144,7 @@ fn set_ambient(world: &mut MaterialsWorld, matches: &[String]) {
     
 }
 
-#[then(regex = r"([^\[\]]+)\.(origin|direction|t|object|count|position|intensity|color|ambient|diffuse|specular|shininess) = (.+)")]
+#[then(regex = r"([^\[\]]+)\.(origin|reflective|transparency|refractive_index|direction|t|object|count|position|intensity|color|ambient|diffuse|specular|shininess) = (.+)")]
 fn check_prop(world: &mut MaterialsWorld, matches: &[String]) {
     let prop = matches[1].as_str();
     
@@ -193,6 +193,21 @@ fn check_prop(world: &mut MaterialsWorld, matches: &[String]) {
             let i = world.material.get(&matches[0]).unwrap();
             let target = &matches[2].parse::<f64>().unwrap();
             assert!(is_equal_f64(i.shininess, *target));
+        },
+        "reflective" => {
+            let i = world.material.get(&matches[0]).unwrap();
+            let target = &matches[2].parse::<f64>().unwrap();
+            assert!(is_equal_f64(i.reflective, *target));
+        },
+        "transparency" => {
+            let i = world.material.get(&matches[0]).unwrap();
+            let target = &matches[2].parse::<f64>().unwrap();
+            assert!(is_equal_f64(i.transparency, *target));
+        },
+        "refractive_index" => {
+            let i = world.material.get(&matches[0]).unwrap();
+            let target = &matches[2].parse::<f64>().unwrap();
+            assert!(is_equal_f64(i.refractive_index, *target));
         },
         _ => panic!()
     }
