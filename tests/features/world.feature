@@ -154,7 +154,9 @@ Scenario: shade_hit() with a reflective material
       | material.reflective | 0.5                   |
       | transform           | translation(0, -1, 0) |
     And shape is added to w
-    And r ← ray(point(0, 0, -3), vector(0, -0.70711, 0.70711))
+    And rayp ← point(0, 0, -3)
+    And rayv ← vector(0, -0.70711, 0.70711)
+    And r ← ray(rayp, rayv)
     And i ← intersection(1.41421, shape)
   When comps ← prepare_computations(i, r)
     And color ← shade_hit(w, comps)
@@ -162,7 +164,9 @@ Scenario: shade_hit() with a reflective material
 
 Scenario: color_at() with mutually reflective surfaces
   Given w ← world()
-    And w.light ← point_light(point(0, 0, 0), color(1, 1, 1))
+    And p ← point(0, 0, 0)
+    And c ← color(1, 1, 1)
+    And w.light ← point_light(p, c)
     And lower ← plane() with:
       | material.reflective | 1                     |
       | transform           | translation(0, -1, 0) |
@@ -171,7 +175,9 @@ Scenario: color_at() with mutually reflective surfaces
       | material.reflective | 1                    |
       | transform           | translation(0, 1, 0) |
     And upper is added to w
-    And r ← ray(point(0, 0, 0), vector(0, 1, 0))
+    And rayp ← point(0, 0, 0)
+    And rayv ← vector(0, 1, 0)
+    And r ← ray(rayp, rayv)
   Then color_at(w, r) should terminate successfully
 
 Scenario: The reflected color at the maximum recursive depth
@@ -180,7 +186,9 @@ Scenario: The reflected color at the maximum recursive depth
       | material.reflective | 0.5                   |
       | transform           | translation(0, -1, 0) |
     And shape is added to w
-    And r ← ray(point(0, 0, -3), vector(0, -0.70711, 0.70711))
+    And rayp ← point(0, 0, -3)
+    And rayv ← vector(0, -0.70711, 0.70711)
+    And r ← ray(rayp, rayv)
     And i ← intersection(1.41421, shape)
   When comps ← prepare_computations(i, r)
     And color ← reflected_color(w, comps, 0)    

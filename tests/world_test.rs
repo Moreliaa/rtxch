@@ -17,12 +17,28 @@ fn given_world(world: &mut WorldWorld, _: &[String]) {
 fn given_default_world(world: &mut WorldWorld, _: &[String]) {
     world.world = rtxch_lib::World::default_world();
 }
-#[given(regex = r"(.+) ← plane\(\).+$")]
+#[given(regex = r"(shape) ← plane\(\).+$")]
 fn given_plane(world: &mut WorldWorld, matches: &[String]) {
     let plane = Plane::new();
     plane.borrow_mut().set_transform(&Matrix::translate(0.0,-1.0,0.0));
     plane.borrow_mut().get_mut_material().reflective = 0.5;
     plane.borrow_mut().get_mut_material().refractive_index = 1.5;
+    world.shape.insert(matches[0].to_string(), plane);
+}
+
+#[given(regex = r"(lower) ← plane\(\).+$")]
+fn given_lower_plane(world: &mut WorldWorld, matches: &[String]) {
+    let plane = Plane::new();
+    plane.borrow_mut().set_transform(&Matrix::translate(0.0,-1.0,0.0));
+    plane.borrow_mut().get_mut_material().reflective = 1.0;
+    world.shape.insert(matches[0].to_string(), plane);
+}
+
+#[given(regex = r"(upper) ← plane\(\).+$")]
+fn given_upper_plane(world: &mut WorldWorld, matches: &[String]) {
+    let plane = Plane::new();
+    plane.borrow_mut().set_transform(&Matrix::translate(0.0,1.0,0.0));
+    plane.borrow_mut().get_mut_material().reflective = 1.0;
     world.shape.insert(matches[0].to_string(), plane);
 }
 
@@ -148,7 +164,7 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
     }
 }
 
-#[given(regex = r"(s|s.|shape|plane) is added to w")]
+#[given(regex = r"(s|s.|shape|plane|lower|upper) is added to w")]
 fn add_sphere(world: &mut WorldWorld, matches: &[String]) {
     let sphere = world.shape.get(&matches[0]).unwrap();
     world.world.add_object(Rc::clone(sphere));
@@ -189,6 +205,14 @@ fn then_light(world: &mut WorldWorld, _: &[String]) {
     let light = world.plight.get(&"light".to_string()).unwrap();
     let world_light = world.world.get_point_lights().get(0).unwrap();
     assert!(world_light.is_equal(&light));
+}
+
+#[then(regex = r"color_at\(w, r\) should terminate successfully")]
+fn check_inf(world: &mut WorldWorld, _: &[String]) {
+    assert!(false);
+    let r = world.ray.get(&"r".to_string()).unwrap();
+    let _ = rtxch_lib::World::color_at(&world.world, r);
+    assert!(true);
 }
 
 #[then(regex = r"w contains (s\d)")]
