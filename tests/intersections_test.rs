@@ -11,8 +11,8 @@ use std::cell::RefCell;
 use rtxch_lib::Computations;
 
 
-#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)$")]
-#[when(regex = r"(.+) ← (point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)$")]
+#[given(regex = r"(.+) ← (plane|point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)$")]
+#[when(regex = r"(.+) ← (plane|point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)$")]
 fn given_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -21,6 +21,9 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
     let t = matches[0].clone();
     let func = matches[1].as_str();
     match func {
+        "plane" => {
+            world.shape.insert(t, Plane::new());
+        },
         "point" => {
             let v = parse_values_f64(&matches[2]);
             let p = Tuples::point(v[0], v[1], v[2]);
@@ -39,12 +42,12 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             world.ray.insert(t, r);
         },
         "sphere" => {
-            world.sphere.insert(t, Sphere::new());
+            world.shape.insert(t, Sphere::new());
         },
         "intersection" => {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let time = v[0].parse::<f64>().unwrap();
-            let obj = world.sphere.get(&v[1].to_string()).unwrap();
+            let obj = world.shape.get(&v[1].to_string()).unwrap();
             world.inter_sphere.insert(t, Intersection::new(time, obj));
         },
         "intersections" => {
@@ -94,7 +97,7 @@ fn check_prop(world: &mut RaysWorld, matches: &[String]) {
         },
         "object" => {
             let i = world.inter_sphere.get(&matches[0]).unwrap();
-            let target = world.sphere.get(&matches[2]).unwrap();
+            let target = world.shape.get(&matches[2]).unwrap();
             assert!(Rc::ptr_eq(i.object(), &target));
         },
         "count" => {
@@ -106,7 +109,7 @@ fn check_prop(world: &mut RaysWorld, matches: &[String]) {
     }
 }
 
-#[then(regex = r"(comps)\.(t|object|point|eyev|normalv|inside) = (.+)")]
+#[then(regex = r"(comps)\.(t|object|point|eyev|normalv|inside|reflectv) = (.+)")]
 fn check_prop_comps(world: &mut RaysWorld, matches: &[String]) {
     let comps = world.comps.get(&matches[0]).unwrap();
     let prop = matches[1].as_str();
@@ -141,6 +144,10 @@ fn check_prop_comps(world: &mut RaysWorld, matches: &[String]) {
             assert!(comps.inside == target);
 
         },
+        "reflectv" => {
+            let target = world.tuple.get(&matches[2]).unwrap();
+            assert!(comps.reflect_v.is_equal(&target));
+        },
         _ => panic!()
     }
 }
@@ -174,7 +181,7 @@ fn sphere2_alter(world: &mut RaysWorld) {
     let transform = Matrix::translate(0.0,0.0,1.0);
     sphere.borrow_mut().set_transform(&transform);
 
-    world.sphere.insert("shape".to_string(), sphere);
+    world.shape.insert("shape".to_string(), sphere);
 }
 
 #[then(regex = r"(.+)\[(.+)\]\.(origin|direction|t|object|count) = (.+)")]
@@ -190,7 +197,7 @@ fn check_sub_prop(world: &mut RaysWorld, matches: &[String]) {
             assert!(is_equal_f64(obj.t(), target));
         },
         "object" => {
-            let target = world.sphere.get(&matches[3]).unwrap();
+            let target = world.shape.get(&matches[3]).unwrap();
             assert!(Rc::ptr_eq(obj.object(), &target));
         },
         _ => panic!()
@@ -239,7 +246,7 @@ fn check_pos(world: &mut RaysWorld, matches: &[String]) {
 struct RaysWorld {
     ray: HashMap<String, Ray>,
     tuple: HashMap<String, Tuples>,
-    sphere: HashMap<String, Rc<RefCell<dyn Shape>>>,
+    shape: HashMap<String, Rc<RefCell<dyn Shape>>>,
     inter_sphere:  HashMap<String, Intersection>,
     interlist_sphere: HashMap<String, IntersectionList>,
     hit: HashMap<String, Option<Intersection>>,

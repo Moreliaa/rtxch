@@ -80,6 +80,7 @@ pub struct Computations {
     pub normal_v: Tuples,
     pub inside: bool,
     pub over_point: Tuples,
+    pub reflect_v: Tuples,
 }
 
 impl Intersection {
@@ -88,23 +89,25 @@ impl Intersection {
     }
 
     pub fn prep_computations(i: &Intersection, r: &Ray) -> Computations {
-        let p = Ray::position(r,i.t());
-        let mut normal_v = <dyn Shape>::normal_at(&i.object(), &p);
+        let point = Ray::position(r,i.t());
+        let mut normal_v = <dyn Shape>::normal_at(&i.object(), &point);
         let eye_v = r.direction().clone().negate();
         let inside = if Tuples::dot(&eye_v, &normal_v) < 0.0 { true } else { false };
         if inside {
             normal_v.negate();
         }
         let normal_v_offset = normal_v.clone().scale(EPSILON);
-        let over_point = p.clone().add(&normal_v_offset);
+        let over_point = point.clone().add(&normal_v_offset);
+        let reflect_v = Tuples::reflect(r.direction(), &normal_v);
         Computations {
             t: i.t(),
             object: Rc::clone(i.object()),
-            point: p,
-            eye_v: eye_v,
-            normal_v: normal_v,
-            inside: inside,
+            point,
+            eye_v,
+            normal_v,
+            inside,
             over_point,
+            reflect_v
         }
     }
 
