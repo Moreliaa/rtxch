@@ -64,11 +64,13 @@ impl World {
     }
 
     pub fn reflected_color(w: &World, comps: &Computations) -> Tuples {
-        if comps.object.borrow().get_material().reflective == 0.0 {
+        let reflective = comps.object.borrow().get_material().reflective;
+        if  reflective == 0.0 {
             Tuples::color(0.0,0.0,0.0)
         } else {
-            let mut color = Tuples::color(0.0,0.5,0.0);
-            color
+            let reflected_ray = Ray::new(comps.over_point.clone(), comps.reflect_v.clone());
+            let mut reflected_color = World::color_at(w, &reflected_ray);
+            reflected_color.scale(reflective)
         }
     }
 

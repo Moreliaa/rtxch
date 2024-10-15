@@ -2,7 +2,7 @@ use std::f64::consts::PI;
 use crate::Tuples;
 use perlin2d::PerlinNoise2D;
 
-pub const EPSILON: f64 = 0.00001;
+pub const EPSILON: f64 = 0.0001;
 
 pub fn is_equal_f64(a: f64, b: f64) -> bool {
     (a - b).abs() < EPSILON

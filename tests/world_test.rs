@@ -17,6 +17,14 @@ fn given_world(world: &mut WorldWorld, _: &[String]) {
 fn given_default_world(world: &mut WorldWorld, _: &[String]) {
     world.world = rtxch_lib::World::default_world();
 }
+#[given(regex = r"(.+) ← plane\(\).+$")]
+fn given_plane(world: &mut WorldWorld, matches: &[String]) {
+    let plane = Plane::new();
+    plane.borrow_mut().set_transform(&Matrix::translate(0.0,-1.0,0.0));
+    plane.borrow_mut().get_mut_material().reflective = 0.5;
+    plane.borrow_mut().get_mut_material().refractive_index = 1.5;
+    world.shape.insert(matches[0].to_string(), plane);
+}
 
 #[given(regex = r"(.+) ← (reflected_color|point|vector|ray|intersect|translation|scaling|normal_at|rotation_z|color|point_light|sphere|prepare_computations)\((.*)\)$")]
 #[when(regex = r"(.+) ← (reflected_color|point|vector|ray|sphere|intersect|translation|scaling|normal_at|point_light|intersect_world|prepare_computations|shade_hit|color_at)\((.*)\)")]
@@ -33,7 +41,7 @@ fn sphere1(world: &mut WorldWorld) {
     material.specular = 0.2;
     sphere.borrow_mut().set_material(&material);
 
-    world.sphere.insert("s1".to_string(), sphere);
+    world.shape.insert("s1".to_string(), sphere);
 }
 
 #[given("s2 ← sphere() with: transform | scaling(0.5, 0.5, 0.5) |")]
@@ -42,7 +50,7 @@ fn sphere2(world: &mut WorldWorld) {
     let transform = Matrix::scale(0.5, 0.5, 0.5);
     sphere.borrow_mut().set_transform(&transform);
 
-    world.sphere.insert("s2".to_string(), sphere);
+    world.shape.insert("s2".to_string(), sphere);
 }
 
 #[given("s2 ← sphere() with: | transform | translation(0, 0, 10) |")]
@@ -51,7 +59,7 @@ fn sphere2_alter(world: &mut WorldWorld) {
     let transform = Matrix::translate(0.0,0.0,10.0);
     sphere.borrow_mut().set_transform(&transform);
 
-    world.sphere.insert("s2".to_string(), sphere);
+    world.shape.insert("s2".to_string(), sphere);
 }
 
 #[then(regex = r"(.+) = color\((.+)\)")]
@@ -59,7 +67,7 @@ fn check_result(world: &mut WorldWorld, matches: &[String]) {
     let val = parse_values_f64(&matches[1]);
     let col = Tuples::color(val[0], val[1], val[2]);
     let r = world.tuple.get(&matches[0].to_string()).unwrap();
-    assert!(r.is_equal(&col));
+    assert!(r.is_equal(&col), "{:?}", r);
 }
 
 fn create_item(world: &mut WorldWorld, matches: &[String]) {
@@ -85,7 +93,7 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
         "intersection" => {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let time = v[0].parse::<f64>().unwrap();
-            let obj = world.sphere.get(&v[1].to_string()).unwrap();
+            let obj = world.shape.get(&v[1].to_string()).unwrap();
             world.inter.insert(t, Intersection::new(time, obj));
         },
         "color" => {
@@ -134,15 +142,15 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
             world.tuple.insert(t, color);
         },
         "sphere" => {
-            world.sphere.insert(t, Sphere::new());
+            world.shape.insert(t, Sphere::new());
         }
         _ => panic!("{func} not implemented")
     }
 }
 
-#[given(regex = r"(s|s.) is added to w")]
+#[given(regex = r"(s|s.|shape|plane) is added to w")]
 fn add_sphere(world: &mut WorldWorld, matches: &[String]) {
-    let sphere = world.sphere.get(&matches[0]).unwrap();
+    let sphere = world.shape.get(&matches[0]).unwrap();
     world.world.add_object(Rc::clone(sphere));
 }
 
@@ -150,12 +158,12 @@ fn add_sphere(world: &mut WorldWorld, matches: &[String]) {
 fn first(world: &mut WorldWorld, matches: &[String]) {
     let idx = if matches[1] == "first" { 0 } else { 1 };
     let shape = Rc::clone(world.world.get_objects().get(idx).unwrap());
-    world.sphere.insert(matches[0].clone(), shape);
+    world.shape.insert(matches[0].clone(), shape);
 }
 
 #[given(regex = r"(.+).material.ambient ← 1")]
 fn set_ambient(world: &mut WorldWorld, matches: &[String]) {
-    let sphere = world.sphere.get(&matches[0]).unwrap();
+    let sphere = world.shape.get(&matches[0]).unwrap();
     sphere.borrow_mut().get_mut_material().ambient = 1.0;
 }
 
@@ -171,7 +179,7 @@ fn set_light(world: &mut WorldWorld, _: &[String]) {
 #[given(regex = r"^(.+) ← intersection\((.+), (.+)\)$")]
 fn intershape(world: &mut WorldWorld, matches: &[String]) {
     let t = matches[1].parse::<f64>().unwrap();
-    let shape = world.sphere.get(&matches[2].to_string()).unwrap();
+    let shape = world.shape.get(&matches[2].to_string()).unwrap();
     let i = Intersection::new(t, shape);
     world.inter.insert(matches[0].clone(), i);
 }
@@ -185,7 +193,7 @@ fn then_light(world: &mut WorldWorld, _: &[String]) {
 
 #[then(regex = r"w contains (s\d)")]
 fn contains(world: &mut WorldWorld, matches: &[String]) {
-    let sphere = world.sphere.get(&matches[0]).unwrap();
+    let sphere = world.shape.get(&matches[0]).unwrap();
     let world_objects = world.world.get_objects();
     let mut result = false;
     for o in world_objects {
@@ -210,7 +218,7 @@ fn check_shadow(world: &mut WorldWorld, matches: &[String]) {
 
 #[then(regex = r"c = inner.material.color")]
 fn check_inner_color(world: &mut WorldWorld, _: &[String]) {
-    let sphere = world.sphere.get(&"inner".to_string()).unwrap();
+    let sphere = world.shape.get(&"inner".to_string()).unwrap();
     let c = world.tuple.get(&"c".to_string()).unwrap();
     assert!(sphere.borrow().get_material().pattern.borrow().color_a().is_equal(c));
 }
@@ -298,7 +306,7 @@ struct WorldWorld {
     world: rtxch_lib::World,
     plight: HashMap<String, PointLight>,
     tuple: HashMap<String, Tuples>,
-    sphere: HashMap<String, Rc<RefCell<dyn Shape>>>,
+    shape: HashMap<String, Rc<RefCell<dyn Shape>>>,
     ray: HashMap<String, Ray>,
     inter_list: HashMap<String, IntersectionList>,
     inter: HashMap<String, Intersection>,
