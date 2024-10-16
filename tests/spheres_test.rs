@@ -8,7 +8,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 
 
-#[given(regex = r"(.+) ← (point|vector|ray|sphere|intersect|translation|scaling|normal_at|rotation_z|material)\((.*)\)")]
+#[given(regex = r"(.+) ← (glass_sphere|point|vector|ray|sphere|intersect|translation|scaling|normal_at|rotation_z|material)\((.*)\)")]
 fn given_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -17,6 +17,9 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
     let t = matches[0].clone();
     let func = matches[1].as_str();
     match func {
+        "glass_sphere" => {
+            world.sphere.insert(t, Sphere::glass_sphere());
+        },
         "point" => {
             let v = parse_values_f64(&matches[2]);
             let p = Tuples::point(v[0], v[1], v[2]);
@@ -113,11 +116,23 @@ fn when_set_transform(world: &mut RaysWorld, matches: &[String]) {
     set_transform(world, matches);
 }
 
-#[then(regex = r"(.+)\.(origin|direction|count|transform|material|intensity|color|ambient|diffuse|specular|shininess) = (.+)")]
+#[then(regex = r"(.+)\.(material\.transparency|material\.refractive_index|origin|direction|count|transform|material|intensity|color|ambient|diffuse|specular|shininess) = (.+)")]
 fn check_prop(world: &mut RaysWorld, matches: &[String]) {
     let prop = matches[1].as_str();
     
     match prop {
+        "material.transparency" => {
+            let r = world.sphere.get(&matches[0]).unwrap();
+            let prop = r.borrow().get_material().transparency;
+            let t = &matches[2].parse::<f64>().unwrap();
+            assert!(is_equal_f64(prop, *t));
+        },
+        "material.refractive_index" => {
+            let r = world.sphere.get(&matches[0]).unwrap();
+            let prop = r.borrow().get_material().refractive_index;
+            let t = &matches[2].parse::<f64>().unwrap();
+            assert!(is_equal_f64(prop, *t));
+        },
         "origin" => {
             let r = world.ray.get(&matches[0]).unwrap();
             let t = world.tuple.get(&matches[2]).unwrap();

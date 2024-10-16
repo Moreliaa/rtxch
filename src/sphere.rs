@@ -3,6 +3,7 @@ use crate::Ray;
 use crate::Tuples;
 use crate::Matrix;
 use crate::Material;
+use std::borrow::BorrowMut;
 use std::rc::Rc;
 use std::cell::RefCell;
 
@@ -16,6 +17,13 @@ pub struct Sphere {
 impl Sphere {
     pub fn new() -> Rc<RefCell<Sphere>> {
         Rc::new(RefCell::new(Sphere { material: Material::material(), transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
+    }
+    pub fn glass_sphere() -> Rc<RefCell<Sphere>> {
+        let mut material = Material::material();
+        material.transparency = 1.0;
+        material.refractive_index = 1.5;
+
+        Rc::new(RefCell::new(Sphere { material, transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
     }
 }
 
