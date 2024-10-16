@@ -130,9 +130,17 @@ Scenario Outline: Finding n1 and n2 at various intersections
     And C ← glass_sphere() with:
       | transform                 | translation(0, 0, 0.25) |
       | material.refractive_index | 2.5                     |
-    And r ← ray(point(0, 0, -4), vector(0, 0, 1))
-    And xs ← intersections(2:A, 2.75:B, 3.25:C, 4.75:B, 5.25:C, 6:A)
-  When comps ← prepare_computations(xs[<index>], r, xs)  
+    And rp ← point(0, 0, -4)
+    And rv ← vector(0, 0, 1)
+    And r ← ray(rp, rv)
+    And i1 ← intersection(2, A)
+    And i2 ← intersection(2.75, B)
+    And i3 ← intersection(3.25, C)
+    And i4 ← intersection(4.75, B)
+    And i5 ← intersection(5.25, C)
+    And i6 ← intersection(6, A)
+    And xs ← intersections(i1, i2, i3, i4, i5, i6)
+  When comps ← prepare_computations(i<index>, r, xs)  
   Then comps.n1 = <n1>
     And comps.n2 = <n2>             
 

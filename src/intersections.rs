@@ -81,6 +81,8 @@ pub struct Computations {
     pub inside: bool,
     pub over_point: Tuples,
     pub reflect_v: Tuples,
+    pub n1: f64,
+    pub n2: f64,
 }
 
 impl Intersection {
@@ -107,7 +109,9 @@ impl Intersection {
             normal_v,
             inside,
             over_point,
-            reflect_v
+            reflect_v,
+            n1: 0.1,
+            n2: 0.1,
         }
     }
 

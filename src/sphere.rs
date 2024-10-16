@@ -3,7 +3,6 @@ use crate::Ray;
 use crate::Tuples;
 use crate::Matrix;
 use crate::Material;
-use std::borrow::BorrowMut;
 use std::rc::Rc;
 use std::cell::RefCell;
 

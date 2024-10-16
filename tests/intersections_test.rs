@@ -109,12 +109,20 @@ fn check_prop(world: &mut RaysWorld, matches: &[String]) {
     }
 }
 
-#[then(regex = r"(comps)\.(t|object|point|eyev|normalv|inside|reflectv) = (.+)")]
+#[then(regex = r"(comps)\.(t|object|point|eyev|normalv|inside|reflectv|n1|n2) = (.+)")]
 fn check_prop_comps(world: &mut RaysWorld, matches: &[String]) {
     let comps = world.comps.get(&matches[0]).unwrap();
     let prop = matches[1].as_str();
     
     match prop {
+        "n1" => {
+            let target = matches[2].parse::<f64>().unwrap();
+            assert!(is_equal_f64(comps.n1, target));
+        },
+        "n2" => {
+            let target = matches[2].parse::<f64>().unwrap();
+            assert!(is_equal_f64(comps.n2, target));
+        },
         "t" => {
             let i = world.inter_sphere.get(&"i".to_string()).unwrap();
             assert!(is_equal_f64(comps.t, i.t()));
@@ -150,6 +158,30 @@ fn check_prop_comps(world: &mut RaysWorld, matches: &[String]) {
         },
         _ => panic!()
     }
+}
+
+#[given(regex = r"A ← glass_sphere\(\).+")]
+fn given_scenario_outline_a(world: &mut RaysWorld, _: &[String]) {
+    let s = Sphere::glass_sphere();
+    s.borrow_mut().set_transform(&Matrix::scale(2.0,2.0,2.0));
+    s.borrow_mut().get_mut_material().refractive_index = 1.5;
+    world.shape.insert("A".to_string(), s);
+}
+
+#[given(regex = r"B ← glass_sphere\(\).+")]
+fn given_scenario_outline_b(world: &mut RaysWorld, _: &[String]) {
+    let s = Sphere::glass_sphere();
+    s.borrow_mut().set_transform(&Matrix::translate(0.0,0.0,-0.25));
+    s.borrow_mut().get_mut_material().refractive_index = 2.0;
+    world.shape.insert("B".to_string(), s);
+}
+
+#[given(regex = r"C ← glass_sphere\(\).+")]
+fn given_scenario_outline_c(world: &mut RaysWorld, _: &[String]) {
+    let s = Sphere::glass_sphere();
+    s.borrow_mut().set_transform(&Matrix::translate(0.0,0.0,0.25));
+    s.borrow_mut().get_mut_material().refractive_index = 2.5;
+    world.shape.insert("C".to_string(), s);
 }
 
 #[then(regex = r"(comps)\.(point.z|over_point.z) (<|>) (.+)")]
