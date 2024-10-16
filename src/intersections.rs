@@ -90,9 +90,9 @@ impl Intersection {
         Intersection { t, object: Rc::clone(object) }
     }
 
-    pub fn prep_computations(i: &Intersection, r: &Ray) -> Computations {
-        let point = Ray::position(r,i.t());
-        let mut normal_v = <dyn Shape>::normal_at(&i.object(), &point);
+    pub fn prep_computations(hit: &Intersection, r: &Ray, xs: &IntersectionList) -> Computations {
+        let point = Ray::position(r,hit.t());
+        let mut normal_v = <dyn Shape>::normal_at(&hit.object(), &point);
         let eye_v = r.direction().clone().negate();
         let inside = if Tuples::dot(&eye_v, &normal_v) < 0.0 { true } else { false };
         if inside {
@@ -101,17 +101,51 @@ impl Intersection {
         let normal_v_offset = normal_v.clone().scale(EPSILON);
         let over_point = point.clone().add(&normal_v_offset);
         let reflect_v = Tuples::reflect(r.direction(), &normal_v);
+
+        // refractive indices
+        let mut n1 = 1.0;
+        let mut n2 = 1.0;
+
+        let mut containers: Vec<Rc<RefCell<dyn Shape>>> = vec![];
+        for i_xs in xs.xs() {
+            let is_hit = i_xs.is_equal(hit);
+            if is_hit {
+                if containers.len() == 0 {
+                    n1 = 1.0;
+                } else {
+                    let obj = containers.last().unwrap();
+                    n1 = obj.borrow().get_material().refractive_index;
+                }
+            }
+        
+            if let Some(index) = containers.iter().position(|ci| Rc::ptr_eq(ci, i_xs.object())) {
+                containers.splice(index..index + 1, vec![]); // exiting
+            } else {
+                containers.push(Rc::clone(i_xs.object())); // entering
+            }
+
+            if is_hit {
+                if containers.len() == 0 {
+                    n2 = 1.0;
+                } else {
+                    let obj = containers.last().unwrap();
+                    n2 = obj.borrow().get_material().refractive_index;
+                }
+                break;
+            }
+        }
+
         Computations {
-            t: i.t(),
-            object: Rc::clone(i.object()),
+            t: hit.t(),
+            object: Rc::clone(hit.object()),
             point,
             eye_v,
             normal_v,
             inside,
             over_point,
             reflect_v,
-            n1: 0.1,
-            n2: 0.1,
+            n1,
+            n2,
         }
     }
 

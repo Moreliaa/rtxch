@@ -128,7 +128,7 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let i = world.inter.get(&v[0].to_string()).unwrap();
             let r = world.ray.get(&v[1].to_string()).unwrap();
-            let comps = Intersection::prep_computations(i, r);
+            let comps = Intersection::prep_computations(i, r, &IntersectionList::intersections_from_vec(vec![]));
             world.comps.insert(t, comps);
         },
         "ray" => {

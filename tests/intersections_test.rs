@@ -68,7 +68,12 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let i = world.inter_sphere.get(&v[0].to_string()).unwrap();
             let r = world.ray.get(&v[1].to_string()).unwrap();
-            let comps = Intersection::prep_computations(i, r);
+            let il = if v.len() > 2 {
+                world.interlist_sphere.get(&v[2].to_string()).unwrap()
+            } else {
+                &IntersectionList::intersections_from_vec(vec![])
+            };
+            let comps = Intersection::prep_computations(i, r,il);
             world.comps.insert(t, comps);
         },
         _ => panic!("{func} not implemented")
@@ -117,11 +122,11 @@ fn check_prop_comps(world: &mut RaysWorld, matches: &[String]) {
     match prop {
         "n1" => {
             let target = matches[2].parse::<f64>().unwrap();
-            assert!(is_equal_f64(comps.n1, target));
+            assert!(is_equal_f64(comps.n1, target), "n1: {} Target: {}", comps.n1, target);
         },
         "n2" => {
             let target = matches[2].parse::<f64>().unwrap();
-            assert!(is_equal_f64(comps.n2, target));
+            assert!(is_equal_f64(comps.n2, target), "n2: {} Target: {}", comps.n2, target);
         },
         "t" => {
             let i = world.inter_sphere.get(&"i".to_string()).unwrap();

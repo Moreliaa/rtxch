@@ -44,7 +44,7 @@ impl World {
         let il = World::intersect_world(w, r);
         let hit = IntersectionList::hit(&il);
         if let Some(i) = hit {
-            let comps = Intersection::prep_computations(i, r);
+            let comps = Intersection::prep_computations(i, r, &il);
             return World::shade_hit(w, &comps, remaining);
         } else {
             return Tuples::color(0.0,0.0,0.0);
