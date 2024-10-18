@@ -61,6 +61,8 @@ impl World {
         }
         let reflected = World::reflected_color(w, comps, remaining);
         color.add(&reflected);
+        let refracted = World::refracted_color(w, comps, remaining);
+        color.add(&refracted);
         color
     }
 
