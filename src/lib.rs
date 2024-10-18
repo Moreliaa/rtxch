@@ -43,6 +43,6 @@ pub use world::World;
 pub mod camera;
 pub use camera::Camera;
 pub mod constants;
-pub use constants::MAX_REFLECTIONS;
+pub use constants::MAX_ITERATIONS;
 
 pub mod utils;

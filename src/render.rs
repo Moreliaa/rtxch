@@ -34,7 +34,7 @@ pub fn render(camera: &Camera, world: &World) -> Canvas {
     for y in 0..camera.v_size {
         for x in 0..camera.h_size {
             let ray = Camera::ray_for_pixel(camera, x, y);
-            let color = World::color_at(world, &ray, MAX_REFLECTIONS);
+            let color = World::color_at(world, &ray, MAX_ITERATIONS);
             canvas.write_pixel(x, y, &color);
         }
     }

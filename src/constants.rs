@@ -1,1 +1,1 @@
-pub const MAX_REFLECTIONS: i32 = 5;
+pub const MAX_ITERATIONS: i32 = 5;
