@@ -189,20 +189,23 @@ fn given_scenario_outline_c(world: &mut RaysWorld, _: &[String]) {
     world.shape.insert("C".to_string(), s);
 }
 
-#[then(regex = r"(comps)\.(point.z|over_point.z) (<|>) (.+)")]
+#[then(regex = r"(comps)\.(point.z|under_point.z|over_point.z) (<|>) (.+)")]
 fn check_prop_less_than_comps(world: &mut RaysWorld, matches: &[String]) {
     let comps = world.comps.get(&matches[0]).unwrap();
     let prop = matches[1].as_str();
     let operator = matches[2].as_str();
     
     let prop_val = match prop {
+        "under_point.z" => comps.under_point.z,
         "over_point.z" => comps.over_point.z,
         "point.z" => comps.point.z,
         _ => panic!()
     };
     let target = match matches[3].as_str() {
         "-EPSILON/2" => -EPSILON / 2.0,
+        "EPSILON/2" => EPSILON / 2.0,
         "comps.over_point.z" => comps.over_point.z,
+        "comps.under_point.z" => comps.under_point.z,
         _ => panic!(),
     };
     match operator {
@@ -215,6 +218,15 @@ fn check_prop_less_than_comps(world: &mut RaysWorld, matches: &[String]) {
 #[when("shape ← sphere() with: | transform | translation(0, 0, 1) |")]
 fn sphere2_alter(world: &mut RaysWorld) {
     let sphere = Sphere::new();
+    let transform = Matrix::translate(0.0,0.0,1.0);
+    sphere.borrow_mut().set_transform(&transform);
+
+    world.shape.insert("shape".to_string(), sphere);
+}
+
+#[when("shape ← glass_sphere() with: | transform | translation(0, 0, 1) |")]
+fn sphere2_alter_glass(world: &mut RaysWorld) {
+    let sphere = Sphere::glass_sphere();
     let transform = Matrix::translate(0.0,0.0,1.0);
     sphere.borrow_mut().set_transform(&transform);
 

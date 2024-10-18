@@ -80,6 +80,7 @@ pub struct Computations {
     pub normal_v: Tuples,
     pub inside: bool,
     pub over_point: Tuples,
+    pub under_point: Tuples,
     pub reflect_v: Tuples,
     pub n1: f64,
     pub n2: f64,
@@ -93,13 +94,14 @@ impl Intersection {
     pub fn prep_computations(hit: &Intersection, r: &Ray, xs: &IntersectionList) -> Computations {
         let point = Ray::position(r,hit.t());
         let mut normal_v = <dyn Shape>::normal_at(&hit.object(), &point);
-        let eye_v = r.direction().clone().negate();
+        let eye_v = r.direction().clone().negate().normalize();
         let inside = if Tuples::dot(&eye_v, &normal_v) < 0.0 { true } else { false };
         if inside {
             normal_v.negate();
         }
         let normal_v_offset = normal_v.clone().scale(EPSILON);
         let over_point = point.clone().add(&normal_v_offset);
+        let under_point = point.clone().subtract(&normal_v_offset);
         let reflect_v = Tuples::reflect(r.direction(), &normal_v);
 
         // refractive indices
@@ -143,6 +145,7 @@ impl Intersection {
             normal_v,
             inside,
             over_point,
+            under_point,
             reflect_v,
             n1,
             n2,
@@ -158,7 +161,7 @@ impl Intersection {
     }
 
     pub fn is_equal(&self, other: &Intersection) -> bool {
-        if self.t() != other.t() {
+        if !crate::utils::is_equal_f64(self.t(), other.t()) {
             return false;
         }
         Rc::ptr_eq(self.object(), other.object())

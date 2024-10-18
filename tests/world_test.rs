@@ -1,7 +1,7 @@
 extern crate rtxch_lib;
 
 use std::collections::HashMap;
-use cucumber::{given, when, then, World};
+use cucumber::{given, when, then, World, gherkin::Step};
 use rtxch_lib::*;
 use rtxch_lib::utils::parse_values_f64;
 use std::rc::Rc;
@@ -42,10 +42,28 @@ fn given_upper_plane(world: &mut WorldWorld, matches: &[String]) {
     world.shape.insert(matches[0].to_string(), plane);
 }
 
-#[given(regex = r"(.+) ← (reflected_color|point|vector|ray|intersect|translation|scaling|normal_at|rotation_z|color|point_light|sphere|prepare_computations)\((.*)\)$")]
-#[when(regex = r"(.+) ← (reflected_color|point|vector|ray|sphere|intersect|translation|scaling|normal_at|point_light|intersect_world|prepare_computations|shade_hit|color_at)\((.*)\)")]
+#[given(regex = r"(.+) ← (reflected_color|refracted_color|intersections|point|vector|ray|intersect|translation|scaling|normal_at|rotation_z|color|point_light|sphere|prepare_computations)\((.*)\)$")]
+#[when(regex = r"(.+) ← (reflected_color|refracted_color|intersections|point|vector|ray|sphere|intersect|translation|scaling|normal_at|point_light|intersect_world|prepare_computations|shade_hit|color_at)\((.*)\)")]
 fn given_item(world: &mut WorldWorld, matches: &[String]) {
     create_item(world, matches);
+}
+
+#[given(regex = r"^(shape|A|B) has:$")]
+fn shape_has(world: &mut WorldWorld, step: &Step, matches: &[String]) {
+    let shape = world.shape.get(&matches[0]).unwrap();
+    if let Some(table) = step.table.as_ref() {
+        for row in table.rows.iter() {
+            let prop = &row[0];
+            let val = row[1].parse::<f64>();
+            match prop.as_str() {
+                "material.transparency" => shape.borrow_mut().get_mut_material().transparency = val.unwrap(),
+                "material.refractive_index" => shape.borrow_mut().get_mut_material().refractive_index = val.unwrap(),
+                "material.pattern" => shape.borrow_mut().get_mut_material().pattern = TestPattern::new(),
+                "material.ambient" => shape.borrow_mut().get_mut_material().ambient = val.unwrap(),
+                _ => panic!("Prop: {prop} not implemented"),
+            }
+        }
+    }
 }
 
 #[given("s1 ← sphere() with: material.color(0.8, 1.0, 0.6) | material.diffuse(0.7) | material.specular(0.2) |")]
@@ -94,8 +112,15 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let w = &world.world;
             let comps = world.comps.get(&v[1].to_string()).unwrap();
-            let remaining= if v.len() == 3 { 0 } else { MAX_REFLECTIONS };
+            let remaining= if v.len() == 3 { v[2].parse::<i32>().unwrap() } else { MAX_REFLECTIONS };
             world.tuple.insert(t, rtxch_lib::World::reflected_color(w, comps, remaining));
+        },
+        "refracted_color" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let w = &world.world;
+            let comps = world.comps.get(&v[1].to_string()).unwrap();
+            let remaining= if v.len() == 3 { v[2].parse::<i32>().unwrap() } else { MAX_REFLECTIONS };
+            world.tuple.insert(t, rtxch_lib::World::refracted_color(w, comps, remaining));
         },
         "point" => {
             let v = parse_values_f64(&matches[2]);
@@ -113,6 +138,12 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
             let obj = world.shape.get(&v[1].to_string()).unwrap();
             world.inter.insert(t, Intersection::new(time, obj));
         },
+        "intersections" => {
+            let v: Vec<&str> = matches[2].split(", ").collect();
+            let i: Vec<Intersection> = v.into_iter().map(|val| world.inter.get(&val.to_string()).unwrap().clone()).collect();
+            let l = IntersectionList::intersections_from_vec(i);
+            world.inter_list.insert(t, l);
+        },
         "color" => {
             let v = parse_values_f64(&matches[2]);
             let p = Tuples::color(v[0], v[1], v[2]);
@@ -128,7 +159,12 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
             let v: Vec<&str> = matches[2].split(", ").collect();
             let i = world.inter.get(&v[0].to_string()).unwrap();
             let r = world.ray.get(&v[1].to_string()).unwrap();
-            let comps = Intersection::prep_computations(i, r, &IntersectionList::intersections_from_vec(vec![]));
+            let il = if v.len() > 2 {
+                world.inter_list.get(&v[2].to_string()).unwrap()
+            } else {
+                &IntersectionList::intersections_from_vec(vec![])
+            };
+            let comps = Intersection::prep_computations(i, r, il);
             world.comps.insert(t, comps);
         },
         "ray" => {
@@ -173,7 +209,7 @@ fn add_sphere(world: &mut WorldWorld, matches: &[String]) {
 
 #[given(regex = r"(.+) ← the (first|second) object in w")]
 fn first(world: &mut WorldWorld, matches: &[String]) {
-    let idx = if matches[1] == "first" { 0 } else { 1 };
+    let idx = if matches[1].as_str() == "first" { 0 } else { 1 };
     let shape = Rc::clone(world.world.get_objects().get(idx).unwrap());
     world.shape.insert(matches[0].clone(), shape);
 }

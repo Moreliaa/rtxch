@@ -78,6 +78,32 @@ impl World {
         }
     }
 
+    pub fn refracted_color(w: &World, comps: &Computations, remaining: i32) -> Tuples {
+        if remaining == 0 {
+            return Tuples::color(0.0,0.0,0.0);
+        }
+        // Snell's law
+        let n_ratio = comps.n1 / comps.n2;
+        let cos_theta_i = Tuples::dot(&comps.eye_v, &comps.normal_v);
+        let sin2_theta_t = n_ratio * n_ratio * (1.0 - cos_theta_i * cos_theta_i);
+        
+        if sin2_theta_t > 1.0 { // total internal reflection
+            return Tuples::color(0.0,0.0,0.0);
+        }
+        
+        let transparency = comps.object.borrow().get_material().transparency;
+        if transparency == 0.0 {
+            Tuples::color(0.0,0.0,0.0)
+        } else {
+            let cos_theta_t = (1.0 - sin2_theta_t).sqrt();
+            let direction_refracted = comps.normal_v.clone()
+                .scale(n_ratio * cos_theta_i - cos_theta_t)
+                .subtract( &comps.eye_v.clone().scale(n_ratio));
+            let r_refracted = Ray::new(comps.under_point.clone(), direction_refracted);
+            World::color_at(w, &r_refracted, remaining - 1).scale(transparency)
+        }
+    }
+
     pub fn intersect_world(w: &World, r: &Ray) -> IntersectionList {
         let mut result: IntersectionList = IntersectionList::create_empty();
         for s in w.get_objects() {
@@ -91,7 +117,7 @@ impl World {
         let mut world = World::new();
         let s1 = Sphere::new();
         let mut material = Material::material();
-        material.pattern =SingleColorPattern::new(Tuples::color(0.8,1.0,0.6));
+        material.pattern = SingleColorPattern::new(Tuples::color(0.8,1.0,0.6));
         material.diffuse = 0.7;
         material.specular = 0.2;
         s1.borrow_mut().set_material(&material);

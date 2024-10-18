@@ -197,9 +197,13 @@ Scenario: The reflected color at the maximum recursive depth
 Scenario: The refracted color with an opaque surface
   Given w ← default_world()
     And shape ← the first object in w
-    And r ← ray(point(0, 0, -5), vector(0, 0, 1))
-    And xs ← intersections(4:shape, 6:shape)
-  When comps ← prepare_computations(xs[0], r, xs)
+    And rayp ← point(0, 0, -5)
+    And rayv ← vector(0, 0, 1)
+    And r ← ray(rayp, rayv)
+    And i1 ← intersection(4, shape)
+    And i2 ← intersection(6, shape)
+    And xs ← intersections(i1, i2)
+  When comps ← prepare_computations(i1, r, xs)
     And c ← refracted_color(w, comps, 5)
   Then c = color(0, 0, 0)
 
@@ -209,9 +213,13 @@ Scenario: The refracted color at the maximum recursive depth
     And shape has:
       | material.transparency     | 1.0 |
       | material.refractive_index | 1.5 |
-    And r ← ray(point(0, 0, -5), vector(0, 0, 1))
-    And xs ← intersections(4:shape, 6:shape)
-  When comps ← prepare_computations(xs[0], r, xs)
+    And rayp ← point(0, 0, -5)
+    And rayv ← vector(0, 0, 1)
+    And r ← ray(rayp, rayv)
+    And i1 ← intersection(4, shape)
+    And i2 ← intersection(6, shape)
+    And xs ← intersections(i1, i2)
+  When comps ← prepare_computations(i1, r, xs)
     And c ← refracted_color(w, comps, 0)
   Then c = color(0, 0, 0)
 
@@ -221,11 +229,15 @@ Scenario: The refracted color under total internal reflection
     And shape has:
       | material.transparency     | 1.0 |
       | material.refractive_index | 1.5 |
-    And r ← ray(point(0, 0, 0.70711), vector(0, 1, 0))
-    And xs ← intersections(-0.70711:shape, 0.70711:shape)
+    And rayp ← point(0, 0, 0.70711)
+    And rayv ← vector(0, 1, 0)
+    And r ← ray(rayp, rayv)
+    And i1 ← intersection(-0.70711, shape)
+    And i2 ← intersection(0.70711, shape)
+    And xs ← intersections(i1, i2)
   # NOTE: this time you're inside the sphere, so you need
   # to look at the second intersection, xs[1], not xs[0]
-  When comps ← prepare_computations(xs[1], r, xs)
+  When comps ← prepare_computations(i2, r, xs)
     And c ← refracted_color(w, comps, 5)
   Then c = color(0, 0, 0)
 
@@ -239,9 +251,15 @@ Scenario: The refracted color with a refracted ray
     And B has:
       | material.transparency     | 1.0 |
       | material.refractive_index | 1.5 |
-    And r ← ray(point(0, 0, 0.1), vector(0, 1, 0))
-    And xs ← intersections(-0.9899:A, -0.4899:B, 0.4899:B, 0.9899:A)
-  When comps ← prepare_computations(xs[2], r, xs)
+    And rayp ← point(0, 0, 0.1)
+    And rayv ← vector(0, 1, 0)
+    And r ← ray(rayp, rayv)
+    And i1 ← intersection(-0.9899, A)
+    And i2 ← intersection(-0.4899, B)
+    And i3 ← intersection(0.4899, B)
+    And i4 ← intersection(0.9899, A)
+    And xs ← intersections(i1, i2, i3, i4)
+  When comps ← prepare_computations(i3, r, xs)
     And c ← refracted_color(w, comps, 5)
   Then c = color(0, 0.99888, 0.04725)
 
