@@ -8,9 +8,12 @@ use utils::deg_to_rad;
 
 fn main() {
     let mut camera = Camera::new(500, 500, deg_to_rad(60.0));
-    let from = Tuples::point(0.0,1.5, -5.0);
+    /*let from = Tuples::point(0.0,1.5, -5.0);
     let to = Tuples::point(0.0,1.0,0.0);
-    let up = Tuples::vector(0.0,1.0,0.0);
+    let up = Tuples::vector(0.0,1.0,0.0);*/
+    let from = Tuples::point(0.0,15.0, 0.0);
+    let to = Tuples::point(0.0,0.0,0.0);
+    let up = Tuples::vector(0.0,0.0,-1.0);
     camera.transform = Matrix::view_transform(&from, &to, &up);
 
     let mut world = World::new();
@@ -18,26 +21,30 @@ fn main() {
     let floor = Plane::new();
     floor.borrow_mut().set_transform(&Matrix::new(4));
     let mut floor_material = Material::material();
-    //floor_material.pattern = RadialGradientPattern::new(Tuples::color(1.0,1.0,0.0), Tuples::color(0.0,0.0,1.0));
-    let sub_pattern1 = CheckersPattern::new(Tuples::color(0.8,0.0,0.0), Tuples::color(0.8,0.8,0.0));
+    /*let sub_pattern1 = CheckersPattern::new(Tuples::color(0.8,0.0,0.0), Tuples::color(0.8,0.8,0.0));
     sub_pattern1.borrow_mut().set_transform(
         Matrix::scale(0.5,0.5,0.5)
     );
     let sub_pattern2 = CheckersPattern::new(Tuples::color(0.0,0.0,1.0), Tuples::color(0.8,0.4,0.3));
     sub_pattern2.borrow_mut().set_transform(
         Matrix::scale(0.25,0.25,0.25)
+    );*/
+    floor_material.pattern = CheckersPattern::new(
+        Tuples::color(1.0,1.0,1.0), Tuples::color(0.2,0.2,0.2)
     );
-    floor_material.pattern = NestedCheckersPattern::new(
-        sub_pattern1,
-        sub_pattern2
-    );
-    floor_material.pattern.borrow_mut().set_transform(
+    /*floor_material.pattern.borrow_mut().set_transform(
         Matrix::scale(0.5,0.5,0.5)
-    );
+    );*/
     floor_material.specular = 0.0;
     floor_material.ambient = 0.3;
     floor.borrow_mut().set_material(&floor_material);
+
     world.add_object(floor);
+
+    let ceiling = Plane::new();
+    ceiling.borrow_mut().set_transform(&(Matrix::translate(0.0,30.0,0.0) * Matrix::rotate_z(deg_to_rad(180.0))));
+    ceiling.borrow_mut().set_material(&floor_material);
+    world.add_object(ceiling);
 
     /*let behind_camera_wall_left = Plane::new();
     behind_camera_wall_left.borrow_mut().set_transform(
@@ -57,7 +64,7 @@ fn main() {
             &Matrix::scale(1.0,1.0,1.0)
     ));
     behind_camera_wall_right.borrow_mut().set_material(&floor_material);
-    world.add_object(behind_camera_wall_right);*/
+    world.add_object(behind_camera_wall_right);
 
 
     let left_wall = Plane::new();
@@ -79,9 +86,14 @@ fn main() {
     ));
     right_wall.borrow_mut().set_material(&floor_material);
     world.add_object(right_wall);
+    */
+    let middle_air: std::rc::Rc<std::cell::RefCell<Sphere>> = Sphere::new();
+    middle_air.borrow_mut().set_transform(&(Matrix::translate(0.0,10.0,0.0) * Matrix::scale(1.0, 1.0, 1.0)));
+    middle_air.borrow_mut().get_mut_material().transparency = 1.0;
+    world.add_object(middle_air);
 
     let middle = Sphere::new();
-    middle.borrow_mut().set_transform(&Matrix::translate(-0.5,1.0,0.5));
+    middle.borrow_mut().set_transform(&(Matrix::translate(0.0,10.0,0.0) * Matrix::scale(2.0, 2.0, 2.0)));
     let mut middle_material = Material::material();
     let sub_pattern1 = StripePattern::new(Tuples::color(0.1,1.0,0.5), Tuples::color(1.0,0.5,0.5));
     let sub_pattern2 = StripePattern::new(Tuples::color(0.1,1.0,0.5), Tuples::color(1.0,0.5,0.5));
@@ -92,19 +104,21 @@ fn main() {
             &Matrix::scale(1.0,1.0,1.0)
     ));
 
-    middle_material.pattern = PerturbedPattern::new(BlendedPattern::new(sub_pattern1, sub_pattern2));
+    middle_material.pattern = SingleColorPattern::new(Tuples::color(0.2,0.2,0.2));//PerturbedPattern::new(BlendedPattern::new(sub_pattern1, sub_pattern2));
     //middle_material.pattern = PerturbedPattern::new(sub_pattern1);
-    middle_material.pattern.borrow_mut().set_transform(
+    /*middle_material.pattern.borrow_mut().set_transform(
         Matrix::transform_from_trs(
             &Matrix::translate(-0.5,1.0,0.5),
             &(Matrix::rotate_y(PI / 4.0) * Matrix::rotate_x(PI / 2.0)),
             &Matrix::scale(0.2,0.2,0.2)
-    ));
+    ));*/
     middle_material.diffuse = 0.7;
     middle_material.specular = 0.3;
+    middle_material.transparency = 1.0;
+    middle_material.refractive_index = 1.5;
     middle.borrow_mut().set_material(&middle_material);
     world.add_object(middle);
-
+/*
     let right = Sphere::new();
     right.borrow_mut().set_transform(
         &(Matrix::translate(1.5,0.5,-0.5) * Matrix::scale(1.2,1.2,1.2)));
@@ -125,7 +139,7 @@ fn main() {
     left_material.diffuse = 0.7;
     left_material.specular = 0.3;
     left.borrow_mut().set_material(&left_material);
-    world.add_object(left);
+    world.add_object(left);*/
 
     let light = point_light(
         &Tuples::point(-10.0,10.0,-10.0),
@@ -133,11 +147,11 @@ fn main() {
     );
     world.add_point_light(light);
  
-    let light2 = point_light(
+    /*let light2 = point_light(
         &Tuples::point(5.0,10.0,-10.0), 
         &Tuples::color(0.5,0.5,0.5)
     );
-    world.add_point_light(light2);
+    world.add_point_light(light2);*/
 
     let canvas = render::render(&camera, &world);
     

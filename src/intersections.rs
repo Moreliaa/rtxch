@@ -91,6 +91,21 @@ impl Intersection {
         Intersection { t, object: Rc::clone(object) }
     }
 
+    pub fn schlick(comps: &Computations) -> f64 {
+        let mut cos_theta_i = Tuples::dot(&comps.eye_v, &comps.normal_v);
+        if comps.n1 > comps.n2 {
+            let n = comps.n1 / comps.n2;
+            let sin2_theta = n.powf(2.0) * (1.0 - cos_theta_i.powf(2.0));
+            if sin2_theta > 1.0 {
+                return 1.0
+            }
+            let cos_theta_t = (1.0 - sin2_theta).sqrt();
+            cos_theta_i = cos_theta_t;
+        }
+        let r0 = ((comps.n1 - comps.n2) / (comps.n1 +  comps.n2)).powf(2.0);
+        return r0 + (1.0 - r0) * (1.0 - cos_theta_i).powf(5.0);
+    }
+
     pub fn prep_computations(hit: &Intersection, r: &Ray, xs: &IntersectionList) -> Computations {
         let point = Ray::position(r,hit.t());
         let mut normal_v = <dyn Shape>::normal_at(&hit.object(), &point);

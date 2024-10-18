@@ -11,8 +11,8 @@ use std::cell::RefCell;
 use rtxch_lib::Computations;
 
 
-#[given(regex = r"(.+) ← (plane|point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)$")]
-#[when(regex = r"(.+) ← (plane|point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)$")]
+#[given(regex = r"(.+) ← (schlick|glass_sphere|plane|point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)$")]
+#[when(regex = r"(.+) ← (schlick|glass_sphere|plane|point|vector|ray|sphere|intersection|intersections|hit|prepare_computations)\((.*)\)$")]
 fn given_item(world: &mut RaysWorld, matches: &[String]) {
     create_item(world, matches);
 }
@@ -21,6 +21,13 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
     let t = matches[0].clone();
     let func = matches[1].as_str();
     match func {
+        "schlick" => {
+            let comps = world.comps.get(&matches[2]).unwrap();
+            world.floats.insert(t, Intersection::schlick(comps));
+        },
+        "glass_sphere" => {
+            world.shape.insert(t, Sphere::glass_sphere());
+        },
         "plane" => {
             world.shape.insert(t, Plane::new());
         },
@@ -78,6 +85,13 @@ fn create_item(world: &mut RaysWorld, matches: &[String]) {
         },
         _ => panic!("{func} not implemented")
     }
+}
+
+#[then(regex = r"reflectance = (.+)")]
+fn check_refl(world: &mut RaysWorld, matches: &[String]) {
+    let r = world.floats.get(&"reflectance".to_string()).unwrap();
+    let t = matches[0].parse::<f64>().unwrap();
+    assert!(is_equal_f64(*r, t));
 }
 
 #[then(regex = r"(i|i.|xs)\.(origin|direction|t|object|count) = (.+)")]
@@ -300,6 +314,7 @@ struct RaysWorld {
     interlist_sphere: HashMap<String, IntersectionList>,
     hit: HashMap<String, Option<Intersection>>,
     comps: HashMap<String, Computations>,
+    floats: HashMap<String, f64>,
 }
 
 fn main() {
