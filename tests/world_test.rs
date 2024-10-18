@@ -48,6 +48,57 @@ fn given_item(world: &mut WorldWorld, matches: &[String]) {
     create_item(world, matches);
 }
 
+#[given(regex = r"^(floor|ball) ← (plane|sphere)\(\) with:$")]
+fn floor_plane(world: &mut WorldWorld, step: &Step, matches: &[String]) {
+    let name = &matches[0];
+    let shape: Rc<RefCell<dyn Shape>> = match matches[1].as_str() {
+        "plane" => Plane::new(),
+        "sphere" => Sphere::new(),
+        _ => panic!(),
+    };
+    
+    if let Some(table) = step.table.as_ref() {
+        for row in table.rows.iter() {
+            let prop = &row[0];
+            let val = row[1].parse::<f64>();
+            match prop.as_str() {
+                "transform" => {
+                    let rx = cucumber::codegen::Regex::new(r"(translation)\((.+)\)").unwrap();
+                    let m = rx.captures(&row[1]);
+                    if let Some(m) = m {
+                        let fun = &m[1];
+                        let values = parse_values_f64(&m[2].to_string());
+                        
+                        let transform = match fun {
+                            "translation" => {
+                                Matrix::translate(values[0], values[1], values[2])
+                            },
+                            _ => panic!("transform not implemented {fun}"),
+                        };
+                        shape.borrow_mut().set_transform(&transform);
+                    } else {
+                        panic!("failed to match transform: {:?}", row[1]);
+                    }
+                },
+                "material.transparency" => shape.borrow_mut().get_mut_material().transparency = val.unwrap(),
+                "material.refractive_index" => shape.borrow_mut().get_mut_material().refractive_index = val.unwrap(),
+                "material.color" => {
+                    let rx = cucumber::codegen::Regex::new(r"\((.+)\)").unwrap();
+                    let m = rx.captures(&row[1]).unwrap();
+                    let values = parse_values_f64(&m[1].to_string());
+                    let color = Tuples::color(values[0], values[1], values[2]);
+                    shape.borrow_mut().get_mut_material().pattern = SingleColorPattern::new(color);
+                },
+                "material.ambient" => shape.borrow_mut().get_mut_material().ambient = val.unwrap(),
+                "material.reflective" => shape.borrow_mut().get_mut_material().reflective = val.unwrap(),
+                _ => panic!("Prop: {prop} not implemented"),
+            }
+        }
+    }
+
+    world.shape.insert(name.clone(), shape);
+}
+
 #[given(regex = r"^(shape|A|B) has:$")]
 fn shape_has(world: &mut WorldWorld, step: &Step, matches: &[String]) {
     let shape = world.shape.get(&matches[0]).unwrap();
@@ -201,7 +252,7 @@ fn create_item(world: &mut WorldWorld, matches: &[String]) {
     }
 }
 
-#[given(regex = r"(s|s.|shape|plane|lower|upper) is added to w")]
+#[given(regex = r"(s|s.|shape|plane|lower|upper|floor|ball) is added to w")]
 fn add_sphere(world: &mut WorldWorld, matches: &[String]) {
     let sphere = world.shape.get(&matches[0]).unwrap();
     world.world.add_object(Rc::clone(sphere));
