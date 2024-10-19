@@ -85,3 +85,8 @@ harness = false
 name = "cubes"
 path = "tests\\cubes_test.rs"
 harness = false
+
+[[test]]
+name = "cylinders"
+path = "tests\\cylinders_test.rs"
+harness = false

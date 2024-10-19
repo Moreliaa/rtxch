@@ -79,7 +79,7 @@ fn main() {
     right_wall.borrow_mut().set_material(&floor_material);
     world.add_object(right_wall);
 
-    let middle = Sphere::new();
+    let middle = Cube::new();
     middle.borrow_mut().set_transform(&Matrix::translate(-0.5,1.0,0.5));
     let mut middle_material = Material::material();
     let sub_pattern1 = StripePattern::new(Tuples::color(0.1,1.0,0.5), Tuples::color(1.0,0.5,0.5));
@@ -100,23 +100,22 @@ fn main() {
     ));
     middle_material.diffuse = 0.7;
     middle_material.specular = 0.3;
-    middle_material.transparency = 0.5;
-    middle_material.refractive_index = 1.5;
+    middle_material.reflective = 0.2;
     middle.borrow_mut().set_material(&middle_material);
     world.add_object(middle);
 
-    let right = Sphere::new();
+    let right = Cube::new();
     right.borrow_mut().set_transform(
-        &(Matrix::translate(1.5,0.5,-0.5) * Matrix::scale(1.2,1.2,1.2)));
+        &(Matrix::translate(1.5,0.5,-0.5) * Matrix::rotate_x(deg_to_rad(20.0)) * Matrix::rotate_y(deg_to_rad(30.0)) * Matrix::rotate_z(deg_to_rad(50.0)) * Matrix::scale(1.2,1.2,1.2)));
     let mut right_material = Material::material();
     right_material.pattern = SingleColorPattern::new(Tuples::color(0.1, 0.1, 0.1));
     right_material.diffuse = 0.7;
-    right_material.reflective = 1.0;
+    right_material.reflective = 0.7;
     right_material.specular = 0.3;
     right.borrow_mut().set_material(&right_material);
     world.add_object(right);
 
-    let left = Sphere::new();
+    let left = Cylinder::new();
     left.borrow_mut().set_transform( 
         &(Matrix::translate(-1.5,0.33,-0.75) * Matrix::scale(0.33,0.33,0.33)));
     let mut left_material = Material::material();
