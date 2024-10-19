@@ -18,25 +18,35 @@ impl Cube {
     pub fn new() -> Rc<RefCell<Cube>> {
         Rc::new(RefCell::new(Cube { material: Material::material(), transform: Matrix::new(4), transform_inverse: Matrix::new(4), cast_shadows: true }))
     }
+
+    fn check_axis(origin: f64, direction: f64) -> (f64, f64) {
+        let tmin_num = -1.0 - origin;
+        let tmax_num = 1.0 - origin;
+        let result = if direction.abs() >= f64::EPSILON {
+            (tmin_num / direction, tmax_num /direction)
+        } else {
+            (tmin_num * f64::INFINITY, tmax_num * f64::INFINITY)
+        };
+        if result.0 > result.1 {
+            (result.1, result.0)
+        } else {
+            result
+        }
+    }
 }
 
 impl Shape for Cube {
     fn intersect_local(&self, r: &Ray) -> Vec<f64> {
-        let sphere_origin = Tuples::point(0.0,0.0,0.0);
-        let sphere_to_ray = r.origin().clone().subtract(&sphere_origin);
-        // a = 1.0 only if direction is normalized
-        let a = Tuples::dot(&r.direction(), &r.direction());
-        let b = 2.0 * Tuples::dot(&r.direction(), &sphere_to_ray);
-        let c = Tuples::dot(&sphere_to_ray, &sphere_to_ray) - 1.0;
-        let discriminant = b * b - 4.0 * a * c;
-        if discriminant < 0.0 {
-            return vec![];
+        let (xtmin, xtmax) = Cube::check_axis(r.origin().x, r.direction().x);
+        let (ytmin, ytmax) = Cube::check_axis(r.origin().y, r.direction().y);
+        let (ztmin, ztmax) = Cube::check_axis(r.origin().z, r.direction().z);
+        let tmin = [xtmin, ytmin, ztmin].into_iter().reduce(f64::max).unwrap();
+        let tmax = [xtmax, ytmax, ztmax].into_iter().reduce(f64::min).unwrap();
+        if tmin > tmax {
+            vec![]
+        } else {
+            vec![tmin, tmax]
         }
-
-        let discriminant_sqrt = discriminant.sqrt();
-        let t1 = (-b - discriminant_sqrt) / (2.0 * a);
-        let t2 = (-b + discriminant_sqrt) / (2.0 * a);
-        vec![t1, t2]
     }
 
     fn set_transform(&mut self, transform: &Matrix) {
@@ -65,8 +75,17 @@ impl Shape for Cube {
     }
 
     fn normal_at_local(&self, p_object_space: &Tuples) -> Tuples {
-        let origin = Tuples::point(0.0,0.0, 0.0);
-        Tuples::vector(p_object_space.x - origin.x, p_object_space.y - origin.y, p_object_space.z - origin.z)
+        let max_coord = [p_object_space.x.abs(), p_object_space.y.abs(), p_object_space.z.abs()].into_iter().reduce(f64::max).unwrap();
+        if max_coord == p_object_space.x.abs()  {
+            let sign = p_object_space.x.signum();
+            Tuples::vector(sign * 1.0, 0.0, 0.0)
+        } else if max_coord == p_object_space.y.abs() {
+            let sign = p_object_space.y.signum();
+            Tuples::vector(0.0, sign * 1.0, 0.0)
+        } else {
+            let sign = p_object_space.z.signum();
+            Tuples::vector(0.0, 0.0, sign * 1.0)
+        }
     }
 
     fn get_type(&self) -> &str {

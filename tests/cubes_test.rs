@@ -428,7 +428,7 @@ fn check_prop_intersection_idx(world: &mut CubesWorld, matches: &[String]) {
     match prop {
         "t" => {
             let target = matches[2].parse::<f64>().unwrap();
-            assert!(rtxch_lib::utils::is_equal_f64(entry.t(), target));
+            assert!(rtxch_lib::utils::is_equal_f64(entry.t(), target), "{:?}", xs.xs().into_iter().map(|a| a.t()).collect::<Vec<f64>>());
         },
         _ => panic!()
     }
