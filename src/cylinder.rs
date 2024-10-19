@@ -3,6 +3,7 @@ use crate::Ray;
 use crate::Tuples;
 use crate::Matrix;
 use crate::Material;
+use core::f64;
 use std::rc::Rc;
 use std::cell::RefCell;
 
@@ -12,11 +13,30 @@ pub struct Cylinder {
     transform: Matrix,
     transform_inverse: Matrix,
     cast_shadows: bool,
+    pub y_min: f64,
+    pub y_max: f64,
+    pub closed: bool,
 }
 
 impl Cylinder {
     pub fn new() -> Rc<RefCell<Cylinder>> {
-        Rc::new(RefCell::new(Cylinder { material: Material::material(), transform: Matrix::new(4), transform_inverse: Matrix::new(4), cast_shadows: true }))
+        Cylinder::new_limited(-f64::INFINITY, f64::INFINITY, false)
+    }
+
+    pub fn new_limited(min: f64, max: f64, closed: bool) -> Rc<RefCell<Cylinder>> {
+        Rc::new(
+            RefCell::new(
+                Cylinder { 
+                    material: Material::material(), 
+                    transform: Matrix::new(4), 
+                    transform_inverse: Matrix::new(4), 
+                    cast_shadows: true,
+                    y_min: min,
+                    y_max: max,
+                    closed
+                }
+            )
+        )
     }
 }
 
@@ -38,9 +58,25 @@ impl Shape for Cylinder {
         }
 
         let discriminant_sqrt = discriminant.sqrt();
-        let t1 = (-b - discriminant_sqrt) / (2.0 * a);
-        let t2 = (-b + discriminant_sqrt) / (2.0 * a);
-        vec![t1, t2]
+        let mut t1 = (-b - discriminant_sqrt) / (2.0 * a);
+        let mut t2 = (-b + discriminant_sqrt) / (2.0 * a);
+        if t1 > t2 {
+            let temp = t2;
+            t2 = t1;
+            t1 = temp;
+        }
+        let mut result = vec![];
+        let y1 = r.origin().y + t1 * r.direction().y;
+        if self.y_min < y1 && y1 < self.y_max {
+            result.push(t1);
+        }
+
+        let y2 = r.origin().y + t2 * r.direction().y;
+        if self.y_min < y2 && y2 < self.y_max {
+            result.push(t2);
+        }
+
+        result
     }
 
     fn set_transform(&mut self, transform: &Matrix) {

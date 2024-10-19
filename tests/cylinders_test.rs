@@ -131,7 +131,7 @@ fn sphere1(world: &mut CylindersWorld) {
 
 #[given(regex = r"^(.+) ← normalize\((.+)\)")]
 #[when(regex = r"(.+) ← normalize\((.+)\)")]
-fn norm(world: &mut CylindersWorld, step: &Step, matches: &[String]) {
+fn norm(world: &mut CylindersWorld, matches: &[String]) {
     let t = world.tuple.get(&matches[1]).unwrap();
     world.tuple.insert(matches[0].clone(), t.clone().normalize());
 }
@@ -172,7 +172,14 @@ fn create_item(world: &mut CylindersWorld, matches: &[String]) {
     let func = matches[1].as_str();
     match func {
         "cylinder" => {
-            world.shape.insert(t, Cylinder::new());
+            
+            if matches[2].chars().into_iter().count() > 0 {
+                let v = parse_values_f64(&matches[2]);
+                world.shape.insert(t, Cylinder::new_limited(v[0], v[1], false));
+            } else {
+                world.shape.insert(t, Cylinder::new());
+            }
+            
         },
         "local_intersect" => {
             let v: Vec<&str> = matches[2].split(", ").collect();

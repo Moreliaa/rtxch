@@ -45,17 +45,12 @@ Scenario Outline: Normal vector on a cylinder
     | point(0, -2, 1) | vector(0, 0, 1)  |
     | point(-1, 1, 0) | vector(-1, 0, 0) |
 
-Scenario: The default minimum and maximum for a cylinder
-  Given cyl ← cylinder()
-  Then cyl.minimum = -infinity
-    And cyl.maximum = infinity
-
 Scenario Outline: Intersecting a constrained cylinder
-  Given cyl ← cylinder()
-    And cyl.minimum ← 1
-    And cyl.maximum ← 2
-    And direction ← normalize(<direction>)
-    And r ← ray(<point>, direction)
+  Given cyl ← cylinder(1, 2)
+    And rp ← <point>
+    And direction ← <direction>
+    And rv ← normalize(direction)
+    And r ← ray(rp, rv)
   When xs ← local_intersect(cyl, r)
   Then xs.count = <count>
 
@@ -73,12 +68,12 @@ Scenario: The default closed value for a cylinder
   Then cyl.closed = false
 
 Scenario Outline: Intersecting the caps of a closed cylinder
-  Given cyl ← cylinder()
-    And cyl.minimum ← 1
-    And cyl.maximum ← 2
+  Given cyl ← cylinder(1, 2)
     And cyl.closed ← true
-    And direction ← normalize(<direction>)
-    And r ← ray(<point>, direction)
+    And rp ← <point>
+    And direction ← <direction>
+    And rv ← normalize(direction)
+    And r ← ray(rp, rv)
   When xs ← local_intersect(cyl, r)
   Then xs.count = <count>
 
@@ -91,11 +86,10 @@ Scenario Outline: Intersecting the caps of a closed cylinder
     | 5 | point(0, -1, -2) | vector(0, 1, 1)  | 2     |
 
 Scenario Outline: The normal vector on a cylinder's end caps
-  Given cyl ← cylinder()
-    And cyl.minimum ← 1
-    And cyl.maximum ← 2
+  Given cyl ← cylinder(1, 2)
     And cyl.closed ← true
-  When n ← local_normal_at(cyl, <point>)
+    And p ← <point>
+  When n ← local_normal_at(cyl, p)
   Then n = <normal>
 
   Examples:

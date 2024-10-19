@@ -115,7 +115,7 @@ fn main() {
     right.borrow_mut().set_material(&right_material);
     world.add_object(right);
 
-    let left = Cylinder::new();
+    let left = Cylinder::new_limited(0.0,3.0, false);
     left.borrow_mut().set_transform( 
         &(Matrix::translate(-1.5,0.33,-0.75) * Matrix::scale(0.33,0.33,0.33)));
     let mut left_material = Material::material();
