@@ -44,5 +44,7 @@ pub mod camera;
 pub use camera::Camera;
 pub mod constants;
 pub use constants::MAX_ITERATIONS;
+pub mod cube;
+pub use cube::Cube;
 
 pub mod utils;
