@@ -11,18 +11,19 @@ pub struct Sphere {
     material: Material,
     transform: Matrix,
     transform_inverse: Matrix,
+    cast_shadows: bool,
 }
 
 impl Sphere {
     pub fn new() -> Rc<RefCell<Sphere>> {
-        Rc::new(RefCell::new(Sphere { material: Material::material(), transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
+        Rc::new(RefCell::new(Sphere { material: Material::material(), transform: Matrix::new(4), transform_inverse: Matrix::new(4), cast_shadows: true }))
     }
     pub fn glass_sphere() -> Rc<RefCell<Sphere>> {
         let mut material = Material::material();
         material.transparency = 1.0;
         material.refractive_index = 1.5;
 
-        Rc::new(RefCell::new(Sphere { material, transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
+        Rc::new(RefCell::new(Sphere { material, transform: Matrix::new(4), transform_inverse: Matrix::new(4), cast_shadows: true }))
     }
 }
 
@@ -77,5 +78,13 @@ impl Shape for Sphere {
 
     fn get_type(&self) -> &str {
         "Sphere"
+    }
+
+    fn set_cast_shadows(&mut self, b: bool) {
+        self.cast_shadows = b;
+    }
+
+    fn cast_shadows(&self) -> bool {
+        self.cast_shadows
     }
 }

@@ -31,7 +31,7 @@ impl World {
         let direction = vector.normalize();
         let ray = Ray::new(point.clone(),  direction);
         let is = World::intersect_world(&w, &ray);
-        let hit = IntersectionList::hit(&is);
+        let hit = IntersectionList::hit_shadow(&is);
         if let Some(h) = hit {
             if h.t() < distance {
                 return true;

@@ -12,11 +12,12 @@ pub struct Plane {
     material: Material,
     transform: Matrix,
     transform_inverse: Matrix,
+    cast_shadows: bool,
 }
 
 impl Plane {
     pub fn new() -> Rc<RefCell<Plane>> {
-        Rc::new(RefCell::new(Plane { material: Material::material(), transform: Matrix::new(4), transform_inverse: Matrix::new(4) }))
+        Rc::new(RefCell::new(Plane { material: Material::material(), transform: Matrix::new(4), transform_inverse: Matrix::new(4), cast_shadows: true }))
     }
 }
 
@@ -62,5 +63,13 @@ impl Shape for Plane {
 
     fn get_type(&self) -> &str {
         "Plane"
+    }
+
+    fn set_cast_shadows(&mut self, b: bool) {
+        self.cast_shadows = b;
+    }
+    
+    fn cast_shadows(&self) -> bool {
+        self.cast_shadows
     }
 }

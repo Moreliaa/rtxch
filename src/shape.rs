@@ -17,6 +17,8 @@ pub trait Shape: Debug {
     fn get_mut_material(&mut self) -> &mut Material;
     fn normal_at_local(&self, p: &Tuples) -> Tuples;
     fn get_type(&self) -> &str;
+    fn set_cast_shadows(&mut self, b: bool);
+    fn cast_shadows(&self) -> bool;
 }
 
 impl dyn Shape {

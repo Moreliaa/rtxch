@@ -52,6 +52,15 @@ impl IntersectionList {
         None
     }
 
+    pub fn hit_shadow(il: &IntersectionList) -> Option<&Intersection> {
+        for i in il.xs() {
+            if i.t() >= 0.0 && i.object().borrow().cast_shadows() {
+                return Some(i);
+            }
+        }
+        None
+    }
+
     pub fn xs(&self) -> &Vec<Intersection> {
         &self.xs
     }
