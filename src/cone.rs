@@ -8,7 +8,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 
 #[derive(Debug, Clone)]
-pub struct Cylinder {
+pub struct Cone {
     material: Material,
     transform: Matrix,
     transform_inverse: Matrix,
@@ -18,15 +18,15 @@ pub struct Cylinder {
     pub closed: bool,
 }
 
-impl Cylinder {
-    pub fn new() -> Rc<RefCell<Cylinder>> {
-        Cylinder::new_limited(-f64::INFINITY, f64::INFINITY, false)
+impl Cone {
+    pub fn new() -> Rc<RefCell<Cone>> {
+        Cone::new_limited(-f64::INFINITY, f64::INFINITY, false)
     }
 
-    pub fn new_limited(min: f64, max: f64, closed: bool) -> Rc<RefCell<Cylinder>> {
+    pub fn new_limited(min: f64, max: f64, closed: bool) -> Rc<RefCell<Cone>> {
         Rc::new(
             RefCell::new(
-                Cylinder { 
+                Cone { 
                     material: Material::material(), 
                     transform: Matrix::new(4), 
                     transform_inverse: Matrix::new(4), 
@@ -39,10 +39,10 @@ impl Cylinder {
         )
     }
 
-    fn check_cap(r: &Ray, t: f64) -> bool {
+    fn check_cap(r: &Ray, t: f64, y_plane: f64) -> bool {
         let x = r.origin().x + t * r.direction().x;
         let z = r.origin().z + t * r.direction().z;
-        (x.powf(2.0) + z.powf(2.0)) <= 1.0
+        (x.powf(2.0) + z.powf(2.0)).sqrt() <= y_plane.abs()
     }
 
     fn intersect_caps(&self, r: &Ray) -> Vec<f64> {
@@ -52,12 +52,12 @@ impl Cylinder {
         // lower cap
         let mut result = vec![];
         let t0 = (self.y_min - r.origin().y) / r.direction().y;
-        if Cylinder::check_cap(r, t0) {
+        if Cone::check_cap(r, t0, self.y_min) {
             result.push(t0);
         }
         // upper cap
         let t1 = (self.y_max - r.origin().y) / r.direction().y;
-        if Cylinder::check_cap(r, t1) {
+        if Cone::check_cap(r, t1, self.y_max) {
             result.push(t1);
         }
 
@@ -65,18 +65,26 @@ impl Cylinder {
     }
 }
 
-impl Shape for Cylinder {
+impl Shape for Cone {
     fn intersect_local(&self, r: &Ray) -> Vec<f64> {
         let mut result = self.intersect_caps(r);
-        let a = r.direction().x.powf(2.0) + r.direction().z.powf(2.0);
-        if a.abs() < crate::utils::EPSILON {
+        let a = r.direction().x.powf(2.0) - r.direction().y.powf(2.0) + r.direction().z.powf(2.0);
+        let b =
+            2.0 * r.origin().x * r.direction().x -
+            2.0 * r.origin().y * r.direction().y +
+            2.0 * r.origin().z * r.direction().z;
+        let c = r.origin().x.powf(2.0) - r.origin().y.powf(2.0) + r.origin().z.powf(2.0);
+
+        if a.abs() < crate::utils::EPSILON && b.abs() < crate::utils::EPSILON {
             return result;
         }
 
-        let b =
-            2.0 * r.origin().x * r.direction().x +
-            2.0 * r.origin().z * r.direction().z;
-        let c = r.origin().x.powf(2.0) + r.origin().z.powf(2.0) - 1.0;
+        if a.abs() < crate::utils::EPSILON {
+            let t = -c / (2.0 * b);
+            result.push(t);
+            result.sort_by(|a, b| a.partial_cmp(&b).unwrap());
+            return result;
+        }
 
         let discriminant = b * b - 4.0 * a * c;
         if discriminant < 0.0 {
@@ -132,20 +140,18 @@ impl Shape for Cylinder {
     }
 
     fn normal_at_local(&self, p_object_space: &Tuples) -> Tuples {
-        let distance_y_axis = p_object_space.x.powf(2.0) + p_object_space.z.powf(2.0);
-        if distance_y_axis < 1.0 {
-            if p_object_space.y >= self.y_max - crate::utils::EPSILON {
-                return Tuples::vector(0.0, 1.0, 0.0);
-            } else if p_object_space.y <= self.y_min + crate::utils::EPSILON {
-                return Tuples::vector(0.0, -1.0, 0.0);
-            }
+        let distance_y_axis = (p_object_space.x.powf(2.0) + p_object_space.z.powf(2.0)).sqrt();
+        if distance_y_axis < self.y_max.abs() && p_object_space.y >= self.y_max - crate::utils::EPSILON {
+            return Tuples::vector(0.0, 1.0, 0.0);
+        } else if distance_y_axis < self.y_min.abs() && p_object_space.y <= self.y_min + crate::utils::EPSILON {
+            return Tuples::vector(0.0, -1.0, 0.0);
         }
-        
-        Tuples::vector(p_object_space.x, 0.0, p_object_space.z)
+        let y = if p_object_space.y > 0.0 { - distance_y_axis } else { distance_y_axis };
+        Tuples::vector(p_object_space.x, y, p_object_space.z)
     }
 
     fn get_type(&self) -> &str {
-        "Cylinder"
+        "Cone"
     }
 
     fn set_cast_shadows(&mut self, b: bool) {

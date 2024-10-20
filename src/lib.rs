@@ -48,5 +48,7 @@ pub mod cube;
 pub use cube::Cube;
 pub mod cylinder;
 pub use cylinder::Cylinder;
+pub mod cone;
+pub use cone::Cone;
 
 pub mod utils;

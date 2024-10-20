@@ -8,8 +8,8 @@ use utils::deg_to_rad;
 
 fn main() {
     let mut camera = Camera::new(500, 500, deg_to_rad(60.0));
-    let from = Tuples::point(0.0,1.5, -5.0);
-    let to = Tuples::point(0.0,1.0,0.0);
+    let from = Tuples::point(0.0,0.1, -5.0);
+    let to = Tuples::point(0.0,3.0,0.0);
     let up = Tuples::vector(0.0,1.0,0.0);
     camera.transform = Matrix::view_transform(&from, &to, &up);
 
@@ -102,7 +102,7 @@ fn main() {
     middle_material.specular = 0.3;
     middle_material.reflective = 0.2;
     middle.borrow_mut().set_material(&middle_material);
-    world.add_object(middle);
+    //world.add_object(middle);
 
     let right = Cube::new();
     right.borrow_mut().set_transform(
@@ -113,11 +113,11 @@ fn main() {
     right_material.reflective = 0.7;
     right_material.specular = 0.3;
     right.borrow_mut().set_material(&right_material);
-    world.add_object(right);
+    //world.add_object(right);
 
-    let left = Cylinder::new_limited(0.0,3.0, true);
+    let left = Cone::new_limited(4.0,7.0, true);
     left.borrow_mut().set_transform( 
-        &(Matrix::translate(-1.5,0.33,-0.75) * Matrix::scale(0.33,0.33,0.33)));
+        &(Matrix::translate(-0.0,0.33,-0.75) * Matrix::scale(0.33,0.33,0.33)));
     let mut left_material = Material::material();
     left_material.pattern = RingPattern::new(Tuples::color(1.0,1.0,1.0), Tuples::color(0.2,0.8,0.1));
     left_material.pattern.borrow_mut().set_transform(Matrix::translate(-1.5,0.33,-0.75) * Matrix::scale(0.33,0.33,0.33));
@@ -132,11 +132,11 @@ fn main() {
     );
     world.add_point_light(light);
  
-    let light2 = point_light(
+    /*let light2 = point_light(
         &Tuples::point(5.0,10.0,-10.0), 
         &Tuples::color(0.5,0.5,0.5)
     );
-    world.add_point_light(light2);
+    world.add_point_light(light2);*/
 
     let canvas = render::render(&camera, &world);
     
