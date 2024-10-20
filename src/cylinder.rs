@@ -38,13 +38,39 @@ impl Cylinder {
             )
         )
     }
+
+    fn check_cap(r: &Ray, t: f64) -> bool {
+        let x = r.origin().x + t * r.direction().x;
+        let z = r.origin().z + t * r.direction().z;
+        (x.powf(2.0) + z.powf(2.0)) <= 1.0
+    }
+
+    fn intersect_caps(&self, r: &Ray) -> Vec<f64> {
+        if !self.closed || r.direction().y.abs() < crate::utils::EPSILON {
+            return vec![];
+        }
+        // lower cap
+        let mut result = vec![];
+        let t0 = (self.y_min - r.origin().y) / r.direction().y;
+        if Cylinder::check_cap(r, t0) {
+            result.push(t0);
+        }
+        // upper cap
+        let t1 = (self.y_max - r.origin().y) / r.direction().y;
+        if Cylinder::check_cap(r, t1) {
+            result.push(t1);
+        }
+
+        result
+    }
 }
 
 impl Shape for Cylinder {
     fn intersect_local(&self, r: &Ray) -> Vec<f64> {
+        let mut result = self.intersect_caps(r);
         let a = r.direction().x.powf(2.0) + r.direction().z.powf(2.0);
         if a < crate::utils::EPSILON {
-            return vec![];
+            return result;
         }
 
         let b =
@@ -54,7 +80,7 @@ impl Shape for Cylinder {
 
         let discriminant = b * b - 4.0 * a * c;
         if discriminant < 0.0 {
-            return vec![];
+            return result;
         }
 
         let discriminant_sqrt = discriminant.sqrt();
@@ -65,7 +91,7 @@ impl Shape for Cylinder {
             t2 = t1;
             t1 = temp;
         }
-        let mut result = vec![];
+        
         let y1 = r.origin().y + t1 * r.direction().y;
         if self.y_min < y1 && y1 < self.y_max {
             result.push(t1);
@@ -75,7 +101,8 @@ impl Shape for Cylinder {
         if self.y_min < y2 && y2 < self.y_max {
             result.push(t2);
         }
-
+        
+        result.sort_by(|a, b| a.partial_cmp(&b).unwrap());
         result
     }
 
@@ -105,6 +132,15 @@ impl Shape for Cylinder {
     }
 
     fn normal_at_local(&self, p_object_space: &Tuples) -> Tuples {
+        let distance_y_axis = p_object_space.x.powf(2.0) + p_object_space.z.powf(2.0);
+        if distance_y_axis < 1.0 {
+            if p_object_space.y >= self.y_max - crate::utils::EPSILON {
+                return Tuples::vector(0.0, 1.0, 0.0);
+            } else if p_object_space.y <= self.y_min + crate::utils::EPSILON {
+                return Tuples::vector(0.0, -1.0, 0.0);
+            }
+        }
+        
         Tuples::vector(p_object_space.x, 0.0, p_object_space.z)
     }
 

@@ -172,12 +172,18 @@ fn create_item(world: &mut CylindersWorld, matches: &[String]) {
     let func = matches[1].as_str();
     match func {
         "cylinder" => {
-            
             if matches[2].chars().into_iter().count() > 0 {
                 let v = parse_values_f64(&matches[2]);
-                world.shape.insert(t, Cylinder::new_limited(v[0], v[1], false));
+                let cyl = Cylinder::new_limited(v[0], v[1], false);
+                world.cyl.insert(t.clone(), Rc::clone(&cyl));
+                let cyl_upcast: Rc<RefCell<dyn Shape>> = cyl;
+                world.shape.insert(t.clone(), Rc::clone(&cyl_upcast));
+
             } else {
-                world.shape.insert(t, Cylinder::new());
+                let cyl = Cylinder::new();
+                world.cyl.insert(t.clone(), Rc::clone(&cyl));
+                let cyl_upcast: Rc<RefCell<dyn Shape>> = cyl;
+                world.shape.insert(t.clone(), Rc::clone(&cyl_upcast));
             }
             
         },
@@ -305,6 +311,28 @@ fn first(world: &mut CylindersWorld, matches: &[String]) {
     world.shape.insert(matches[0].clone(), shape);
 }
 
+#[given(regex = r"(cyl).(closed) ← (true|false)")]
+fn set_closed(world: &mut CylindersWorld, matches: &[String]) {
+    let cyl = world.cyl.get(&matches[0]).unwrap();
+    let prop = matches[1].as_str();
+    let shape = world.shape.get(&matches[0]).unwrap();
+    let cyl_cloned= Rc::clone(cyl);
+    let cyl_upcast: Rc<RefCell<dyn Shape>> = cyl_cloned;
+    assert!(Rc::ptr_eq(&shape, &cyl_upcast));
+    
+    match prop {
+        "closed" => {
+            match matches[2].as_str() {
+                "false" => {cyl.borrow_mut().closed = false;},
+                "true" => {cyl.borrow_mut().closed = true;},
+                _ => panic!(),
+            };
+        },
+        _ => panic!()
+    }
+
+}
+
 #[given(regex = r"(.+).material.ambient ← 1")]
 fn set_ambient(world: &mut CylindersWorld, matches: &[String]) {
     let sphere = world.shape.get(&matches[0]).unwrap();
@@ -413,6 +441,23 @@ fn check_prop_comps(world: &mut CylindersWorld, matches: &[String]) {
     }
 }
 
+#[then(regex = r"(cyl)\.(closed) = (.+)")]
+fn check_prop_cyl(world: &mut CylindersWorld, matches: &[String]) {
+    let cyl = world.cyl.get(&matches[0]).unwrap();
+    let prop = matches[1].as_str();
+    
+    match prop {
+        "closed" => {
+            match matches[2].as_str() {
+                "false" => assert!(!cyl.borrow().closed),
+                "true" => assert!(cyl.borrow().closed),
+                _ => panic!(),
+            };
+        },
+        _ => panic!()
+    }
+}
+
 #[then(regex = r"w contains no objects")]
 fn no_obj(world: &mut CylindersWorld, _: &[String]) {
     assert!(world.world.get_objects().len() == 0);
@@ -430,7 +475,7 @@ fn check_prop_intersection(world: &mut CylindersWorld, matches: &[String]) {
     match prop {
         "count" => {
             let target = matches[1].parse::<usize>().unwrap();
-            assert!(xs.count() == target);
+            assert!(xs.count() == target, "{}", xs.count());
         },
         _ => panic!()
     }
@@ -457,6 +502,7 @@ struct CylindersWorld {
     world: rtxch_lib::World,
     plight: HashMap<String, PointLight>,
     tuple: HashMap<String, Tuples>,
+    cyl: HashMap<String, Rc<RefCell<Cylinder>>>,
     shape: HashMap<String, Rc<RefCell<dyn Shape>>>,
     ray: HashMap<String, Ray>,
     inter_list: HashMap<String, IntersectionList>,
